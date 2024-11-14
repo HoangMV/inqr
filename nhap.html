@@ -37,8 +37,8 @@
             }
 
             .print-item {
-                width: 80mm;
-                height: 17mm;
+                width: 60mm;
+                height: 14mm;
                 border: 2px solid black !important;
                 margin: 1px;
                 padding: 0;
@@ -69,20 +69,25 @@
             }
 
             .sizeso2 {
-                font-size: 18px;
+                font-size: 14px;
             }
 
             .sizeso3 {
-                font-size: 18px;
+                font-size: 16px;
             }
 
             .table-cell {
                 font-weight: bold;
                 white-space: nowrap;
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                text-align: center;
+                line-height: 1;
             }
 
             .left-cell {
-                width: 20mm !important;
+                width: 15mm !important;
                 border-right: 1px solid rgba(179, 176, 176, 0.911);
                 overflow: hidden;
                 white-space: nowrap;
@@ -96,9 +101,9 @@
                 white-space: nowrap;
                 /* Giữ text trên một dòng */
                 overflow: hidden;
-                width: 60mm;
+                width: 45mm;
                 /* Điều chỉnh độ rộng tối đa */
-                height: 8mm;
+                height: 6.5mm;
                 /* Điều chỉnh chiều cao */
             }
 
@@ -276,22 +281,22 @@
             if (type === 'orderKd') {
                 // Điều chỉnh font size cho cột order_kd
                 if (text.length <= 10) {
-                    fontSize = 14; // Kích thước mặc định
+                    fontSize = 10; // Kích thước mặc định
                 } else if (text.length <= 15) {
-                    fontSize = 12;
+                    fontSize = 9;
                 } else if (text.length <= 20) {
-                    fontSize = 10;
+                    fontSize = 7;
                 } else {
-                    fontSize = 8; // Với text rất dài
+                    fontSize = 6; // Với text rất dài
                 }
             } else {
                 // Logic hiện tại cho ten_chi_tiet
                 if (text.length < 25) {
-                    fontSize = 20;
+                    fontSize = 14;
                 } else if (text.length < 30) {
-                    fontSize = 12;
+                    fontSize = 9;
                 } else {
-                    fontSize = 10;
+                    fontSize = 8;
                 }
             }
 
@@ -346,7 +351,7 @@
                 for (let i = 0; i < Math.floor(totalQuantity / labelQuantity); i++) {
                     currentRow += createLabelHTML(order, labelQuantity);
 
-                    if ((i + 1) % 3 === 0) {
+                    if ((i + 1) % 4 === 0) {
                         labelsHTML += `<div class="print-row">${currentRow}</div>`;
                         currentRow = '';
                     }
@@ -357,7 +362,7 @@
                 }
 
                 if (currentRow) {
-                    while (currentRow.split('print-item').length - 1 < 3) {
+                    while (currentRow.split('print-item').length - 1 < 4) {
                         currentRow += `<div class="print-item" style="visibility: hidden;"></div>`;
                     }
                     labelsHTML += `<div class="print-row">${currentRow}</div>`;
