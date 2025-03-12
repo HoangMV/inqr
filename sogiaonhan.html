@@ -1,0 +1,558 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Phiếu Theo Dõi Tình Trạng Sản Phẩm</title>
+    <style>
+        body {
+            font-family: 'Times New Roman', Times, serif;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .title {
+            margin-top: 20px !important;
+            color: blue;
+            font-weight: bold;
+            font-size: 36px;
+            text-align: center;
+            margin: 10px 0;
+            width: 85%;
+        }
+
+        .top-labels {
+            display: flex;
+        }
+
+        .info-section {
+            width: 85%;
+            display: grid;
+            grid-template-columns: 15% 35% 15% 35%;
+            gap: 15px;
+            margin: 10px 0;
+        }
+
+        .qr-code {
+            width: 15%;
+            text-align: right;
+            margin-top: -84px;
+        }
+
+        .info-label {
+            text-align: left;
+        }
+
+        .info-value {
+            font-weight: bold;
+        }
+
+
+        .receipt-section {
+            display: flex;
+            flex-wrap: nowrap;
+            gap: 5px;
+            margin-bottom: 10px;
+            align-items: center;
+        }
+
+        .receipt-section .info-label {
+            white-space: nowrap;
+            margin-right: 5px;
+        }
+
+        .receipt-section .info-value {
+            min-width: 80px;
+            margin-right: 15px;
+            flex-grow: 1;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 15px 0;
+        }
+
+        th {
+            border: 1px solid black;
+            padding: 6px;
+            text-align: center;
+        }
+
+        td {
+            border: 1px solid black;
+            padding: 6px;
+            text-align: center;
+            height: 30px;
+        }
+
+        th {
+            background-color: #f0f0f0;
+            color: blue;
+            font-weight: bold;
+        }
+
+        .double-column {
+            grid-column: span 2;
+        }
+
+        .notes {
+            font-size: 13px;
+            line-height: 1;
+        }
+
+        .top-label {
+            width: 50%;
+            font-style: italic;
+        }
+
+        .cleaning-header {
+            text-align: center;
+        }
+
+        .loading {
+            text-align: center;
+            margin: 20px;
+            font-size: 18px;
+            display: none;
+        }
+
+        .error {
+            color: red;
+            text-align: center;
+            margin: 20px;
+            font-size: 16px;
+            display: none;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="loading" id="loadingIndicator">Đang tải dữ liệu...</div>
+    <div class="error" id="errorMessage"></div>
+
+    <div class="container" id="formContainer" style="display: none;">
+        <div class="top-labels">
+            <div class="top-label">
+                <span style="text-decoration: underline;">Ưu tiên:</span> <span style="font-weight: bold;" id="tinh_chat"></span>
+            </div>
+            <div class="top-label">
+                <span>Ghi chú: </span> <span style="font-weight: bold;"  id="ghi_chu"></span>
+            </div>
+        </div>
+
+        <div class="title">PHIẾU THEO DÕI TÌNH TRẠNG SẢN PHẨM</div>
+
+        <div class="top-labels">
+            <div class="info-section">
+                <div class="info-label">Tên chi tiết:</div>
+                <div class="info-value" id="ten_chi_tiet"></div>
+                <div class="info-label">Vật liệu:</div>
+                <div class="info-value" id="vat_lieu"></div>
+
+                <div class="info-label">Số Order:</div>
+                <div class="info-value" id="order_kd"></div>
+                <div class="info-label">Thời hạn:</div>
+                <div class="info-value" id="thoi_han"></div>
+
+                <div class="info-label">Số lượng:</div>
+                <div class="info-value" id="sll"></div>
+                <div class="info-label">Xlbm:</div>
+                <div class="info-value" id="xlbm"></div>
+
+                <div class="info-label">File:</div>
+                <div class="info-value" id="so_file"></div>
+                <div class="info-label">Nơi G/c:</div>
+                <div class="info-value" id="noi_gia_cong"></div>
+
+                <div class="info-label">Bề mặt:</div>
+                <div class="info-value" id="be_mat"></div>
+            </div>
+
+            <div class="qr-code" id="qr_code" style="text-align: right;">
+                <!-- QR code sẽ được hiển thị ở đây -->
+            </div>
+        </div>
+
+        <div class="receipt-section">
+            <div class="info-label">Ngày nhận:</div>
+            <div class="info-value" id="ngay_nhan"></div>
+            <div class="info-label">Giờ nhận:</div>
+            <div class="info-value" id="gio_nhan"></div>
+            <div class="info-label">Code:</div>
+            <div class="info-value" id="code"></div>
+            <div class="info-label">Người nhận:</div>
+            <div class="info-value" id="ho_va_ten"></div>
+        </div>
+
+        <table>
+            <thead>
+                <tr>
+                    <th rowspan="2">Công việc</th>
+                    <th rowspan="2">Nhận hàng</th>
+                    <th rowspan="2">Tạp ren</th>
+                    <th rowspan="2">Làm via</th>
+                    <th colspan="2">Làm sạch</th>
+                    <th rowspan="2">Kiểm tra</th>
+                    <th rowspan="2">Đóng gói</th>
+                </tr>
+                <tr>
+                    <th>Xi sp</th>
+                    <th>Lau sp</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>Người làm</td>
+                    <td></td>
+                    <td id="tap_ren_info"></td>
+                    <td id="gc_bang_tay_info"></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                </tr>
+                <tr>
+                    <td>Số lượng OK</td>
+                    <td></td>
+                    <td id="phay_ren_info"></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                </tr>
+                <tr>
+                    <td>Số lượng trả lại</td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                </tr>
+            </tbody>
+        </table>
+
+        <div class="notes">
+            <p><i style="text-decoration: underline;">Ghi chú:</i></p>
+            <p><i style="font-weight: bold;"  id="note1"></i></p>
+            <p><i style="font-weight: bold;"  id="note2"></i></p>
+            <p><i style="font-weight: bold;"  id="note3"></i></p>
+            <p><i style="font-weight: bold;"  id="note4"></i></p>
+            <p><i style="font-weight: bold;"  id="note5"></i></p>
+            <p><i style="font-weight: bold;"  id="note6"></i></p>
+        </div>
+    </div>
+
+    <script>
+        // Constants for AppSheet connection
+        const appId = '684ad0ab-ffc5-4c21-a959-f5e023c668e3';
+        const accessKey = 'V2-jOfc3-JvKqz-lxeNm-FS8O6-1RK08-Bu5SX-erQVj-Jp2S9';
+        const region = 'www';
+
+        // Hiển thị loading indicator
+        document.getElementById('loadingIndicator').style.display = 'block';
+
+        // Function to fetch data from so_giao_nhan table
+        async function fetchOrderData(orderId) {
+            try {
+                const response = await fetch(`https://${region}.appsheet.com/api/v2/apps/${appId}/tables/so_giao_nhan/Action`, {
+                    method: 'POST',
+                    headers: {
+                        'ApplicationAccessKey': accessKey,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        Action: 'Find',
+                        Properties: {},
+                        Selector: `[order_kd] = "${orderId}"`
+                    })
+                });
+
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+
+                const data = await response.json();
+                if (!Array.isArray(data) || data.length === 0) {
+                    throw new Error('Không tìm thấy dữ liệu cho Order này');
+                }
+
+                // Tìm chính xác bản ghi với order_kd
+                const exactMatch = data.find(item => item.order_kd === orderId);
+                if (!exactMatch) {
+                    throw new Error('Không tìm thấy thông tin đơn hàng khớp với mã order');
+                }
+
+                return exactMatch;
+            } catch (error) {
+                console.error('Lỗi khi lấy dữ liệu đơn hàng:', error);
+                throw error;
+            }
+        }
+
+        // Function to fetch product data from san_pham table
+        async function fetchProductData(tenChiTiet) {
+            try {
+                const response = await fetch(`https://${region}.appsheet.com/api/v2/apps/${appId}/tables/san_pham/Action`, {
+                    method: 'POST',
+                    headers: {
+                        'ApplicationAccessKey': accessKey,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        Action: 'Find',
+                        Properties: {},
+                        Selector: `[ten_chi_tiet] = "${tenChiTiet}"`
+                    })
+                });
+
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+
+                const data = await response.json();
+                if (!Array.isArray(data) || data.length === 0) {
+                    console.warn('Không tìm thấy dữ liệu sản phẩm cho tên chi tiết:', tenChiTiet);
+                    return null; // Trả về null nếu không tìm thấy
+                }
+
+                // Tìm chính xác bản ghi với ten_chi_tiet
+                const exactMatch = data.find(item => item.ten_chi_tiet === tenChiTiet);
+                if (!exactMatch) {
+                    console.warn('Không tìm thấy sản phẩm khớp chính xác với tên chi tiết:', tenChiTiet);
+                    return data[0]; // Trả về bản ghi đầu tiên nếu không có khớp chính xác
+                }
+
+                return exactMatch;
+            } catch (error) {
+                console.error('Lỗi khi lấy dữ liệu sản phẩm:', error);
+                return null; // Trả về null nếu có lỗi
+            }
+        }
+
+        // Function to fill the form with combined data
+        function fillForm(orderData, productData) {
+            // Điền thông tin từ dữ liệu đơn hàng (so_giao_nhan)
+            document.getElementById('ten_chi_tiet').textContent = orderData.ten_chi_tiet || '';
+            document.getElementById('order_kd').textContent = orderData.order_kd || '';
+            document.getElementById('thoi_han').textContent = orderData.thoi_han || '';
+            document.getElementById('ngay_nhan').textContent = formatDate(orderData.ngay_nhan) || '';
+            document.getElementById('gio_nhan').textContent = orderData.gio_nhan || '';
+            document.getElementById('code').textContent = orderData.code || '';
+            document.getElementById('ho_va_ten').textContent = orderData.ho_va_ten || '';
+            document.getElementById('so_file').textContent = orderData.so_file || '';
+            document.getElementById('vat_lieu').textContent = orderData.vat_lieu || '';
+            document.getElementById('sll').textContent = orderData.sll || '';
+            document.getElementById('xlbm').textContent = orderData.xlbm || '';
+            document.getElementById('noi_gia_cong').textContent = orderData.noi_gia_cong || '';
+
+            // Điền thông tin top labels
+            document.getElementById('tinh_chat').textContent = orderData.tinh_chat || '';
+            document.getElementById('ghi_chu').textContent = orderData.ghi_chu || '';
+
+            // Xử lý QR code nếu có
+            if (orderData.qr_code) {
+                document.getElementById('qr_code').innerHTML = `<img src="${orderData.qr_code}" alt="QR Code" style="max-width: 150px;">`;
+            }
+            
+
+            // Lấy thông tin cụ thể từ dữ liệu sản phẩm (san_pham) nếu có
+            if (productData) {
+
+                document.getElementById('vat_lieu').textContent = productData.vat_lieu || orderData.vat_lieu || '';
+
+                // Xử lý thông tin xlbm
+                document.getElementById('xlbm').textContent = productData.xlbm || orderData.xlbm || '';
+
+                // Xử lý thông tin tạp ren
+                const tapRen = productData.tap_ren === 'K' ? 'Không lỗ ren' : (productData.tap_ren === 'M' ? 'CNC' : '');
+                document.getElementById('tap_ren_info').textContent = tapRen;
+
+                // Xử lý thông tin phay ren
+                const phayRen = productData.phay_ren === 'K' ? '' : 'Phay' + productData.phay_ren;
+                document.getElementById('phay_ren_info').textContent = phayRen;
+
+                // Xử lý thông tin gia công bằng tay
+                const gcBangTay = productData.gc_bang_tay === 'K' ? '' : 'G/c ' + productData.gc_bang_tay;
+                document.getElementById('gc_bang_tay_info').textContent = gcBangTay;
+
+                // Xử lý logic phức tạp hơn cho trường bề mặt
+                let beMat = '';
+                if (productData.mat_ngoai === 'M') {
+                    beMat = 'Mặt ngoài';
+                } else if (productData.mat_ngoai === 'T') {
+                    beMat = 'Tương đương bm cấp 1';
+                }
+
+                if (productData.ngoai_rc_xuat_le === 'X') {
+                    beMat += '- Xuất lẻ';
+                } else if (productData.ngoai_rc_xuat_le === 'N') {
+                    beMat += '-T/C ngoài RRC';
+                }
+
+                document.getElementById('be_mat').textContent = beMat;
+
+                // Xử lý các ghi chú dựa trên điều kiện từ bảng san_pham
+                processNotes(productData, orderData);
+            } else {
+                // Nếu không có dữ liệu sản phẩm, để trống các trường cụ thể này
+                document.getElementById('be_mat').textContent = '';
+                document.getElementById('tap_ren_info').textContent = '';
+                document.getElementById('phay_ren_info').textContent = '';
+                document.getElementById('gc_bang_tay_info').textContent = '';
+
+                // Xóa các ghi chú
+                document.getElementById('note1').textContent = '';
+                document.getElementById('note2').textContent = '';
+                document.getElementById('note3').textContent = '';
+                document.getElementById('note4').textContent = '';
+                document.getElementById('note5').textContent = '';
+                document.getElementById('note6').textContent = '';
+            }
+        }
+
+        // Xử lý các ghi chú dựa trên dữ liệu sản phẩm
+        function processNotes(productData, orderData) {
+            // Lấy thông tin so_file từ orderData vì nó không nằm trong bảng san_pham
+            const so_file = orderData.so_file || '';
+            const order_kd = orderData.order_kd || '';
+
+            // Sử dụng dữ liệu từ sản phẩm
+            const vat_lieu = productData.vat_lieu || '';
+            const mat_ngoai = productData.mat_ngoai || '';
+            const sp_de_bien_dang = productData.sp_de_bien_dang || '';
+            const mail_xn_bv = productData.mail_xn_bv || '';
+            const gc_bang_tay = productData.gc_bang_tay || '';
+
+            // Note 1
+            let note1 = '';
+            if (vat_lieu.substring(0, 3) === "SUS") {
+                note1 = "RỬA: phải NGÂM NƯỚC NÓNG khi rửa và làm sạch => XN thực hiện:";
+            } else if (vat_lieu === "A6063-H") {
+                note1 = "XLBM: phải xử lý đánh nỉ MẶT NGUYÊN PHÔI A6063 trước khi xuất hàng => XN thực hiện:";
+            } else if (so_file === "N-1557") {
+                note1 = "TAP: hỗ trợ táp 2 M6 đạt chiều sâu => XN thực hiện:";
+            } else if (so_file === "N-1278") {
+                note1 = "TAP: hỗ trợ táp 2 M4 đạt chiều sâu => XN thực hiện:";
+            }
+            document.getElementById('note1').textContent = note1;
+
+            // Note 2
+            let note2 = '';
+            if (so_file.charAt(0) === "A" && mat_ngoai === "M") {
+                if (order_kd.includes("T")) {
+                    note2 = "XLBM: phải đánh đều toàn bộ MẶT NGOÀI để đạt tiêu chuẩn trước khi xử lý mạ => XN thực hiện:";
+                }
+            }
+            document.getElementById('note2').textContent = note2;
+
+            // Note 3
+            let note3 = '';
+            if (so_file.charAt(0) !== "A") {
+                if (vat_lieu.substring(0, 3) === "SUS") {
+                    note3 = "KTRA: phải ĐÓNG DẤU KIỂM SOÁT RỬA trong biên bản kiểm tra đi cùng hàng => XN thực hiện:";
+                } else if (vat_lieu === "A6063-H") {
+                    note3 = "KTRA: phải kiểm tra BM nguyên phôi đã được xử lý đánh nỉ => XN thực hiện:";
+                }
+            }
+            document.getElementById('note3').textContent = note3;
+
+            // Note 4
+            let note4 = '';
+            if (so_file.charAt(0) !== "A") {
+                const lastThreeChars = order_kd.slice(-3);
+                if (lastThreeChars.charAt(0) === "B") {
+                    note4 = "KTRA: phải có GIẤY BÁO LỖI TỪ RRC đi kèm biên bản kiểm tra => XN thực hiện:";
+                } else if (vat_lieu.substring(0, 3) === "SUS") {
+                    note4 = "XLBM: phải xử lý đánh nỉ SÁNG ĐỀU MẶT PHÔI => XN thực hiện:";
+                }
+            }
+            document.getElementById('note4').textContent = note4;
+
+            // Note 5
+            let note5 = '';
+            if (sp_de_bien_dang === "BD") {
+                note5 = "GÓI: phải có tem vàng in (ghi) dòng chữ SẢN PHẨM DỄ BIẾN DẠNG, KHÔNG XẾP ĐÈ LÊN trên mỗi gói hàng => XN thực hiện:";
+            }
+            document.getElementById('note5').textContent = note5;
+
+            // Note 6
+            let note6 = '';
+            if (mail_xn_bv === "M") {
+                note6 = "KTRA: phải có MAIL XÁC NHẬN BẢN VẼ TỪ RRC đi kèm biên bản kiểm tra => XN thực hiện:";
+            } else if (gc_bang_tay !== "K") {
+                note6 = "VIA: phải G/c bằng tay => XN thực hiện:";
+            }
+            document.getElementById('note6').textContent = note6;
+        }
+
+        // Helper function to format date
+        function formatDate(dateString) {
+            if (!dateString) return '';
+
+            try {
+                const date = new Date(dateString);
+                return date.toLocaleDateString('vi-VN');
+            } catch (e) {
+                return dateString;
+            }
+        }
+
+        // Main function to initialize the page
+        async function initPage() {
+            try {
+                // Lấy ID bản ghi từ URL
+                const urlParams = new URLSearchParams(window.location.search);
+                const orderId = urlParams.get('order');
+
+                if (!orderId) {
+                    throw new Error('Thiếu thông tin Order');
+                }
+
+                // 1. Fetch dữ liệu từ bảng so_giao_nhan
+                const orderData = await fetchOrderData(orderId);
+
+                // 2. Lấy ten_chi_tiet từ dữ liệu đơn hàng
+                const tenChiTiet = orderData.ten_chi_tiet;
+
+                // 3. Fetch dữ liệu từ bảng san_pham dựa trên ten_chi_tiet
+                let productData = null;
+                if (tenChiTiet) {
+                    productData = await fetchProductData(tenChiTiet);
+                }
+
+                // Ẩn loading indicator
+                document.getElementById('loadingIndicator').style.display = 'none';
+
+                // Hiển thị form
+                document.getElementById('formContainer').style.display = 'block';
+
+                // 4. Điền dữ liệu vào form
+                fillForm(orderData, productData);
+
+            } catch (error) {
+                console.error('Lỗi khởi tạo trang:', error);
+                document.getElementById('loadingIndicator').style.display = 'none';
+                document.getElementById('errorMessage').style.display = 'block';
+                document.getElementById('errorMessage').textContent = 'Đã xảy ra lỗi: ' + error.message;
+            }
+        }
+
+        // Khởi chạy khi trang đã tải xong
+        document.addEventListener('DOMContentLoaded', initPage);
+    </script>
+</body>
+
+</html>
