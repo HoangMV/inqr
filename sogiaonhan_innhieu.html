@@ -400,44 +400,42 @@
                         "Properties": {
                             "Locale": "vi-VN",
                             "Timezone": "Asia/Ho_Chi_Minh"
-                            // Bỏ MaxRecords và SortBy để xem có tải được dữ liệu không
                         },
                         "Rows": []
                     })
                 });
-
-                // Kiểm tra response chi tiết hơn
-                console.log("API Response Status:", response.status);
-                console.log("API Response Headers:", response.headers);
 
                 if (!response.ok) {
                     throw new Error(`HTTP error! status: ${response.status}`);
                 }
 
                 const text = await response.text();
-                console.log("API Response Text Length:", text.length);
-
                 if (!text || text.trim() === '') {
-                    console.warn('Response trống từ API');
                     return [];
                 }
 
-                try {
-                    const data = JSON.parse(text);
-                    console.log("Parsed Data Type:", typeof data);
-                    console.log("Is Array:", Array.isArray(data));
-                    console.log("Data Length:", Array.isArray(data) ? data.length : "Not an array");
+                const data = JSON.parse(text);
+                if (!Array.isArray(data)) {
+                    return [];
+                }
 
-                    if (!Array.isArray(data)) {
-                        console.warn('Dữ liệu không phải là mảng:', data);
-                        return [];
+                // Lọc dữ liệu hợp lệ (có order_kd và ten_chi_tiet)
+                const filteredData = data.filter(item => item.order_kd && item.ten_chi_tiet);
+
+                // Sắp xếp theo _RowNumber giảm dần (nếu có)
+                const sortedData = [...filteredData].sort((a, b) => {
+                    // Kiểm tra xem dữ liệu có _RowNumber không
+                    if (a._RowNumber !== undefined && b._RowNumber !== undefined) {
+                        return b._RowNumber - a._RowNumber; // Sắp xếp giảm dần
                     }
+                    // Fallback nếu không có _RowNumber
+                    return 0;
+                });
 
-                    return data.filter(item => item.order_kd && item.ten_chi_tiet);
-                } catch (parseError) {
-                    console.error('Lỗi khi parse JSON:', parseError, 'Text:', text);
-                    return [];
-                }
+                console.log("Dữ liệu sau khi sắp xếp theo _RowNumber:",
+                    sortedData.map(item => `${item._RowNumber || 'N/A'} - ${item.order_kd}`));
+
+                return sortedData;
             } catch (error) {
                 console.error('Lỗi khi lấy dữ liệu đơn hàng:', error);
                 throw error;
@@ -449,6 +447,7 @@
             const tableBody = document.getElementById('tableBody');
             tableBody.innerHTML = '';
 
+            // Dữ liệu đã được sắp xếp theo _RowNumber giảm dần
             data.forEach((item, index) => {
                 const row = tableBody.insertRow();
 
@@ -460,47 +459,33 @@
                 checkbox.setAttribute('data-order', item.order_kd);
                 cellCheckbox.appendChild(checkbox);
 
-                // STT - Không gán số cố định ở đây
+                // STT - Đánh số từ 1 trở đi
                 const cellSTT = row.insertCell(1);
+                cellSTT.textContent = index + 1;
 
-                // Order KD
+                // Các cột khác như trước đây...
                 const cellOrder = row.insertCell(2);
                 cellOrder.textContent = item.order_kd;
 
-                // Tên chi tiết
                 const cellTenChiTiet = row.insertCell(3);
                 cellTenChiTiet.textContent = item.ten_chi_tiet;
 
-                // Số lượng
                 const cellSoLuong = row.insertCell(4);
                 cellSoLuong.textContent = item.sll;
 
-                // file_ban_ve
                 const cellTinhChat = row.insertCell(5);
                 if (item.file_ban_ve) {
-                    // Tạo phần tử a (link) thay vì chỉ hiển thị text
                     const fileLink = document.createElement('a');
-                    fileLink.textContent = item.file_ban_ve;
-
-                    // Xây dựng URL để mở file dựa trên định dạng URL đã cung cấp
+                    fileLink.textContent = "In bản vẽ";
                     const fileName = encodeURIComponent(item.file_ban_ve);
                     fileLink.href = `https://www.appsheet.com/template/gettablefileurl?appName=NewAppPKT2025-648353741&tableName=so_giao_nhan&fileName=${fileName}`;
-
-                    // Thiết lập để mở file trong cùng tab (thay vì tab mới)
-                    // fileLink.target = "_blank"; // Bỏ comment nếu muốn mở trong tab mới
-
-                    // Định dạng để trông giống như link có thể click
                     fileLink.style.color = "blue";
                     fileLink.style.textDecoration = "underline";
                     fileLink.style.cursor = "pointer";
-
-                    // Thêm sự kiện click để xử lý việc mở file
                     fileLink.addEventListener('click', function (e) {
-                        e.preventDefault(); // Ngăn hành vi mặc định của thẻ a
-                        // window.location.href = this.href; // Mở file trong tab hiện tại
-                        window.open(this.href, '_blank'); // Mở trong tab mới
+                        e.preventDefault();
+                        window.open(this.href, '_blank');
                     });
-
                     cellTinhChat.appendChild(fileLink);
                 } else {
                     cellTinhChat.textContent = '';
@@ -512,24 +497,14 @@
                 dataTable.destroy();
             }
 
-            // Khởi tạo DataTable mới với columnDefs để xử lý STT
+            // Khởi tạo DataTable mới với ordering tắt
             dataTable = $('#dataTable').DataTable({
                 language: {
                     url: 'https://cdn.datatables.net/plug-ins/1.11.5/i18n/vi.json'
                 },
-                processing: true, // Hiển thị "Đang xử lý"
-                deferRender: true, // Chỉ render khi cần thiết
-                columnDefs: [
-                    { orderable: false, targets: 0 },
-                    {
-                        // Thiết lập lại STT động cho cột thứ 1
-                        targets: 1,
-                        render: function (data, type, row, meta) {
-                            return meta.row + 1;
-                        }
-                    }
-                ],
-                order: [[1, 'desc']],
+                processing: true,
+                deferRender: true,
+                ordering: false, // Tắt ordering để giữ nguyên thứ tự đã sắp xếp
                 pageLength: 25,
                 lengthMenu: [[10, 25, 50, 100, -1], [10, 25, 50, 100, "Tất cả"]]
             });
