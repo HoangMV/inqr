@@ -1,0 +1,357 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Giấy Phép Liên Vận Giữa Việt Nam và Lào</title>
+    <style>
+        @page {
+            size: A4 landscape;
+            margin: 0;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.4;
+            margin: 0;
+            padding: 0;
+            font-size: 8pt;
+            overflow-x: hidden;
+        }
+
+        .page {
+            position: relative;
+            width: 297mm;
+            height: 210mm;
+            overflow: hidden;
+        }
+
+        .page-break {
+            page-break-after: always;
+            page-break-inside: avoid;
+        }
+
+        /* Trang cuối không có page break */
+        .page:last-child {
+            page-break-after: avoid;
+        }
+
+        .print-area {
+            position: absolute;
+            top: 0;
+            right: 0;
+            width: 50%;
+            height: 50%;
+            padding: 10mm;
+            box-sizing: border-box;
+        }
+
+        .container {
+            width: 100%;
+            height: 100%;
+            padding: 5mm;
+            box-sizing: border-box;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 3mm;
+        }
+
+        .title {
+            font-weight: bold;
+            text-align: center;
+            margin: 2mm 0;
+            line-height: 1.3;
+            font-size: 9pt;
+        }
+
+        .section {
+            margin-bottom: 2mm;
+        }
+
+        .section-title {
+            font-weight: bold;
+            text-align: center;
+            margin: 2mm 0;
+            font-size: 8pt;
+        }
+
+        .field {
+            margin-bottom: 1mm;
+        }
+
+        .field-label {
+            font-weight: bold;
+        }
+
+        .footer {
+            margin-top: 3mm;
+            text-align: center;
+        }
+
+        .emblem {
+            text-align: center;
+            margin-bottom: 2mm;
+        }
+
+        .emblem img {
+            width: 10mm;
+            height: auto;
+        }
+
+        .separator {
+            text-align: center;
+            margin: 1mm 0;
+        }
+
+        .permit-number {
+            text-align: center;
+            font-weight: bold;
+            margin: 3mm 0 2mm 0;
+        }
+
+        hr.dotted {
+            border-top: 1px dotted #000;
+            border-bottom: none;
+            margin: 2mm 0;
+        }
+
+        /* Ngăn không hiển thị nội dung sau trang cuối */
+        html,
+        body {
+            height: 100%;
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Thêm nút in vào đầu trang -->
+    <div style="position: fixed; top: 20px; right: 20px; z-index: 1000;">
+        <button id="printButton"
+            style="padding: 8px 15px; background-color: #4CAF50; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 14px;">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16"
+                style="vertical-align: text-bottom; margin-right: 5px;">
+                <path
+                    d="M5 1a2 2 0 0 0-2 2v1h10V3a2 2 0 0 0-2-2H5zm6 8H5a1 1 0 0 0-1 1v3a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1v-3a1 1 0 0 0-1-1z" />
+                <path
+                    d="M0 7a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v3a2 2 0 0 1-2 2h-1v-2a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v2H2a2 2 0 0 1-2-2V7zm2.5 1a.5.5 0 1 0 0-1 .5.5 0 0 0 0 1z" />
+            </svg>
+            In giấy phép
+        </button>
+    </div>
+
+
+    <!-- Trang 1 -->
+    <div class="page page-break">
+        <div class="print-area">
+            <div class="container">
+                <div class="emblem">
+                    <img src="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGNpcmNsZSBjeD0iMzAiIGN5PSIzMCIgcj0iMjgiIGZpbGw9Im5vbmUiIHN0cm9rZT0iIzAwMCIgc3Ryb2tlLXdpZHRoPSIyIi8+PHRleHQgeD0iMzAiIHk9IjM1IiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBmb250LXNpemU9IjE4IiBmb250LXdlaWdodD0iYm9sZCIgZmlsbD0iIzAwMCI+KjwvdGV4dD48L3N2Zz4="
+                        alt="Quốc huy">
+                </div>
+
+                <div class="header">
+                    <p style="font-weight: bold; margin-bottom: 1mm;">CỘNG HÒA XÃ HỘI CHỦ NGHĨA VIỆT NAM<br>
+                        <span style="font-weight: normal;">SOCIALIST REPUBLIC OF VIETNAM</span>
+                    </p>
+                    <p style="font-weight: bold; margin-top: 1mm; margin-bottom: 1mm;">Độc lập - Tự do - Hạnh phúc<br>
+                        <span style="font-weight: normal;">Independence - Freedom - Happiness</span>
+                    </p>
+                    <div class="separator">---------------</div>
+                </div>
+
+                <div class="title">
+                    GIẤY PHÉP LIÊN VẬN<br>
+                    GIỮA VIỆT NAM VÀ LÀO<br>
+                    <br>
+                    VIET NAM - LAOS<br>
+                    VEHICLE CROSS - BORDER TRANSPORT<br>
+                    PERMIT
+                </div>
+
+                <div class="permit-number">
+                    Số Giấy phép (Permit Number): 00525/SVL
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Trang 2 -->
+    <div class="page page-break">
+        <div class="print-area">
+            <div class="container">
+                <div class="section-title">
+                    Thông tin cơ bản về phương tiện<br>
+                    General data of the vehicle
+                </div>
+
+                <div class="section">
+                    <div class="field">
+                        <span class="field-label">1. Số đăng ký phương tiện (Registration number)</span><br>
+                        98A-308.80
+                    </div>
+
+                    <div class="field">
+                        <span class="field-label">2. Thông số kỹ thuật (Specifications)</span>
+                    </div>
+
+                    <div class="field">
+                        <span class="field-label">- Năm sản xuất (Manufacture year):</span> 2016
+                    </div>
+
+                    <div class="field">
+                        <span class="field-label">- Nhãn hiệu (Brand/Trademark):</span> TOYOTA
+                    </div>
+
+                    <div class="field">
+                        <span class="field-label">- Loại xe (Model):</span> Loại khác
+                    </div>
+
+                    <div class="field">
+                        <span class="field-label">- Màu sơn (Colour):</span>
+                    </div>
+
+                    <div class="field">
+                        <span class="field-label">- Số máy (Engine No.):</span> 2AR1600909
+                    </div>
+
+                    <div class="field">
+                        <span class="field-label">- Số khung (Chassis No.):</span> RL4BF3FK3G6009964
+                    </div>
+
+                    <div class="field">
+                        <span class="field-label">- Trọng tải (Gross weight):</span> 4
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Trang 3 -->
+    <div class="page page-break">
+        <div class="print-area">
+            <div class="container">
+                <div class="section-title">
+                    Chi tiết về cơ quan/đơn vị/cá nhân<br>
+                    được cấp giấy phép liên vận<br>
+                    Details of Organization/ individual granted<br>
+                    transport permit
+                </div>
+
+                <div class="section">
+                    <div class="field">
+                        <span class="field-label">Tên cơ quan/đơn vị/cá nhân (Organization/individual name):</span><br>
+                        CÔNG TY TNHH TM&VT HÀNG HÓA HẢI ĐẠT
+                    </div>
+
+                    <div class="field">
+                        <span class="field-label">Địa chỉ (Address):</span><br>
+                        48, Lương Văn Nắm, Phường Dĩnh Kế, Thành phố Bắc Giang, Tỉnh Bắc Giang
+                    </div>
+
+                    <div class="field">
+                        <span class="field-label">Điện thoại (Telephone number):</span> 0976471578
+                    </div>
+
+                    <div class="field">
+                        <span class="field-label">Số Fax (Fax number):</span>
+                    </div>
+
+                    <div class="field">
+                        <span class="field-label">Lĩnh vực hoạt động vận tải (Type of transport operation):</span> Vận
+                        tải hàng hóa bằng xe ô tô
+                    </div>
+
+                    <div class="field">
+                        <span class="field-label">Số giấy phép vận tải đường bộ quốc tế giữa Việt Nam và Lào:</span><br>
+                        002/2025/GPQT
+                    </div>
+
+                    <div class="field">
+                        <span class="field-label">Ngày phát hành (Issuing date):</span> 25/04/2025
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Trang 4 - không có page-break ở trang cuối cùng -->
+    <div class="page">
+        <div class="print-area">
+            <div class="container">
+                <div class="section-title">
+                    GHI CHÚ<br>
+                    NOTICES
+                </div>
+
+                <div class="section">
+                    <div class="field">
+                        <span class="field-label">Giấy phép này có giá trị<br>This permit is valid</span>
+                    </div>
+
+                    <div class="field">
+                        <span class="field-label">Từ ngày (From):</span> 28/04/2025
+                    </div>
+
+                    <div class="field">
+                        <span class="field-label">Đến ngày (until):</span> 28/04/2026
+                    </div>
+                </div>
+
+                <div class="section-title">
+                    Cửa khẩu, Vùng/tuyến hoạt động, Nơi đến<br>
+                    Border gate, Operation areas/routes, Destination
+                </div>
+
+                <div class="section">
+                    <div class="field">
+                        <span class="field-label">Cửa khẩu (Border gate):</span><br>
+                        Các cửa khẩu đã được hai nước Việt Nam- Lào cho phép
+                    </div>
+
+                    <div class="field">
+                        <span class="field-label">Vùng/tuyến hoạt động (Operation areas/routes):</span><br>
+                        Các tỉnh thuộc Lào
+                    </div>
+
+                    <div class="field">
+                        <span class="field-label">Nơi đến (Destination):</span><br>
+                        Các tỉnh thuộc Lào
+                    </div>
+
+                    <div class="field">
+                        <span class="field-label">Ngày cấp (Issued date):</span> 28/04/2025
+                    </div>
+                </div>
+
+                <hr class="dotted">
+
+                <div class="footer">
+                    <strong>Cơ quan cấp phép<br>
+                        Issuing Authority<br>
+                        (Signature, stamp)</strong>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Thêm script xử lý in -->
+    <script>
+        document.getElementById('printButton').addEventListener('click', function () {
+            // Ẩn nút in khi in
+            this.style.display = 'none';
+
+            // Mở cửa sổ in
+            window.print();
+
+            // Hiện lại nút sau khi đóng cửa sổ in
+            setTimeout(function () {
+                document.getElementById('printButton').style.display = 'block';
+            }, 1000);
+        });
+    </script>
+</body>
+
+</html>
