@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Shipping Label Template</title>
+    <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.5/dist/JsBarcode.all.min.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+        }
+        .controls {
+            margin-bottom: 20px;
+        }
+        .print-button {
+            padding: 10px 20px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            margin-right: 10px;
+        }
+        .print-button:hover {
+            background-color: #45a049;
+        }
+        .label-container {
+            width: 90mm;
+            height: 60mm;
+            box-sizing: border-box;
+            position: relative;
+            background-color: white;
+            border: 1px solid #000;
+            padding: 8px;
+            margin: 0 auto;
+        }
+        .barcode-container {
+            text-align: center;
+            margin-bottom: 5px;
+        }
+        .barcode {
+            width: 70%;
+            height: 15mm;
+        }
+        .tracking-number {
+            text-align: center;
+            font-size: 18px;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+        .destination {
+            text-align: center;
+            font-size: 24px;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+        .details {
+            display: grid;
+            grid-template-columns: auto 1fr;
+            gap: 5px;
+            font-size: 11px;
+            text-align: left;
+        }
+        .detail-label {
+            font-weight: normal;
+        }
+        .page-number {
+            position: absolute;
+            bottom: 10px;
+            right: 10px;
+            font-size: 18px;
+            font-weight: bold;
+        }
+        @media print {
+            @page {
+                size: 90mm 60mm;
+                margin: 0;
+            }
+            body {
+                margin: 0;
+                padding: 0;
+            }
+            .controls {
+                display: none;
+            }
+            .label-container {
+                width: 90mm;
+                height: 60mm;
+                margin: 0;
+                border: none;
+                page-break-after: always;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="controls">
+        <button class="print-button" onclick="printMultipleLabels()">In Theo Số Lượng</button>
+        <button class="print-button" onclick="printSinglePage()">In Tem (1 trang)</button>
+    </div>
+    
+    <!-- Chỉ hiển thị một tem trên trang web -->
+    <div class="label-container" id="singleLabel">
+        <div class="barcode-container">
+            <svg class="barcode"></svg>
+        </div>
+        <div class="tracking-number">CP1005150757</div>
+        <table class="details" style="width: 100%;">
+            <tr>
+                <td class="detail-label" style="width: 70px;">Tỉnh trả:</td>
+                <td style="font-weight: bold; font-size: 18px;">HỒ CHÍ MINH</td>
+            </tr>
+            <tr>
+                <td class="detail-label" style="vertical-align: top;">Huyện trả:</td>
+                <td>
+                    <span style="font-weight: normal;">1</span>
+                    <span style="margin-left: 65px;">Kiện: TẮC-12CSD/TPGTTT-OCV</span>
+                </td>
+            </tr>
+        </table>
+        <div class="page-number">5</div>
+    </div>
+
+    <script>
+        // Lấy số lượng tem cần in từ page-number
+        function getNumberOfLabels() {
+            const pageNumberElement = document.querySelector('.page-number');
+            return pageNumberElement ? parseInt(pageNumberElement.textContent) : 1;
+        }
+        
+        // Tạo mã vạch khi trang tải xong
+        document.addEventListener('DOMContentLoaded', function() {
+            JsBarcode(".barcode", "CP1005150757", {
+                format: "CODE128",
+                width: 2.5,
+                height: 40,
+                displayValue: false,
+                margin: 0
+            });
+        });
+        
+        // Hàm in nhiều tem theo số lượng trong page-number
+        function printMultipleLabels() {
+            const numberOfLabels = getNumberOfLabels();
+            const labelTemplate = document.getElementById('singleLabel').outerHTML;
+            
+            // Lưu nội dung gốc
+            const originalContent = document.body.innerHTML;
+            
+            // Tạo stylesheet cho in
+            const printStyles = `
+                <style>
+                    @page {
+                        size: 90mm 60mm;
+                        margin: 0;
+                    }
+                    body {
+                        margin: 0;
+                        padding: 0;
+                        overflow: visible !important;
+                    }
+                    .label-container {
+                        width: 90mm;
+                        height: 60mm;
+                        margin: 0;
+                        overflow: visible !important;
+                        position: static !important;
+                        page-break-after: always;
+                        page-break-inside: avoid !important;
+                    }
+                    .controls {
+                        display: none;
+                    }
+                </style>
+            `;
+            
+            // Tạo nội dung mới với số lượng tem theo page-number
+            let newContent = printStyles;
+            for (let i = 0; i < numberOfLabels; i++) {
+                newContent += labelTemplate;
+            }
+            
+            // Thay thế nội dung
+            document.body.innerHTML = newContent;
+            
+            // Khởi tạo lại mã vạch cho tất cả các tem
+            const barcodeElements = document.querySelectorAll('.barcode');
+            barcodeElements.forEach(element => {
+                JsBarcode(element, "CP1005150757", {
+                    format: "CODE128",
+                    width: 2.5,
+                    height: 40,
+                    displayValue: false,
+                    margin: 0
+                });
+            });
+            
+            // In
+            window.print();
+            
+            // Khôi phục lại nội dung
+            setTimeout(function() {
+                document.body.innerHTML = originalContent;
+                
+                // Khởi tạo lại mã vạch
+                JsBarcode(".barcode", "CP1005150757", {
+                    format: "CODE128",
+                    width: 2.5,
+                    height: 40,
+                    displayValue: false,
+                    margin: 0
+                });
+            }, 1000);
+        }
+        
+        // Hàm in trang đơn (giữ nguyên như đã có)
+        function printSinglePage() {
+            // Lưu nội dung gốc
+            const originalContent = document.body.innerHTML;
+            
+            // Chỉ lấy phần tem
+            const printContent = document.querySelector('.label-container').outerHTML;
+            
+            // Tạo stylesheet cho in
+            const printStyles = `
+                <style>
+                    @page {
+                        size: 90mm 60mm;
+                        margin: 0;
+                    }
+                    body {
+                        margin: 0;
+                        padding: 0;
+                        overflow: visible !important;
+                    }
+                    .label-container {
+                        width: 90mm;
+                        height: 60mm;
+                        margin: 0;
+                        overflow: visible !important;
+                        position: static !important;
+                        page-break-after: avoid !important;
+                        page-break-inside: avoid !important;
+                    }
+                </style>
+            `;
+            
+            // Thay thế nội dung
+            document.body.innerHTML = printStyles + printContent;
+            
+            // Khởi tạo lại mã vạch
+            JsBarcode(".barcode", "CP1005150757", {
+                format: "CODE128",
+                width: 2.5,
+                height: 40,
+                displayValue: false,
+                margin: 0
+            });
+            
+            // In
+            window.print();
+            
+            // Khôi phục lại nội dung
+            setTimeout(function() {
+                document.body.innerHTML = originalContent;
+                
+                // Khởi tạo lại mã vạch
+                JsBarcode(".barcode", "CP1005150757", {
+                    format: "CODE128",
+                    width: 2.5,
+                    height: 40,
+                    displayValue: false,
+                    margin: 0
+                });
+            }, 1000);
+        }
+    </script>
+</body>
+</html>
