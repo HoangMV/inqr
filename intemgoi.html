@@ -74,9 +74,11 @@
             .label-table.has-danh-bong tr:nth-child(1) {
                 height: 38%;
             }
+
             .label-table.has-danh-bong tr:nth-child(2) {
                 height: 38%;
             }
+
             .label-table.has-danh-bong tr:nth-child(3) {
                 height: 24%;
             }
@@ -158,6 +160,19 @@
             .sticky-pagination {
                 position: static;
                 border: none;
+            }
+
+            /* Đảm bảo không cắt xén tem */
+            .print-item {
+                break-inside: avoid;
+                page-break-inside: avoid;
+            }
+
+            .print-row {
+                break-inside: avoid;
+                page-break-inside: avoid;
+                display: flex !important;
+                flex-wrap: nowrap !important;
             }
         }
 
@@ -542,10 +557,10 @@
         function createLabelHTML(order, quantity) {
             const labelQuantity = order.sl_tem_goi === 0 ? 0 : (parseInt(order.sl_tem_goi) || 1);
             const unit = quantity === 1 ? 'PC' : 'PCS';
-            
+
             // Kiểm tra xem có trong danh sách đánh bóng không
             const isDanhBong = danhBongData.includes(order.ten_chi_tiet);
-            
+
             return `
                 <div class="print-item ${isDanhBong ? 'has-danh-bong' : ''}">
                     <div class="label-content">
@@ -684,7 +699,7 @@
 
         function loadDanhBongData() {
             const apiUrl = `https://${region}.appsheet.com/api/v2/apps/${appId}/tables/chi_tiet_danh_bong/Action`;
-            
+
             return fetch(apiUrl, {
                 method: 'POST',
                 headers: {
@@ -699,17 +714,17 @@
                     }
                 })
             })
-            .then(response => response.json())
-            .then(data => {
-                if (Array.isArray(data)) {
-                    danhBongData = data.map(item => item.ten_chi_tiet);
-                    console.log('Loaded danh bong data:', danhBongData.length, 'items');
-                }
-            })
-            .catch(error => {
-                console.error('Error loading danh bong data:', error);
-                danhBongData = []; // Đảm bảo danhBongData là array rỗng nếu có lỗi
-            });
+                .then(response => response.json())
+                .then(data => {
+                    if (Array.isArray(data)) {
+                        danhBongData = data.map(item => item.ten_chi_tiet);
+                        console.log('Loaded danh bong data:', danhBongData.length, 'items');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error loading danh bong data:', error);
+                    danhBongData = []; // Đảm bảo danhBongData là array rỗng nếu có lỗi
+                });
         }
 
         function loadMainData() {
@@ -729,28 +744,28 @@
                     }
                 })
             })
-            .then(response => response.json())
-            .then(data => {
-                if (Array.isArray(data)) {
-                    data.reverse();
-                    originalData = data;
-                    filteredData = data;
-                    renderTable(data);
-                    console.log('Loaded main data:', data.length, 'items');
-                }
-            });
+                .then(response => response.json())
+                .then(data => {
+                    if (Array.isArray(data)) {
+                        data.reverse();
+                        originalData = data;
+                        filteredData = data;
+                        renderTable(data);
+                        console.log('Loaded main data:', data.length, 'items');
+                    }
+                });
         }
 
         async function loadData() {
             showLoading();
-            
+
             try {
                 // Tải cả hai bảng song song
                 await Promise.all([
                     loadDanhBongData(),
                     loadMainData()
                 ]);
-                
+
                 hideLoading();
             } catch (error) {
                 console.error('Error loading data:', error);
