@@ -52,7 +52,7 @@
             border-radius: 4px;
             cursor: pointer;
             transition: background 0.2s;
-            
+
         }
 
         .btn-primary:hover {
@@ -849,135 +849,150 @@
 
         function generateExportTemplate(selectedItems) {
             const printArea = document.getElementById('printArea');
+            const itemsPerPage = 36; // Số dòng tối đa mỗi trang
+            const totalPages = Math.ceil(selectedItems.length / itemsPerPage);
 
-            let content = `
-               <div style="font-family:'Times New Roman', Times, serif;">
-                   <div style="text-align: center; font-weight: bold; font-size: 24px; margin-bottom: 10px;">BIÊN BẢN CHECK GIAO KHO VP</div>
-                   <div style="font-weight: bold; font-style: italic; font-size: 14px;">Lần: ......... &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Giao Kho VP: ......... h ........, ngày ........ tháng ........ năm 20........</div>
-                   
-                   <table style="width: 100%; border-collapse: collapse; border: 1px solid black;">
-                       <thead>
-                           <tr>
-                               <th style="border: 1px solid black; width: 5pt; font-weight: bold; text-align: center; padding: 1px; font-size: 13px;" rowspan="2">Stt</th>
-                               <th style="border: 1px solid black; width: 5pt; font-weight: bold; text-align: center; padding: 1px; font-size: 13px;" rowspan="2">Order Vật liệu</th>
-                               <th style="border: 1px solid black; width: 5pt; font-weight: bold; text-align: center; padding: 1px; font-size: 13px;" rowspan="2">Order Kinh doanh</th>
-                               <th style="border: 1px solid black; width: 75pt; font-weight: bold; text-align: center; padding: 1px; font-size: 13px;" rowspan="2">Tên sản phẩm</th>
-                              <th style="border: 1px solid black; width: 5pt; font-weight: bold; text-align: center; padding: 1px; font-size: 13px;" rowspan="2">Số lg</th>
-                              <th style="border: 1px solid black; width: 5pt; font-weight: bold; text-align: center; padding: 1px; font-size: 15px;" colspan="7">CHECK THỰC HIỆN</th>
-                              <th style="border: 1px solid black; font-weight: bold; text-align: center; padding: 1px; font-size: 13px;" rowspan="2">Ghi chú</th>
-                          </tr>
-                          <tr>
-                              <th style="border: 1px solid black; width: 7mm; font-weight: normal; text-align: center; padding: 4px; font-size: 10px;">Dán tem</th>
-                              <th style="border: 1px solid black; width: 7mm; font-weight: normal; text-align: center; padding: 4px; font-size: 10px;">BB ktra</th>
-                              <th style="border: 1px solid black; width: 9mm; font-weight: normal; text-align: center; padding: 1px; font-size: 10px;">Dầu Rửa + Sp mới</th>
-                              <th style="border: 1px solid black; width: 7mm; font-weight: normal; text-align: center; padding: 4px; font-size: 10x;">Đấu D.gối</th>
-                              <th style="border: 1px solid black; width: 7mm; font-weight: normal; text-align: center; padding: 4px; font-size: 10x;">Mail XN</th>
-                              <th style="border: 1px solid black; width: 7mm; font-weight: normal; text-align: center; padding: 4px; font-size: 10px;">QR code</th>
-                              <th style="border: 1px solid black; width: 7pt; font-weight: normal; text-align: center; padding: 4px; font-size: 11px;">Tổng số gói</th>
-                          </tr>
-                      </thead>
-                      <tbody>
-          `;
+            let allContent = '';
 
-            selectedItems.forEach((item, index) => {
-                const orderVL = item.order_vat_lieu || '';
-                const orderKD = item.order_kd || '';
-                const tenSP = item.ten_chi_tiet || '';
-                const soLuong = item.sll || '';
-                const soGoi = item.sl_tem_goi || '';
-                const mailxn = item.loai_giay_to || '';
-                const qrcode = item.qr_code || '';
+            // Tạo từng trang
+            for (let page = 0; page < totalPages; page++) {
+                const startIndex = page * itemsPerPage;
+                const endIndex = Math.min(startIndex + itemsPerPage, selectedItems.length);
+                const pageItems = selectedItems.slice(startIndex, endIndex);
 
-                // Logic cho daurua
-                let daurua = '';
-                const dongDauRua = (item.dong_dau_rua || '').toUpperCase();
-                const giaCongMoi = (item.gia_cong_moi || '').toUpperCase();
+                let pageContent = `
+            <div style="font-family:'Times New Roman', Times, serif; page-break-after: ${page < totalPages - 1 ? 'always' : 'auto'};">
+                <div style="text-align: center; font-weight: bold; font-size: 24px; margin-bottom: 10px;">BIÊN BẢN CHECK GIAO KHO VP</div>
+                <div style="font-weight: bold; font-style: italic; font-size: 14px;">Lần: ......... &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Giao Kho VP: ......... h ........, ngày ........ tháng ........ năm 20........ (Trang ${page + 1}/${totalPages})</div>
+                
+                <table style="width: 100%; border-collapse: collapse; border: 1px solid black; margin-bottom: 10px;">
+                    <thead>
+                        <tr>
+                            <th style="border: 1px solid black; width: 5pt; font-weight: bold; text-align: center; padding: 1px; font-size: 13px;" rowspan="2">Stt</th>
+                            <th style="border: 1px solid black; width: 5pt; font-weight: bold; text-align: center; padding: 1px; font-size: 13px;" rowspan="2">Order Vật liệu</th>
+                            <th style="border: 1px solid black; width: 5pt; font-weight: bold; text-align: center; padding: 1px; font-size: 13px;" rowspan="2">Order Kinh doanh</th>
+                            <th style="border: 1px solid black; width: 75pt; font-weight: bold; text-align: center; padding: 1px; font-size: 13px;" rowspan="2">Tên sản phẩm</th>
+                            <th style="border: 1px solid black; width: 5pt; font-weight: bold; text-align: center; padding: 1px; font-size: 13px;" rowspan="2">Số lg</th>
+                            <th style="border: 1px solid black; width: 5pt; font-weight: bold; text-align: center; padding: 1px; font-size: 15px;" colspan="7">CHECK THỰC HIỆN</th>
+                            <th style="border: 1px solid black; font-weight: bold; text-align: center; padding: 1px; font-size: 13px;" rowspan="2">Ghi chú</th>
+                        </tr>
+                        <tr>
+                            <th style="border: 1px solid black; width: 7mm; font-weight: normal; text-align: center; padding: 4px; font-size: 10px;">Dán tem</th>
+                            <th style="border: 1px solid black; width: 7mm; font-weight: normal; text-align: center; padding: 4px; font-size: 10px;">BB ktra</th>
+                            <th style="border: 1px solid black; width: 9mm; font-weight: normal; text-align: center; padding: 1px; font-size: 10px;">Dầu Rửa + Sp mới</th>
+                            <th style="border: 1px solid black; width: 7mm; font-weight: normal; text-align: center; padding: 4px; font-size: 10x;">Đấu D.gối</th>
+                            <th style="border: 1px solid black; width: 7mm; font-weight: normal; text-align: center; padding: 4px; font-size: 10x;">Mail XN</th>
+                            <th style="border: 1px solid black; width: 7mm; font-weight: normal; text-align: center; padding: 4px; font-size: 10px;">QR code</th>
+                            <th style="border: 1px solid black; width: 7pt; font-weight: normal; text-align: center; padding: 4px; font-size: 11px;">Tổng số gói</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+        `;
 
-                const hasSUS = dongDauRua.includes('SUS');
-                const hasGC = giaCongMoi.includes('GC');
+                // Thêm dữ liệu của trang hiện tại
+                pageItems.forEach((item, index) => {
+                    const globalIndex = startIndex + index + 1; // STT toàn cục
+                    const orderVL = item.order_vat_lieu || '';
+                    const orderKD = item.order_kd || '';
+                    const tenSP = item.ten_chi_tiet || '';
+                    const soLuong = item.sll || '';
+                    const soGoi = item.sl_tem_goi || '';
+                    const mailxn = item.loai_giay_to || '';
+                    const qrcode = item.qr_code || '';
 
-                if (hasSUS || hasGC) {
-                    daurua = ''; // Có ít nhất 1 điều kiện đúng thì để trống
-                } else {
-                    daurua = '\\\\\\\\\\\\\\\\'; // Cả 2 điều kiện đều sai thì hiển thị 8 dấu \
+                    // Logic cho daurua
+                    let daurua = '';
+                    const dongDauRua = (item.dong_dau_rua || '').toUpperCase();
+                    const giaCongMoi = (item.gia_cong_moi || '').toUpperCase();
+
+                    const hasSUS = dongDauRua.includes('SUS');
+                    const hasGC = giaCongMoi.includes('GC');
+
+                    if (hasSUS || hasGC) {
+                        daurua = '';
+                    } else {
+                        daurua = '\\\\\\\\\\\\\\\\';
+                    }
+
+                    // Logic cho ghiChu
+                    let ghiChu = '';
+                    if (hasSUS && hasGC) {
+                        ghiChu = 'BBKT có dấu rửa - BV có dấu g/c lần 1';
+                    } else if (hasSUS) {
+                        ghiChu = 'BBKT có dấu rửa';
+                    } else if (hasGC) {
+                        ghiChu = 'BV có dấu g/c lần 1';
+                    }
+
+                    pageContent += `
+                <tr>
+                    <td style="border-right: 1px solid black; border-bottom: 1px dashed black; padding: 1.5px; height: 23px; text-align: center; font-size: 13px;">${globalIndex}</td>
+                    <td style="border-right: 1px solid black; border-bottom: 1px dashed black; padding: 1.5px; height: 23px; text-align: center; font-size: 13px;">${orderVL}</td>
+                    <td style="border-right: 1px solid black; border-bottom: 1px dashed black; padding: 1.5px; height: 23px; text-align: center; font-size: 13px;">${orderKD}</td>
+                    <td style="border-right: 1px solid black; border-bottom: 1px dashed black; padding: 1.5px; height: 23px; text-align: center; font-size: 13px;">${tenSP}</td>
+                    <td style="border-right: 1px solid black; border-bottom: 1px dashed black; padding: 1.5px; height: 23px; text-align: center; font-size: 13px;">${soLuong}</td>
+                    <td style="border-right: 1px solid black; border-bottom: 1px dashed black; padding: 1px; height: 23px; text-align: center; font-size: 9px;"></td>
+                    <td style="border-right: 1px solid black; border-bottom: 1px dashed black; padding: 1px; height: 23px; text-align: center; font-size: 9px;"></td>
+                    <td style="border-right: 1px solid black; border-bottom: 1px dashed black; padding: 1px; height: 23px; text-align: center; font-size: 9px;">${daurua}</td>
+                    <td style="border-right: 1px solid black; border-bottom: 1px dashed black; padding: 1px; height: 23px; text-align: center; font-size: 9px;"></td>
+                    <td style="border-right: 1px solid black; border-bottom: 1px dashed black; padding: 1px; height: 23px; text-align: center; font-size: 9px;">${mailxn}</td>
+                    <td style="border-right: 1px solid black; border-bottom: 1px dashed black; padding: 1px; height: 23px; text-align: center; font-size: 9px;">${qrcode}</td>
+                    <td style="border-right: 1px solid black; border-bottom: 1px dashed black; padding: 1px; height: 23px; text-align: center; font-size: 13px;">${soGoi}</td>
+                    <td style="border-right: 1px solid black; border-bottom: 1px dashed black; padding: 1px; height: 23px; text-align: center; font-size: 13px;">${ghiChu}</td>
+                </tr>
+            `;
+                });
+
+                // Thêm các dòng trống để đủ itemsPerPage dòng mỗi trang
+                const remainingRows = itemsPerPage - pageItems.length;
+                for (let i = 0; i < remainingRows; i++) {
+                    const emptyRowIndex = startIndex + pageItems.length + i + 1;
+                    pageContent += `
+                <tr>
+                    <td style="border-right: 1px solid black; border-bottom: 1px dashed black; padding: 1px; height: 25px; text-align: center; font-size: 13px;">${emptyRowIndex}</td>
+                    <td style="border-right: 1px solid black; border-bottom: 1px dashed black; padding: 1px; height: 25px; text-align: center; font-size: 13px;"></td>
+                    <td style="border-right: 1px solid black; border-bottom: 1px dashed black; padding: 1px; height: 25px; text-align: center; font-size: 13px;"></td>
+                    <td style="border-right: 1px solid black; border-bottom: 1px dashed black; padding: 1px; height: 25px; text-align: center; font-size: 13px;"></td>
+                    <td style="border-right: 1px solid black; border-bottom: 1px dashed black; padding: 1px; height: 25px; text-align: center; font-size: 13px;"></td>
+                    <td style="border-right: 1px solid black; border-bottom: 1px dashed black; padding: 1px; height: 25px; text-align: center; font-size: 13px;"></td>
+                    <td style="border-right: 1px solid black; border-bottom: 1px dashed black; padding: 1px; height: 25px; text-align: center; font-size: 13px;"></td>
+                    <td style="border-right: 1px solid black; border-bottom: 1px dashed black; padding: 1px; height: 25px; text-align: center; font-size: 13px;"></td>
+                    <td style="border-right: 1px solid black; border-bottom: 1px dashed black; padding: 1px; height: 25px; text-align: center; font-size: 13px;"></td>
+                    <td style="border-right: 1px solid black; border-bottom: 1px dashed black; padding: 1px; height: 25px; text-align: center; font-size: 13px;"></td>
+                    <td style="border-right: 1px solid black; border-bottom: 1px dashed black; padding: 1px; height: 25px; text-align: center; font-size: 13px;"></td>
+                    <td style="border-right: 1px solid black; border-bottom: 1px dashed black; padding: 1px; height: 25px; text-align: center; font-size: 13px;"></td>
+                    <td style="border-right: 1px solid black; border-bottom: 1px dashed black; padding: 1px; height: 25px; text-align: center; font-size: 13px;"></td>
+                </tr>
+            `;
                 }
 
-                // Logic cho ghiChu
-                let ghiChu = '';
-                if (hasSUS && hasGC) {
-                    ghiChu = 'BBKT có dấu rửa - BV có dấu g/c lần 1';
-                } else if (hasSUS) {
-                    ghiChu = 'BBKT có dấu rửa';
-                } else if (hasGC) {
-                    ghiChu = 'BV có dấu g/c lần 1';
-                }
+                // Đóng bảng và thêm footer cho mỗi trang
+                pageContent += `
+                    </tbody>
+                </table>
+                
+                <div style="text-align: center; margin-top: 10px; font-size: 13px;">
+                    <span>Thực hiện việc đến đâu tích dấu "√" vào ô tương ứng bảng bút đó.</span> <br>
+                    <span>Kiểm tra lại biên bản đã được tích đủ các ô, các cột mới được giao Kho VP</span>
+                </div>
+                
+                <div style="display: flex; justify-content: space-between; margin-bottom: 30px;">
+                    <div style="text-align: right; width: 40%; font-size: 13px;">
+                        <span>Người thực hiện</span>
+                    </div>
+                    <div style="text-align: left; width: 40%; font-size: 13px;">
+                        <span>Người soát xét</span>
+                    </div>
+                </div>
+            </div>
+        `;
 
-                content += `
-        <tr>
-            <td style="border: 1px solid black; padding: 1.5px; height: 22px; text-align: center; font-size: 13px;">${index + 1}</td>
-            <td style="border: 1px solid black; padding: 1.5px; height: 22px; text-align: center; font-size: 13px;">${orderVL}</td>
-            <td style="border: 1px solid black; padding: 1.5px; height: 22px; text-align: center; font-size: 13px;">${orderKD}</td>
-            <td style="border: 1px solid black; padding: 1.5px; height: 22px; text-align: center; font-size: 13px;">${tenSP}</td>
-            <td style="border: 1px solid black; padding: 1.5px; height: 22px; text-align: center; font-size: 13px;">${soLuong}</td>
-            <td style="border: 1px solid black; padding: 1px; height: 22px; text-align: center; font-size: 9px;"></td>
-            <td style="border: 1px solid black; padding: 1px; height: 22px; text-align: center; font-size: 9px;"></td>
-            <td style="border: 1px solid black; padding: 1px; height: 22px; text-align: center; font-size: 9px;">${daurua}</td>
-            <td style="border: 1px solid black; padding: 1px; height: 22px; text-align: center; font-size: 9px;"></td>
-            <td style="border: 1px solid black; padding: 1px; height: 22px; text-align: center; font-size: 9px;">${mailxn}</td>
-            <td style="border: 1px solid black; padding: 1px; height: 22px; text-align: center; font-size: 9px;">${qrcode}</td>
-            <td style="border: 1px solid black; padding: 1px; height: 22px; text-align: center; font-size: 13px;">${soGoi}</td>
-            <td style="border: 1px solid black; padding: 1px; height: 22px; text-align: center; font-size: 13px;">${ghiChu}</td>
-        </tr>
-    `;
-            });
-
-            // Add empty rows to complete the table
-            for (let i = selectedItems.length; i < 20; i++) {
-                content += `
-                  <tr>
-                      <td style="border: 1px solid black; padding: 1px; height: 25px; text-align: center; font-size: 13px;">${i + 1}</td>
-                      <td style="border: 1px solid black; padding: 1px; height: 25px; text-align: center; font-size: 13px;"></td>
-                      <td style="border: 1px solid black; padding: 1px; height: 25px; text-align: center; font-size: 13px;"></td>
-                      <td style="border: 1px solid black; padding: 1px; height: 25px; text-align: center; font-size: 13px;"></td>
-                      <td style="border: 1px solid black; padding: 1px; height: 25px; text-align: center; font-size: 13px;"></td>
-                      <td style="border: 1px solid black; padding: 1px; height: 25px; text-align: center; font-size: 13px;"></td>
-                      <td style="border: 1px solid black; padding: 1px; height: 25px; text-align: center; font-size: 13px;"></td>
-                      <td style="border: 1px solid black; padding: 1px; height: 25px; text-align: center; font-size: 13px;"></td>
-                      <td style="border: 1px solid black; padding: 1px; height: 25px; text-align: center; font-size: 13px;"></td>
-                      <td style="border: 1px solid black; padding: 1px; height: 25px; text-align: center; font-size: 13px;"></td>
-                      <td style="border: 1px solid black; padding: 1px; height: 25px; text-align: center; font-size: 13px;"></td>
-                      <td style="border: 1px solid black; padding: 1px; height: 25px; text-align: center; font-size: 13px;"></td>
-                      <td style="border: 1px solid black; padding: 1px; height: 25px; text-align: center; font-size: 13px;"></td>
-                      <td style="border: 1px solid black; padding: 1px; height: 25px; text-align: center; font-size: 13px;"></td>
-                  </tr>
-              `;
+                allContent += pageContent;
             }
 
-            content += `
-                      </tbody>
-                  </table>
-                  
-                  <div style="text-align: center; margin-top: 10px; font-size: 13px;">
-                      <p>Thực hiện việc đến đâu tích dấu "√" vào ô tương ứng bảng bút đó.</p>
-                      <p>Kiểm tra lại biên bản đã được tích đủ các ô, các cột mới được giao Kho VP</p>
-                  </div>
-                  
-                  <div style="display: flex; justify-content: space-between; margin-top: 20px;">
-                      <div style="text-align: center; width: 40%; font-size: 13px;">
-                          <p>Người thực hiện</p>
-                          <br><br><br>
-                      </div>
-                      <div style="text-align: center; width: 40%; font-size: 13px;">
-                          <p>Người soát xét</p>
-                          <br><br><br>
-                      </div>
-                  </div>
-              </div>
-          `;
+            printArea.innerHTML = allContent;
 
-            printArea.innerHTML = content;
-
-            // Create iframe for printing
+            // Tạo iframe để in
             const iframe = document.createElement('iframe');
             iframe.name = 'print_frame';
             iframe.style.position = 'absolute';
@@ -988,29 +1003,25 @@
             const frameDoc = iframe.contentWindow ? iframe.contentWindow : iframe.contentDocument.document ? iframe.contentDocument.document : iframe.contentDocument;
             frameDoc.document.open();
             frameDoc.document.write(`
-              <title>Biên bản check giao kho VP</title>
-              <style>
-                  @page { 
-                      size: A4;
-                      margin: 5mm;
-                  }
-                  body {
-                      font-family: Arial, sans-serif;
-                      margin: 0;
-                      padding: 0;
-                  }
-                  table, th, td {
-                      border: 1px solid black;
-                      border-collapse: collapse;
-                  }
-                  th, td {
-                      text-align: center;
-                      font-size: 13px;
-                      padding: 1px;
-                  }
-              </style>
-              ${content}
-          `);
+        <title>Biên bản check giao kho VP</title>
+        <style>
+            @page { 
+                size: A4;
+                margin: 5mm;
+            }
+            body {
+                font-family: Arial, sans-serif;
+                margin: 0;
+                padding: 0;
+            }
+            th, td {
+                text-align: center;
+                font-size: 13px;
+                padding: 1px;
+            }
+        </style>
+        ${allContent}
+    `);
             frameDoc.document.close();
 
             setTimeout(function () {
@@ -1080,6 +1091,25 @@
 
         // Initialize
         fetchData();
+
+        document.addEventListener('contextmenu', function (e) {
+            e.preventDefault();
+        }, false);
+
+        document.onkeydown = function (e) {
+            if (e.keyCode == 123) {
+                return false;
+            }
+            if (e.ctrlKey && e.shiftKey && e.keyCode == 'I'.charCodeAt(0)) {
+                return false;
+            }
+            if (e.ctrlKey && e.shiftKey && e.keyCode == 'J'.charCodeAt(0)) {
+                return false;
+            }
+            if (e.ctrlKey && e.keyCode == 'U'.charCodeAt(0)) {
+                return false;
+            }
+        };
     </script>
 </body>
 
