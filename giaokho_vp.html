@@ -863,16 +863,16 @@
                 let pageContent = `
             <div style="font-family:'Times New Roman', Times, serif; page-break-after: ${page < totalPages - 1 ? 'always' : 'auto'};">
                 <div style="text-align: center; font-weight: bold; font-size: 24px; margin-bottom: 10px;">BIÊN BẢN CHECK GIAO KHO VP</div>
-                <div style="font-weight: bold; font-style: italic; font-size: 14px;">Lần: ......... &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Giao Kho VP: ......... h ........, ngày ........ tháng ........ năm 20........ (Trang ${page + 1}/${totalPages})</div>
+                <div style="font-weight: bold; font-style: italic; font-size: 14px;">Lần: ......... &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Giao Kho VP: ......... h ........, ngày ........ tháng ........ năm 20........</div>
                 
                 <table style="width: 100%; border-collapse: collapse; border: 1px solid black; margin-bottom: 10px;">
                     <thead>
                         <tr>
                             <th style="border: 1px solid black; width: 5pt; font-weight: bold; text-align: center; padding: 1px; font-size: 13px;" rowspan="2">Stt</th>
-                            <th style="border: 1px solid black; width: 5pt; font-weight: bold; text-align: center; padding: 1px; font-size: 13px;" rowspan="2">Order Vật liệu</th>
-                            <th style="border: 1px solid black; width: 5pt; font-weight: bold; text-align: center; padding: 1px; font-size: 13px;" rowspan="2">Order Kinh doanh</th>
+                            <th style="border: 1px solid black; width: 55pt; font-weight: bold; text-align: center; padding: 1px; font-size: 13px;" rowspan="2">Order Vật liệu</th>
+                            <th style="border: 1px solid black; width: 55pt; font-weight: bold; text-align: center; padding: 1px; font-size: 13px;" rowspan="2">Order Kinh doanh</th>
                             <th style="border: 1px solid black; width: 75pt; font-weight: bold; text-align: center; padding: 1px; font-size: 13px;" rowspan="2">Tên sản phẩm</th>
-                            <th style="border: 1px solid black; width: 5pt; font-weight: bold; text-align: center; padding: 1px; font-size: 13px;" rowspan="2">Số lg</th>
+                            <th style="border: 1px solid black; width: 7mm; font-weight: bold; text-align: center; padding: 1px; font-size: 13px;" rowspan="2">Số lg</th>
                             <th style="border: 1px solid black; width: 5pt; font-weight: bold; text-align: center; padding: 1px; font-size: 15px;" colspan="7">CHECK THỰC HIỆN</th>
                             <th style="border: 1px solid black; font-weight: bold; text-align: center; padding: 1px; font-size: 13px;" rowspan="2">Ghi chú</th>
                         </tr>
@@ -926,19 +926,19 @@
 
                     pageContent += `
                 <tr>
-                    <td style="border-right: 1px solid black; border-bottom: 1px dashed black; padding: 1.5px; height: 23px; text-align: center; font-size: 13px;">${globalIndex}</td>
-                    <td style="border-right: 1px solid black; border-bottom: 1px dashed black; padding: 1.5px; height: 23px; text-align: center; font-size: 13px;">${orderVL}</td>
-                    <td style="border-right: 1px solid black; border-bottom: 1px dashed black; padding: 1.5px; height: 23px; text-align: center; font-size: 13px;">${orderKD}</td>
-                    <td style="border-right: 1px solid black; border-bottom: 1px dashed black; padding: 1.5px; height: 23px; text-align: center; font-size: 13px;">${tenSP}</td>
-                    <td style="border-right: 1px solid black; border-bottom: 1px dashed black; padding: 1.5px; height: 23px; text-align: center; font-size: 13px;">${soLuong}</td>
-                    <td style="border-right: 1px solid black; border-bottom: 1px dashed black; padding: 1px; height: 23px; text-align: center; font-size: 9px;"></td>
-                    <td style="border-right: 1px solid black; border-bottom: 1px dashed black; padding: 1px; height: 23px; text-align: center; font-size: 9px;"></td>
-                    <td style="border-right: 1px solid black; border-bottom: 1px dashed black; padding: 1px; height: 23px; text-align: center; font-size: 9px;">${daurua}</td>
-                    <td style="border-right: 1px solid black; border-bottom: 1px dashed black; padding: 1px; height: 23px; text-align: center; font-size: 9px;"></td>
-                    <td style="border-right: 1px solid black; border-bottom: 1px dashed black; padding: 1px; height: 23px; text-align: center; font-size: 9px;">${mailxn}</td>
-                    <td style="border-right: 1px solid black; border-bottom: 1px dashed black; padding: 1px; height: 23px; text-align: center; font-size: 9px;">${qrcode}</td>
-                    <td style="border-right: 1px solid black; border-bottom: 1px dashed black; padding: 1px; height: 23px; text-align: center; font-size: 13px;">${soGoi}</td>
-                    <td style="border-right: 1px solid black; border-bottom: 1px dashed black; padding: 1px; height: 23px; text-align: center; font-size: 13px;">${ghiChu}</td>
+                    <td style="border-right: 1px solid black; border-bottom: 0.5px dashed gray; padding: 1.5px; height: 23px; text-align: center; font-size: 13px;">${globalIndex}</td>
+                    <td style="border-right: 1px solid black; border-bottom: 0.5px dashed gray; padding: 1.5px; height: 23px; text-align: center; font-size: 13px;">${orderVL}</td>
+                    <td style="border-right: 1px solid black; border-bottom: 0.5px dashed gray; padding: 1.5px; height: 23px; text-align: center; font-size: 13px;">${orderKD}</td>
+                    <td style="border-right: 1px solid black; border-bottom: 0.5px dashed gray; padding: 1.5px; height: 23px; text-align: center; font-size: 13px;">${tenSP}</td>
+                    <td style="border-right: 1px solid black; border-bottom: 0.5px dashed gray; padding: 1.5px; height: 23px; text-align: center; font-size: 13px;">${soLuong}</td>
+                    <td style="border-right: 1px solid black; border-bottom: 0.5px dashed gray; padding: 1px; height: 23px; text-align: center; font-size: 9px;"></td>
+                    <td style="border-right: 1px solid black; border-bottom: 0.5px dashed gray; padding: 1px; height: 23px; text-align: center; font-size: 9px;"></td>
+                    <td style="border-right: 1px solid black; border-bottom: 0.5px dashed gray; padding: 1px; height: 23px; text-align: center; font-size: 9px;">${daurua}</td>
+                    <td style="border-right: 1px solid black; border-bottom: 0.5px dashed gray; padding: 1px; height: 23px; text-align: center; font-size: 9px;"></td>
+                    <td style="border-right: 1px solid black; border-bottom: 0.5px dashed gray; padding: 1px; height: 23px; text-align: center; font-size: 9px;">${mailxn}</td>
+                    <td style="border-right: 1px solid black; border-bottom: 0.5px dashed gray; padding: 1px; height: 23px; text-align: center; font-size: 9px;">${qrcode}</td>
+                    <td style="border-right: 1px solid black; border-bottom: 0.5px dashed gray; padding: 1px; height: 23px; text-align: center; font-size: 13px;">${soGoi}</td>
+                    <td style="border-right: 1px solid black; border-bottom: 0.5px dashed gray; padding: 1px; height: 23px; text-align: center; font-size: 13px;">${ghiChu}</td>
                 </tr>
             `;
                 });
@@ -949,19 +949,19 @@
                     const emptyRowIndex = startIndex + pageItems.length + i + 1;
                     pageContent += `
                 <tr>
-                    <td style="border-right: 1px solid black; border-bottom: 1px dashed black; padding: 1px; height: 25px; text-align: center; font-size: 13px;">${emptyRowIndex}</td>
-                    <td style="border-right: 1px solid black; border-bottom: 1px dashed black; padding: 1px; height: 25px; text-align: center; font-size: 13px;"></td>
-                    <td style="border-right: 1px solid black; border-bottom: 1px dashed black; padding: 1px; height: 25px; text-align: center; font-size: 13px;"></td>
-                    <td style="border-right: 1px solid black; border-bottom: 1px dashed black; padding: 1px; height: 25px; text-align: center; font-size: 13px;"></td>
-                    <td style="border-right: 1px solid black; border-bottom: 1px dashed black; padding: 1px; height: 25px; text-align: center; font-size: 13px;"></td>
-                    <td style="border-right: 1px solid black; border-bottom: 1px dashed black; padding: 1px; height: 25px; text-align: center; font-size: 13px;"></td>
-                    <td style="border-right: 1px solid black; border-bottom: 1px dashed black; padding: 1px; height: 25px; text-align: center; font-size: 13px;"></td>
-                    <td style="border-right: 1px solid black; border-bottom: 1px dashed black; padding: 1px; height: 25px; text-align: center; font-size: 13px;"></td>
-                    <td style="border-right: 1px solid black; border-bottom: 1px dashed black; padding: 1px; height: 25px; text-align: center; font-size: 13px;"></td>
-                    <td style="border-right: 1px solid black; border-bottom: 1px dashed black; padding: 1px; height: 25px; text-align: center; font-size: 13px;"></td>
-                    <td style="border-right: 1px solid black; border-bottom: 1px dashed black; padding: 1px; height: 25px; text-align: center; font-size: 13px;"></td>
-                    <td style="border-right: 1px solid black; border-bottom: 1px dashed black; padding: 1px; height: 25px; text-align: center; font-size: 13px;"></td>
-                    <td style="border-right: 1px solid black; border-bottom: 1px dashed black; padding: 1px; height: 25px; text-align: center; font-size: 13px;"></td>
+                    <td style="border-right: 1px solid black; border-bottom: 0.5px dashed gray; padding: 1px; height: 25px; text-align: center; font-size: 13px;">${emptyRowIndex}</td>
+                    <td style="border-right: 1px solid black; border-bottom: 0.5px dashed gray; padding: 1px; height: 25px; text-align: center; font-size: 13px;"></td>
+                    <td style="border-right: 1px solid black; border-bottom: 0.5px dashed gray; padding: 1px; height: 25px; text-align: center; font-size: 13px;"></td>
+                    <td style="border-right: 1px solid black; border-bottom: 0.5px dashed gray; padding: 1px; height: 25px; text-align: center; font-size: 13px;"></td>
+                    <td style="border-right: 1px solid black; border-bottom: 0.5px dashed gray; padding: 1px; height: 25px; text-align: center; font-size: 13px;"></td>
+                    <td style="border-right: 1px solid black; border-bottom: 0.5px dashed gray; padding: 1px; height: 25px; text-align: center; font-size: 13px;"></td>
+                    <td style="border-right: 1px solid black; border-bottom: 0.5px dashed gray; padding: 1px; height: 25px; text-align: center; font-size: 13px;"></td>
+                    <td style="border-right: 1px solid black; border-bottom: 0.5px dashed gray; padding: 1px; height: 25px; text-align: center; font-size: 13px;"></td>
+                    <td style="border-right: 1px solid black; border-bottom: 0.5px dashed gray; padding: 1px; height: 25px; text-align: center; font-size: 13px;"></td>
+                    <td style="border-right: 1px solid black; border-bottom: 0.5px dashed gray; padding: 1px; height: 25px; text-align: center; font-size: 13px;"></td>
+                    <td style="border-right: 1px solid black; border-bottom: 0.5px dashed gray; padding: 1px; height: 25px; text-align: center; font-size: 13px;"></td>
+                    <td style="border-right: 1px solid black; border-bottom: 0.5px dashed gray; padding: 1px; height: 25px; text-align: center; font-size: 13px;"></td>
+                    <td style="border-right: 1px solid black; border-bottom: 0.5px dashed gray; padding: 1px; height: 25px; text-align: center; font-size: 13px;"></td>
                 </tr>
             `;
                 }
