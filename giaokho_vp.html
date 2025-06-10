@@ -319,14 +319,9 @@
 
         <!-- Filters -->
         <div class="grid grid-cols-1 md:grid-cols-6 gap-3 mobile-stack">
-            <div class="md:col-span-2">
+            <div class="md:col-span-3">
                 <input type="text" placeholder="Tìm kiếm..." class="w-full p-2 border rounded" id="searchInput">
             </div>
-            <select id="statusFilter" class="p-2 border rounded">
-                <option value="all">Tất cả trạng thái</option>
-                <option value="pending">Chưa xuất</option>
-                <option value="exported">Đã xuất</option>
-            </select>
             <select id="lanGiaoFilter" class="p-2 border rounded">
                 <option value="all">Tất cả lần giao</option>
             </select>
@@ -389,7 +384,7 @@
                             <th>ĐVT</th>
                             <th>SLL</th>
                             <th>Ngày gói</th>
-                            <th>Trạng thái</th>
+                            <th>Label</th>
                             <th>Xác nhận</th>
                             <th>Ghi chú</th>
                             <th>Số gói</th>
@@ -528,7 +523,6 @@
         // Filtering
         const applyFilters = debounce(function () {
             const search = document.getElementById('searchInput').value.toLowerCase().trim();
-            const status = document.getElementById('statusFilter').value;
             const lanGiao = document.getElementById('lanGiaoFilter').value;
             const date = document.getElementById('dateFilter').value;
 
@@ -547,14 +541,6 @@
                     ].join(' ').toLowerCase();
 
                     if (!searchableText.includes(search)) return false;
-                }
-
-                // Status filter
-                if (status !== 'all') {
-                    const isExported = item.thoi_han === 'Đã xuất';
-                    if ((status === 'pending' && isExported) || (status === 'exported' && !isExported)) {
-                        return false;
-                    }
                 }
 
                 // Lan giao filter
@@ -672,7 +658,7 @@
                <td>${item.dvt || ''}</td>
                <td><strong>${item.sll || ''}</strong></td>
                <td>${item._formattedDate}</td>
-               <td>${status}</td>
+               <td>${item.Label}</td>
                <td>${item.xac_nhan_tu_rc || ''}</td>
                <td title="${item.ghi_chu || ''}">${truncateText(item.ghi_chu || '', 15)}</td>
                <td>${item.so_goi || ''}</td>
@@ -916,31 +902,40 @@
 
                     // Logic cho ghiChu
                     let ghiChu = '';
+                    const mailxnUpper = mailxn.toUpperCase();
+                    const hasBV = mailxnUpper.includes('BẢN VẼ') || mailxnUpper.includes('BV');
+
                     if (hasSUS && hasGC) {
                         ghiChu = 'BBKT có dấu rửa - BV có dấu g/c lần 1';
                     } else if (hasSUS) {
                         ghiChu = 'BBKT có dấu rửa';
                     } else if (hasGC) {
                         ghiChu = 'BV có dấu g/c lần 1';
+                    } else if (daurua === '' && hasBV) {
+                        // Nếu daurua trống và mailxn có chứa "Bản vẽ" hoặc "BV"
+                        ghiChu = 'BBKT có dấu rửa - BV có dấu g/c lần 1';
+                    } else if (hasBV) {
+                        // Nếu chỉ mailxn có chứa "Bản vẽ" hoặc "BV"
+                        ghiChu = 'BV có dấu g/c lần 1';
                     }
 
                     pageContent += `
-                <tr>
-                    <td style="border-right: 1px solid black; border-bottom: 0.5px dashed gray; padding: 1.5px; height: 23px; text-align: center; font-size: 13px;">${globalIndex}</td>
-                    <td style="border-right: 1px solid black; border-bottom: 0.5px dashed gray; padding: 1.5px; height: 23px; text-align: center; font-size: 13px;">${orderVL}</td>
-                    <td style="border-right: 1px solid black; border-bottom: 0.5px dashed gray; padding: 1.5px; height: 23px; text-align: center; font-size: 13px;">${orderKD}</td>
-                    <td style="border-right: 1px solid black; border-bottom: 0.5px dashed gray; padding: 1.5px; height: 23px; text-align: center; font-size: 13px;">${tenSP}</td>
-                    <td style="border-right: 1px solid black; border-bottom: 0.5px dashed gray; padding: 1.5px; height: 23px; text-align: center; font-size: 13px;">${soLuong}</td>
-                    <td style="border-right: 1px solid black; border-bottom: 0.5px dashed gray; padding: 1px; height: 23px; text-align: center; font-size: 9px;"></td>
-                    <td style="border-right: 1px solid black; border-bottom: 0.5px dashed gray; padding: 1px; height: 23px; text-align: center; font-size: 9px;"></td>
-                    <td style="border-right: 1px solid black; border-bottom: 0.5px dashed gray; padding: 1px; height: 23px; text-align: center; font-size: 9px;">${daurua}</td>
-                    <td style="border-right: 1px solid black; border-bottom: 0.5px dashed gray; padding: 1px; height: 23px; text-align: center; font-size: 9px;"></td>
-                    <td style="border-right: 1px solid black; border-bottom: 0.5px dashed gray; padding: 1px; height: 23px; text-align: center; font-size: 9px;">${mailxn}</td>
-                    <td style="border-right: 1px solid black; border-bottom: 0.5px dashed gray; padding: 1px; height: 23px; text-align: center; font-size: 9px;">${qrcode}</td>
-                    <td style="border-right: 1px solid black; border-bottom: 0.5px dashed gray; padding: 1px; height: 23px; text-align: center; font-size: 13px;">${soGoi}</td>
-                    <td style="border-right: 1px solid black; border-bottom: 0.5px dashed gray; padding: 1px; height: 23px; text-align: center; font-size: 13px;">${ghiChu}</td>
-                </tr>
-            `;
+        <tr>
+            <td style="border-right: 1px solid black; border-bottom: 0.5px dashed gray; padding: 1.5px; height: 23px; text-align: center; font-size: 13px;">${globalIndex}</td>
+            <td style="border-right: 1px solid black; border-bottom: 0.5px dashed gray; padding: 1.5px; height: 23px; text-align: center; font-size: 13px;">${orderVL}</td>
+            <td style="border-right: 1px solid black; border-bottom: 0.5px dashed gray; padding: 1.5px; height: 23px; text-align: center; font-size: 13px;">${orderKD}</td>
+            <td style="border-right: 1px solid black; border-bottom: 0.5px dashed gray; padding: 1.5px; height: 23px; text-align: center; font-size: 13px;">${tenSP}</td>
+            <td style="border-right: 1px solid black; border-bottom: 0.5px dashed gray; padding: 1.5px; height: 23px; text-align: center; font-size: 13px;">${soLuong}</td>
+            <td style="border-right: 1px solid black; border-bottom: 0.5px dashed gray; padding: 1px; height: 23px; text-align: center; font-size: 9px;"></td>
+            <td style="border-right: 1px solid black; border-bottom: 0.5px dashed gray; padding: 1px; height: 23px; text-align: center; font-size: 9px;"></td>
+            <td style="border-right: 1px solid black; border-bottom: 0.5px dashed gray; padding: 1px; height: 23px; text-align: center; font-size: 9px;">${daurua}</td>
+            <td style="border-right: 1px solid black; border-bottom: 0.5px dashed gray; padding: 1px; height: 23px; text-align: center; font-size: 9px;"></td>
+            <td style="border-right: 1px solid black; border-bottom: 0.5px dashed gray; padding: 1px; height: 23px; text-align: center; font-size: 9px;">${mailxn}</td>
+            <td style="border-right: 1px solid black; border-bottom: 0.5px dashed gray; padding: 1px; height: 23px; text-align: center; font-size: 9px;">${qrcode}</td>
+            <td style="border-right: 1px solid black; border-bottom: 0.5px dashed gray; padding: 1px; height: 23px; text-align: center; font-size: 13px;">${soGoi}</td>
+            <td style="border-right: 1px solid black; border-bottom: 0.5px dashed gray; padding: 1px; height: 23px; text-align: center; font-size: 13px;">${ghiChu}</td>
+        </tr>
+    `;
                 });
 
                 // Thêm các dòng trống để đủ itemsPerPage dòng mỗi trang
@@ -949,19 +944,19 @@
                     const emptyRowIndex = startIndex + pageItems.length + i + 1;
                     pageContent += `
                 <tr>
-                    <td style="border-right: 1px solid black; border-bottom: 0.5px dashed gray; padding: 1px; height: 25px; text-align: center; font-size: 13px;">${emptyRowIndex}</td>
-                    <td style="border-right: 1px solid black; border-bottom: 0.5px dashed gray; padding: 1px; height: 25px; text-align: center; font-size: 13px;"></td>
-                    <td style="border-right: 1px solid black; border-bottom: 0.5px dashed gray; padding: 1px; height: 25px; text-align: center; font-size: 13px;"></td>
-                    <td style="border-right: 1px solid black; border-bottom: 0.5px dashed gray; padding: 1px; height: 25px; text-align: center; font-size: 13px;"></td>
-                    <td style="border-right: 1px solid black; border-bottom: 0.5px dashed gray; padding: 1px; height: 25px; text-align: center; font-size: 13px;"></td>
-                    <td style="border-right: 1px solid black; border-bottom: 0.5px dashed gray; padding: 1px; height: 25px; text-align: center; font-size: 13px;"></td>
-                    <td style="border-right: 1px solid black; border-bottom: 0.5px dashed gray; padding: 1px; height: 25px; text-align: center; font-size: 13px;"></td>
-                    <td style="border-right: 1px solid black; border-bottom: 0.5px dashed gray; padding: 1px; height: 25px; text-align: center; font-size: 13px;"></td>
-                    <td style="border-right: 1px solid black; border-bottom: 0.5px dashed gray; padding: 1px; height: 25px; text-align: center; font-size: 13px;"></td>
-                    <td style="border-right: 1px solid black; border-bottom: 0.5px dashed gray; padding: 1px; height: 25px; text-align: center; font-size: 13px;"></td>
-                    <td style="border-right: 1px solid black; border-bottom: 0.5px dashed gray; padding: 1px; height: 25px; text-align: center; font-size: 13px;"></td>
-                    <td style="border-right: 1px solid black; border-bottom: 0.5px dashed gray; padding: 1px; height: 25px; text-align: center; font-size: 13px;"></td>
-                    <td style="border-right: 1px solid black; border-bottom: 0.5px dashed gray; padding: 1px; height: 25px; text-align: center; font-size: 13px;"></td>
+                    <td style="border-right: 1px solid black; border-bottom: 0.5px dashed gray; padding: 1px; height: 23px; text-align: center; font-size: 13px;">${emptyRowIndex}</td>
+                    <td style="border-right: 1px solid black; border-bottom: 0.5px dashed gray; padding: 1px; height: 23px; text-align: center; font-size: 13px;"></td>
+                    <td style="border-right: 1px solid black; border-bottom: 0.5px dashed gray; padding: 1px; height: 23px; text-align: center; font-size: 13px;"></td>
+                    <td style="border-right: 1px solid black; border-bottom: 0.5px dashed gray; padding: 1px; height: 23px; text-align: center; font-size: 13px;"></td>
+                    <td style="border-right: 1px solid black; border-bottom: 0.5px dashed gray; padding: 1px; height: 23px; text-align: center; font-size: 13px;"></td>
+                    <td style="border-right: 1px solid black; border-bottom: 0.5px dashed gray; padding: 1px; height: 23px; text-align: center; font-size: 13px;"></td>
+                    <td style="border-right: 1px solid black; border-bottom: 0.5px dashed gray; padding: 1px; height: 23px; text-align: center; font-size: 13px;"></td>
+                    <td style="border-right: 1px solid black; border-bottom: 0.5px dashed gray; padding: 1px; height: 23px; text-align: center; font-size: 13px;"></td>
+                    <td style="border-right: 1px solid black; border-bottom: 0.5px dashed gray; padding: 1px; height: 23px; text-align: center; font-size: 13px;"></td>
+                    <td style="border-right: 1px solid black; border-bottom: 0.5px dashed gray; padding: 1px; height: 23px; text-align: center; font-size: 13px;"></td>
+                    <td style="border-right: 1px solid black; border-bottom: 0.5px dashed gray; padding: 1px; height: 23px; text-align: center; font-size: 13px;"></td>
+                    <td style="border-right: 1px solid black; border-bottom: 0.5px dashed gray; padding: 1px; height: 23px; text-align: center; font-size: 13px;"></td>
+                    <td style="border-right: 1px solid black; border-bottom: 0.5px dashed gray; padding: 1px; height: 23px; text-align: center; font-size: 13px;"></td>
                 </tr>
             `;
                 }
@@ -1033,7 +1028,6 @@
 
         // Event listeners
         document.getElementById('searchInput').addEventListener('input', applyFilters);
-        document.getElementById('statusFilter').addEventListener('change', applyFilters);
         document.getElementById('lanGiaoFilter').addEventListener('change', applyFilters);
         document.getElementById('dateFilter').addEventListener('change', applyFilters);
 
