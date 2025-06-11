@@ -882,7 +882,7 @@
                     const orderKD = item.order_kd || '';
                     const tenSP = item.ten_chi_tiet || '';
                     const soLuong = item.sll || '';
-                    const soGoi = item.sl_tem_goi || '';
+                    const soGoi = item.so_goi || '';
                     const mailxn = item.loai_giay_to || '';
                     const qrcode = item.qr_code || '';
 
@@ -921,19 +921,19 @@
 
                     pageContent += `
         <tr>
-            <td style="border-right: 1px solid black; border-bottom: 0.5px dashed gray; padding: 1.5px; height: 23px; text-align: center; font-size: 13px;">${globalIndex}</td>
-            <td style="border-right: 1px solid black; border-bottom: 0.5px dashed gray; padding: 1.5px; height: 23px; text-align: center; font-size: 13px;">${orderVL}</td>
-            <td style="border-right: 1px solid black; border-bottom: 0.5px dashed gray; padding: 1.5px; height: 23px; text-align: center; font-size: 13px;">${orderKD}</td>
-            <td style="border-right: 1px solid black; border-bottom: 0.5px dashed gray; padding: 1.5px; height: 23px; text-align: center; font-size: 13px;">${tenSP}</td>
-            <td style="border-right: 1px solid black; border-bottom: 0.5px dashed gray; padding: 1.5px; height: 23px; text-align: center; font-size: 13px;">${soLuong}</td>
-            <td style="border-right: 1px solid black; border-bottom: 0.5px dashed gray; padding: 1px; height: 23px; text-align: center; font-size: 9px;"></td>
-            <td style="border-right: 1px solid black; border-bottom: 0.5px dashed gray; padding: 1px; height: 23px; text-align: center; font-size: 9px;"></td>
-            <td style="border-right: 1px solid black; border-bottom: 0.5px dashed gray; padding: 1px; height: 23px; text-align: center; font-size: 9px;">${daurua}</td>
-            <td style="border-right: 1px solid black; border-bottom: 0.5px dashed gray; padding: 1px; height: 23px; text-align: center; font-size: 9px;"></td>
-            <td style="border-right: 1px solid black; border-bottom: 0.5px dashed gray; padding: 1px; height: 23px; text-align: center; font-size: 9px;">${mailxn}</td>
-            <td style="border-right: 1px solid black; border-bottom: 0.5px dashed gray; padding: 1px; height: 23px; text-align: center; font-size: 9px;">${qrcode}</td>
-            <td style="border-right: 1px solid black; border-bottom: 0.5px dashed gray; padding: 1px; height: 23px; text-align: center; font-size: 13px;">${soGoi}</td>
-            <td style="border-right: 1px solid black; border-bottom: 0.5px dashed gray; padding: 1px; height: 23px; text-align: center; font-size: 13px;">${ghiChu}</td>
+            <td style="border-right: 1px solid black; border-bottom: 0.5px dashed #d3d3d3; padding: 1.5px; height: 23px; text-align: center; font-size: 13px;">${globalIndex}</td>
+            <td style="border-right: 1px solid black; border-bottom: 0.5px dashed #d3d3d3; padding: 1.5px; height: 23px; text-align: center; font-size: 13px;">${orderVL}</td>
+            <td style="border-right: 1px solid black; border-bottom: 0.5px dashed #d3d3d3; padding: 1.5px; height: 23px; text-align: center; font-size: 13px;">${orderKD}</td>
+            <td style="border-right: 1px solid black; border-bottom: 0.5px dashed #d3d3d3; padding: 1.5px; height: 23px; text-align: center; font-size: 13px;">${tenSP}</td>
+            <td style="border-right: 1px solid black; border-bottom: 0.5px dashed #d3d3d3; padding: 1.5px; height: 23px; text-align: center; font-size: 13px;">${soLuong}</td>
+            <td style="border-right: 1px solid black; border-bottom: 0.5px dashed #d3d3d3; padding: 1px; height: 23px; text-align: center; font-size: 9px;"></td>
+            <td style="border-right: 1px solid black; border-bottom: 0.5px dashed #d3d3d3; padding: 1px; height: 23px; text-align: center; font-size: 9px;"></td>
+            <td style="border-right: 1px solid black; border-bottom: 0.5px dashed #d3d3d3; padding: 1px; height: 23px; text-align: center; font-size: 9px;">${daurua}</td>
+            <td style="border-right: 1px solid black; border-bottom: 0.5px dashed #d3d3d3; padding: 1px; height: 23px; text-align: center; font-size: 9px;"></td>
+            <td style="border-right: 1px solid black; border-bottom: 0.5px dashed #d3d3d3; padding: 1px; height: 23px; text-align: center; font-size: 9px;">${mailxn}</td>
+            <td style="border-right: 1px solid black; border-bottom: 0.5px dashed #d3d3d3; padding: 1px; height: 23px; text-align: center; font-size: 9px;">${qrcode}</td>
+            <td style="border-right: 1px solid black; border-bottom: 0.5px dashed #d3d3d3; padding: 1px; height: 23px; text-align: center; font-size: 13px;">${soGoi}</td>
+            <td style="border-right: 1px solid black; border-bottom: 0.5px dashed #d3d3d3; padding: 1px; height: 23px; text-align: center; font-size: 13px;">${ghiChu}</td>
         </tr>
     `;
                 });
@@ -944,19 +944,19 @@
                     const emptyRowIndex = startIndex + pageItems.length + i + 1;
                     pageContent += `
                 <tr>
-                    <td style="border-right: 1px solid black; border-bottom: 0.5px dashed gray; padding: 1px; height: 23px; text-align: center; font-size: 13px;">${emptyRowIndex}</td>
-                    <td style="border-right: 1px solid black; border-bottom: 0.5px dashed gray; padding: 1px; height: 23px; text-align: center; font-size: 13px;"></td>
-                    <td style="border-right: 1px solid black; border-bottom: 0.5px dashed gray; padding: 1px; height: 23px; text-align: center; font-size: 13px;"></td>
-                    <td style="border-right: 1px solid black; border-bottom: 0.5px dashed gray; padding: 1px; height: 23px; text-align: center; font-size: 13px;"></td>
-                    <td style="border-right: 1px solid black; border-bottom: 0.5px dashed gray; padding: 1px; height: 23px; text-align: center; font-size: 13px;"></td>
-                    <td style="border-right: 1px solid black; border-bottom: 0.5px dashed gray; padding: 1px; height: 23px; text-align: center; font-size: 13px;"></td>
-                    <td style="border-right: 1px solid black; border-bottom: 0.5px dashed gray; padding: 1px; height: 23px; text-align: center; font-size: 13px;"></td>
-                    <td style="border-right: 1px solid black; border-bottom: 0.5px dashed gray; padding: 1px; height: 23px; text-align: center; font-size: 13px;"></td>
-                    <td style="border-right: 1px solid black; border-bottom: 0.5px dashed gray; padding: 1px; height: 23px; text-align: center; font-size: 13px;"></td>
-                    <td style="border-right: 1px solid black; border-bottom: 0.5px dashed gray; padding: 1px; height: 23px; text-align: center; font-size: 13px;"></td>
-                    <td style="border-right: 1px solid black; border-bottom: 0.5px dashed gray; padding: 1px; height: 23px; text-align: center; font-size: 13px;"></td>
-                    <td style="border-right: 1px solid black; border-bottom: 0.5px dashed gray; padding: 1px; height: 23px; text-align: center; font-size: 13px;"></td>
-                    <td style="border-right: 1px solid black; border-bottom: 0.5px dashed gray; padding: 1px; height: 23px; text-align: center; font-size: 13px;"></td>
+                    <td style="border-right: 1px solid black; border-bottom: 0.5px dashed #d3d3d3; padding: 1px; height: 23px; text-align: center; font-size: 13px;">${emptyRowIndex}</td>
+                    <td style="border-right: 1px solid black; border-bottom: 0.5px dashed #d3d3d3; padding: 1px; height: 23px; text-align: center; font-size: 13px;"></td>
+                    <td style="border-right: 1px solid black; border-bottom: 0.5px dashed #d3d3d3; padding: 1px; height: 23px; text-align: center; font-size: 13px;"></td>
+                    <td style="border-right: 1px solid black; border-bottom: 0.5px dashed #d3d3d3; padding: 1px; height: 23px; text-align: center; font-size: 13px;"></td>
+                    <td style="border-right: 1px solid black; border-bottom: 0.5px dashed #d3d3d3; padding: 1px; height: 23px; text-align: center; font-size: 13px;"></td>
+                    <td style="border-right: 1px solid black; border-bottom: 0.5px dashed #d3d3d3; padding: 1px; height: 23px; text-align: center; font-size: 13px;"></td>
+                    <td style="border-right: 1px solid black; border-bottom: 0.5px dashed #d3d3d3; padding: 1px; height: 23px; text-align: center; font-size: 13px;"></td>
+                    <td style="border-right: 1px solid black; border-bottom: 0.5px dashed #d3d3d3; padding: 1px; height: 23px; text-align: center; font-size: 13px;"></td>
+                    <td style="border-right: 1px solid black; border-bottom: 0.5px dashed #d3d3d3; padding: 1px; height: 23px; text-align: center; font-size: 13px;"></td>
+                    <td style="border-right: 1px solid black; border-bottom: 0.5px dashed #d3d3d3; padding: 1px; height: 23px; text-align: center; font-size: 13px;"></td>
+                    <td style="border-right: 1px solid black; border-bottom: 0.5px dashed #d3d3d3; padding: 1px; height: 23px; text-align: center; font-size: 13px;"></td>
+                    <td style="border-right: 1px solid black; border-bottom: 0.5px dashed #d3d3d3; padding: 1px; height: 23px; text-align: center; font-size: 13px;"></td>
+                    <td style="border-right: 1px solid black; border-bottom: 0.5px dashed #d3d3d3; padding: 1px; height: 23px; text-align: center; font-size: 13px;"></td>
                 </tr>
             `;
                 }
