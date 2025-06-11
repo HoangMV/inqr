@@ -536,7 +536,7 @@
                 if (search) {
                     const searchableText = [
                         item.order_kd, item.so_dh, item.order_phoi, item.order_vat_lieu,
-                        item.ten_chi_tiet, item.dvt, item.sll, item.xac_nhan_tu_rc,
+                        item.ten_chi_tiet, item.dvt, item.sll, item.loai_giay_to,
                         item.ghi_chu, item.so_goi, item.lan_giao
                     ].join(' ').toLowerCase();
 
@@ -659,7 +659,7 @@
                <td><strong>${item.sll || ''}</strong></td>
                <td>${item._formattedDate}</td>
                <td>${item.Label}</td>
-               <td>${item.xac_nhan_tu_rc || ''}</td>
+               <td>${item.loai_giay_to || ''}</td>
                <td title="${item.ghi_chu || ''}">${truncateText(item.ghi_chu || '', 15)}</td>
                <td>${item.so_goi || ''}</td>
                <td>${item.lan_giao || ''}</td>
@@ -907,15 +907,16 @@
 
                     if (hasSUS && hasGC) {
                         ghiChu = 'BBKT có dấu rửa - BV có dấu g/c lần 1';
-                    } else if (hasSUS) {
-                        ghiChu = 'BBKT có dấu rửa';
-                    } else if (hasGC) {
-                        ghiChu = 'BV có dấu g/c lần 1';
+                    
                     } else if (daurua === '' && hasBV) {
                         // Nếu daurua trống và mailxn có chứa "Bản vẽ" hoặc "BV"
                         ghiChu = 'BBKT có dấu rửa - BV có dấu g/c lần 1';
                     } else if (hasBV) {
                         // Nếu chỉ mailxn có chứa "Bản vẽ" hoặc "BV"
+                        ghiChu = 'BV có dấu g/c lần 1';
+                    } else if (hasSUS) {
+                        ghiChu = 'BBKT có dấu rửa';
+                    } else if (hasGC) {
                         ghiChu = 'BV có dấu g/c lần 1';
                     }
 
