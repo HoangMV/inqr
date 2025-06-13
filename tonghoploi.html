@@ -1438,18 +1438,14 @@
                 row.classList.add('selected');
             }
 
-            let errorRateClass = 'percentage-green';
-            if (item.ty_le_loi > 5) errorRateClass = 'percentage-red';
-            else if (item.ty_le_loi > 2) errorRateClass = 'percentage-yellow';
-
             let html = `
             <td><input type="checkbox" class="checkbox-custom row-checkbox" ${isSelected ? 'checked' : ''}></td>
             <td>${stt}</td>
             <td>${item.order_kd || ''}</td>
             <td title="${item.ten_chi_tiet || ''}">${item.ten_chi_tiet || ''}</td>
-            <td><strong>${item.sll || ''}</strong></td>
+            <td>${item.sll || ''}</td>
             <td>${formatDateFull(item.thoi_han) || 'Theo KH'}</td>
-            <td class="${item.tong_loi < 0 ? 'error-red' : ''}"><strong>${item.tong_loi !== '' ? item.tong_loi : ''}</strong></td>
+            <td class="${item.tong_loi || ''}">${item.tong_loi !== '' ? item.tong_loi : ''}</td>
         `;
 
             // Add 5 error report columns
@@ -1459,7 +1455,7 @@
                     html += `
                     <td class="error-cell">${formatDate(error.ngay_bao_loi)}</td>
                     <td class="error-cell" title="${error.noi_dung_loi || ''}">${error.noi_dung_loi || ''}</td>
-                    <td class="error-cell error-red"><strong>${error.sl_loi || ''}</strong></td>
+                    <td class="error-cell">${error.sl_loi || ''}</td>
                 `;
                 } else {
                     html += '<td class="error-cell"></td><td class="error-cell"></td><td class="error-cell"></td>';
@@ -1472,7 +1468,7 @@
                 if (error && error.ngay_tra_loi) {
                     html += `
                     <td class="return-cell">${formatDate(error.ngay_tra_loi)}</td>
-                    <td class="return-cell"><strong>${error.sl_tra || ''}</strong></td>
+                    <td class="return-cell">${error.sl_tra || ''}</td>
                 `;
                 } else {
                     html += '<td class="return-cell"></td><td class="return-cell"></td>';
@@ -1480,8 +1476,8 @@
             }
 
             html += `
-            <td><strong>${item.so_lan_loi || ''}</strong></td>
-            <td class="${errorRateClass}"><strong>${item.ty_le_loi || ''}%</strong></td>
+            <td>${item.so_lan_loi || ''}</td>
+            <td>${item.ty_le_loi || ''}%</td>
             <td>${item.bo_phan || ''}</td>
             <td></td>
             <td></td>
@@ -1703,103 +1699,120 @@
         }
 
         // Tạo worksheet với định dạng chi tiết
-        // Tạo worksheet với định dạng chi tiết
+        // Cập nhật hàm createExcelWorksheetWithFormat
         async function createExcelWorksheetWithFormat(worksheet, selectedItems) {
             const today = new Date();
             const currentDate = `${today.getDate()} / ${today.getMonth() + 1} / ${today.getFullYear()}`;
 
-            // Thiết lập độ rộng cột
+            // Thiết lập trang in A4 ngang
+            worksheet.pageSetup = {
+                paperSize: 9, // A4
+                orientation: 'landscape', // Ngang
+                fitToPage: true,
+                fitToWidth: 1,
+                fitToHeight: 0,
+                margins: {
+                    left: 0.25,
+                    right: 0.25,
+                    top: 0.75,
+                    bottom: 0.75,
+                    header: 0.3,
+                    footer: 0.3
+                },
+                printArea: 'A1:AL1000',
+                scale: 100
+            };
+
+            // Thiết lập độ rộng cột được tối ưu cho A4 ngang
             worksheet.columns = [
-                { width: 5 },   // A - Số tt
-                { width: 12 },  // B - Order KD
-                { width: 18 },  // C - Tên chi tiết
-                { width: 8 },   // D - Slg lệnh
-                { width: 12 },  // E - Thời hạn
-                { width: 10 },  // F - Tổng SL tồn lỗi
+                { width: 4 },    // A - Số tt
+                { width: 8 },    // B - Order KD
+                { width: 12 },   // C - Tên chi tiết
+                { width: 6 },    // D - Slg lệnh
+                { width: 8 },    // E - Thời hạn
+                { width: 6 },    // F - Tổng SL tồn lỗi
                 // Báo lỗi lần 1-5 (G-U)
-                { width: 10 }, { width: 18 }, { width: 8 }, // G,H,I - Lần 1
-                { width: 10 }, { width: 18 }, { width: 8 }, // J,K,L - Lần 2
-                { width: 10 }, { width: 18 }, { width: 8 }, // M,N,O - Lần 3
-                { width: 10 }, { width: 18 }, { width: 8 }, // P,Q,R - Lần 4
-                { width: 10 }, { width: 18 }, { width: 8 }, // S,T,U - Lần 5
+                { width: 6 }, { width: 10 }, { width: 4 }, // G,H,I - Lần 1
+                { width: 6 }, { width: 10 }, { width: 4 }, // J,K,L - Lần 2
+                { width: 6 }, { width: 10 }, { width: 4 }, // M,N,O - Lần 3
+                { width: 6 }, { width: 10 }, { width: 4 }, // P,Q,R - Lần 4
+                { width: 6 }, { width: 10 }, { width: 4 }, // S,T,U - Lần 5
                 // Trả lần 1-5 (V-AE)
-                { width: 10 }, { width: 8 }, // V,W - Trả lần 1
-                { width: 10 }, { width: 8 }, // X,Y - Trả lần 2
-                { width: 10 }, { width: 8 }, // Z,AA - Trả lần 3
-                { width: 10 }, { width: 8 }, // AB,AC - Trả lần 4
-                { width: 10 }, { width: 8 }, // AD,AE - Trả lần 5
+                { width: 6 }, { width: 4 }, // V,W - Trả lần 1
+                { width: 6 }, { width: 4 }, // X,Y - Trả lần 2
+                { width: 6 }, { width: 4 }, // Z,AA - Trả lần 3
+                { width: 6 }, { width: 4 }, // AB,AC - Trả lần 4
+                { width: 6 }, { width: 4 }, // AD,AE - Trả lần 5
                 // Các cột cuối (AF-AL)
-                { width: 8 },   // AF - Số lần báo lỗi
-                { width: 8 },   // AG - Tỷ lệ lỗi
-                { width: 20 },  // AH - Bộ phận
-                { width: 12 },  // AI - Máy sửa
-                { width: 12 },  // AJ - Hẹn sửa xong
-                { width: 15 },  // AK - Kiểm tra
-                { width: 20 }   // AL - Ghi chú
+                { width: 5 },    // AF - Số lần báo lỗi
+                { width: 5 },    // AG - Tỷ lệ lỗi
+                { width: 12 },   // AH - Bộ phận
+                { width: 8 },    // AI - Máy sửa
+                { width: 8 },    // AJ - Hẹn sửa xong
+                { width: 8 },    // AK - Kiểm tra
+                { width: 12 }    // AL - Ghi chú
             ];
 
             // Tiêu đề chính (dòng 1)
             const titleRow = worksheet.addRow([`TỔNG HỢP LỖI CÒN TỒN ĐỌNG TRONG NGÀY ${currentDate}`]);
             worksheet.mergeCells('A1:AL1');
             titleRow.getCell(1).style = {
-                font: { name: 'Times New Roman', size: 14, bold: true },
+                font: { name: 'Times New Roman', size: 12, bold: true },
                 alignment: { horizontal: 'center', vertical: 'middle' }
             };
-            titleRow.height = 25;
+            titleRow.height = 20;
 
             // Dòng trống
             worksheet.addRow([]);
 
             // Header chính (dòng 3)
             const mainHeaderRow = worksheet.addRow([
-                'Số tt', 'Order KD', 'Tên chi tiết', 'Slg lệnh', 'Thời hạn khách hàng', 'Tổng SL tồn lỗi',
+                'Số tt', 'Order KD', 'Tên chi tiết', 'Slg lệnh', 'Thời hạn KH', 'Tổng SL tồn lỗi',
                 'Báo lỗi lần 1', '', '', 'Báo lỗi lần 2', '', '', 'Báo lỗi lần 3', '', '',
                 'Báo lỗi lần 4', '', '', 'Báo lỗi lần 5', '', '',
                 'Trả lần 1', '', 'Trả lần 2', '', 'Trả lần 3', '', 'Trả lần 4', '', 'Trả lần 5', '',
-                'Số lần báo lỗi', 'Tỷ lệ lỗi', 'Bộ phận phát sinh lỗi',
-                'Xác nhận của SX AMJ', '', 'Kiểm tra xác nhận lại', 'Ghi chú'
+                'Số lần BL', 'Tỷ lệ lỗi', 'Bộ phận phát sinh lỗi',
+                'Xác nhận SX AMJ', '', 'Kiểm tra', 'Ghi chú'
             ]);
 
             // Sub-header (dòng 4)
             const subHeaderRow = worksheet.addRow([
                 '', '', '', '', '', '',
-                'Ngày BL', 'Nội dung lỗi', 'SL BL',
-                'Ngày BL', 'Nội dung lỗi', 'SL BL',
-                'Ngày BL', 'Nội dung lỗi', 'SL BL',
-                'Ngày BL', 'Nội dung lỗi', 'SL BL',
-                'Ngày BL', 'Nội dung lỗi', 'SL BL',
-                'Ngày trả', 'SL trả', 'Ngày trả', 'SL trả', 'Ngày trả', 'SL trả',
-                'Ngày trả', 'SL trả', 'Ngày trả', 'SL trả',
-                '', '', '', 'Máy sửa', 'Hẹn sửa xong', '', ''
+                'Ngày', 'Nội dung', 'SL',
+                'Ngày', 'Nội dung', 'SL',
+                'Ngày', 'Nội dung', 'SL',
+                'Ngày', 'Nội dung', 'SL',
+                'Ngày', 'Nội dung', 'SL',
+                'Ngày', 'SL', 'Ngày', 'SL', 'Ngày', 'SL',
+                'Ngày', 'SL', 'Ngày', 'SL',
+                '', '', '', 'Máy sửa', 'Hẹn sửa', '', ''
             ]);
 
             // Merge cells cho header
             const merges = [
-                // Các cột đơn từ dòng 3-4
                 'A3:A4', 'B3:B4', 'C3:C4', 'D3:D4', 'E3:E4', 'F3:F4',
-                // Báo lỗi lần 1-5
                 'G3:I3', 'J3:L3', 'M3:O3', 'P3:R3', 'S3:U3',
-                // Trả lần 1-5
                 'V3:W3', 'X3:Y3', 'Z3:AA3', 'AB3:AC3', 'AD3:AE3',
-                // Các cột cuối
                 'AF3:AF4', 'AG3:AG4', 'AH3:AH4',
-                // Xác nhận SX AMJ
-                'AI3:AJ3',
-                'AK3:AK4', 'AL3:AL4'
+                'AI3:AJ3', 'AK3:AK4', 'AL3:AL4'
             ];
 
             merges.forEach(range => {
                 worksheet.mergeCells(range);
             });
 
-            // Định dạng header
+            // Định dạng header với border đen liền
+            const headerBorderStyle = {
+                top: { style: 'thin', color: { argb: '000000' } },
+                bottom: { style: 'thin', color: { argb: '000000' } },
+                left: { style: 'thin', color: { argb: '000000' } },
+                right: { style: 'thin', color: { argb: '000000' } }
+            };
+
             const headerStyle = {
-                font: { name: 'Times New Roman', size: 9, bold: true },
+                font: { name: 'Times New Roman', size: 7, bold: true },
                 alignment: { horizontal: 'center', vertical: 'middle', wrapText: true },
-                border: {
-                    top: { style: 'thin' }, bottom: { style: 'thin' },
-                    left: { style: 'thin' }, right: { style: 'thin' }
-                }
+                border: headerBorderStyle
             };
 
             // Áp dụng style cho header rows
@@ -1807,12 +1820,12 @@
                 row.eachCell(cell => {
                     cell.style = { ...headerStyle };
                 });
-                row.height = 20;
+                row.height = 15;
             });
 
             // Màu nền cho các nhóm cột header
-            const errorBgColor = 'FDE9D9'; // Cam nhạt
-            const returnBgColor = 'EBF1DE'; // Xanh nhạt
+            const errorBgColor = 'FDE9D9';
+            const returnBgColor = 'EBF1DE';
 
             // Áp dụng màu nền cho cột báo lỗi (G-U)
             for (let col = 7; col <= 21; col++) {
@@ -1834,18 +1847,18 @@
                 };
             }
 
-            // Màu chữ ĐỎ cho "Tỷ lệ lỗi" và "Bộ phận phát sinh lỗi"
+            // Màu chữ đặc biệt cho header
             const redTextColor = 'DC2626';
-            [33, 34].forEach(col => { // AG: Tỷ lệ lỗi, AH: Bộ phận phát sinh lỗi
+            const blueTextColor = '4C73C0';
+
+            [33, 34].forEach(col => {
                 mainHeaderRow.getCell(col).font = {
                     ...mainHeaderRow.getCell(col).font,
                     color: { argb: redTextColor }
                 };
             });
 
-            // Màu chữ XANH DƯƠNG cho "Xác nhận của SX AMJ"
-            const blueTextColor = '4C73C0';
-            [35, 36].forEach(col => { // AI: Máy sửa, AJ: Hẹn sửa xong
+            [35, 36].forEach(col => {
                 mainHeaderRow.getCell(col).font = {
                     ...mainHeaderRow.getCell(col).font,
                     color: { argb: blueTextColor }
@@ -1856,13 +1869,7 @@
                 };
             });
 
-            // Header "Xác nhận của SX AMJ" cũng cần màu xanh
-            mainHeaderRow.getCell(35).font = {
-                ...mainHeaderRow.getCell(34).font,
-                color: { argb: blueTextColor }
-            };
-
-            // Thêm dữ liệu
+            // Thêm dữ liệu với định dạng giống y hệt bản in
             selectedItems.forEach((item, index) => {
                 const rowData = [
                     index + 1,
@@ -1905,23 +1912,33 @@
                     item.so_lan_loi || '',
                     item.ty_le_loi ? item.ty_le_loi + '%' : '',
                     item.bo_phan || '',
-                    '', // Máy sửa
-                    '', // Hẹn sửa xong
-                    '', // Kiểm tra xác nhận lại
-                    item.ghi_chu || ''
+                    '', '', '', item.ghi_chu || ''
                 );
 
                 const dataRow = worksheet.addRow(rowData);
 
-                // Định dạng cho dòng dữ liệu
+                // Định dạng cho dòng dữ liệu giống y hệt bản in
                 dataRow.eachCell((cell, colNumber) => {
+                    // Border cơ bản: 
+                    // - Trên, trái: đường liền đen mỏng
+                    // - Phải: đường liền đen
+                    // - Dưới: đường đứt nét mờ nhạt (trừ dòng cuối)
+                    let cellBorder = {
+                        top: { style: 'thin', color: { argb: '000000' } },
+                        left: { style: 'thin', color: { argb: '000000' } },
+                        right: { style: 'thin', color: { argb: '000000' } },
+                        bottom: { style: 'dotted', color: { argb: 'D3D3D3' } } // Đường đứt nét mờ nhạt
+                    };
+
                     cell.style = {
-                        font: { name: 'Times New Roman', size: 8 },
+                        font: {
+                            name: 'Times New Roman',
+                            size: 7, // Tăng size lên 8 cho dễ đọc
+                            bold: false, // Không in đậm
+                            color: { argb: '000000' } // Màu đen bình thường
+                        },
                         alignment: { horizontal: 'center', vertical: 'middle', wrapText: true },
-                        border: {
-                            top: { style: 'thin' }, bottom: { style: 'thin' },
-                            left: { style: 'thin' }, right: { style: 'thin' }
-                        }
+                        border: cellBorder
                     };
 
                     // Màu nền cho các cột báo lỗi
@@ -1937,23 +1954,25 @@
                         };
                     }
 
-                    // Định dạng màu chữ đặc biệt cho dữ liệu
-                    if ([6, 9, 12, 15, 18, 21].includes(colNumber)) { // Cột SL lỗi và tổng SL tồn lỗi
-                        cell.font = { ...cell.font, color: { argb: 'DC2626' }, bold: true };
-                    } else if (colNumber === 32) { // Cột tỷ lệ lỗi
-                        const value = parseFloat(item.ty_le_loi);
-                        let color = '16A34A'; // Xanh
-                        if (value > 5) color = 'DC2626'; // Đỏ
-                        else if (value > 2) color = 'CA8A04'; // Vàng
-
-                        cell.font = { ...cell.font, color: { argb: color }, bold: true };
-                    } else if ([4, 31].includes(colNumber)) { // Cột SLL và số lần báo lỗi
-                        cell.font = { ...cell.font, bold: true };
-                    }
+                    // KHÔNG có định dạng màu chữ đặc biệt hay in đậm cho nội dung
+                    // Tất cả nội dung đều màu đen bình thường, không in đậm
                 });
 
-                dataRow.height = 18;
+                dataRow.height = 20; // Tăng chiều cao để giống bản in
             });
+
+            // Border cho dòng cuối cùng: đường liền đen
+            if (selectedItems.length > 0) {
+                const lastRowNumber = 4 + selectedItems.length;
+                const lastRow = worksheet.getRow(lastRowNumber);
+
+                for (let col = 1; col <= 38; col++) {
+                    const cell = lastRow.getCell(col);
+                    if (cell.style && cell.style.border) {
+                        cell.style.border.bottom = { style: 'thin', color: { argb: '000000' } };
+                    }
+                }
+            }
         }
 
         // Tạo worksheet với định dạng giống bản in
@@ -2296,9 +2315,9 @@
                 content += `<td style="border-right: 1px solid black; border-bottom: 0.5px dashed #d3d3d3; padding: 1px; text-align: center; height: 20px; ">${index + 1}</td>`;
                 content += `<td style="border-right: 1px solid black; border-bottom: 0.5px dashed #d3d3d3; padding: 1px; text-align: center; height: 20px; ">${item.order_kd || ''}</td>`;
                 content += `<td style="border-right: 1px solid black; border-bottom: 0.5px dashed #d3d3d3; padding: 1px; text-align: center; height: 20px; ">${item.ten_chi_tiet || ''}</td>`;
-                content += `<td style="border-right: 1px solid black; border-bottom: 0.5px dashed #d3d3d3; padding: 1px; text-align: center; height: 20px;  font-weight: bold;">${item.sll || ''}</td>`;
+                content += `<td style="border-right: 1px solid black; border-bottom: 0.5px dashed #d3d3d3; padding: 1px; text-align: center; height: 20px;">${item.sll || ''}</td>`;
                 content += `<td style="border-right: 1px solid black; border-bottom: 0.5px dashed #d3d3d3; padding: 1px; text-align: center; height: 20px; ">${formatDateFull(item.thoi_han) || 'Theo KH'}</td>`;
-                content += `<td style="border-right: 1px solid black; border-bottom: 0.5px dashed #d3d3d3; padding: 1px; text-align: center; height: 20px;  font-weight: bold; color: red;">${item.tong_loi === 0 ? '0' : (item.tong_loi || '')}</td>`;
+                content += `<td style="border-right: 1px solid black; border-bottom: 0.5px dashed #d3d3d3; padding: 1px; text-align: center; height: 20px; ">${item.tong_loi === 0 ? '0' : (item.tong_loi || '')}</td>`;
 
                 // Add error data for 5 occurrences (Báo lỗi)
                 for (let i = 0; i < 5; i++) {
@@ -2306,7 +2325,7 @@
                     if (error) {
                         content += `<td style="border-right: 1px solid black; border-bottom: 0.5px dashed #d3d3d3; background: #fde9d9; padding: 1px; text-align: center; height: 20px; ">${formatDate(error.ngay_bao_loi)}</td>`;
                         content += `<td style="border-right: 1px solid black; border-bottom: 0.5px dashed #d3d3d3; background: #fde9d9; padding: 1px; font-size: 7px;">${error.noi_dung_loi || ''}</td>`;
-                        content += `<td style="border-right: 1px solid black; border-bottom: 0.5px dashed #d3d3d3; background: #fde9d9; padding: 1px; text-align: center; height: 20px;  color: red; font-weight: bold;">${error.sl_loi || ''}</td>`;
+                        content += `<td style="border-right: 1px solid black; border-bottom: 0.5px dashed #d3d3d3; background: #fde9d9; padding: 1px; text-align: center; height: 20px;  ">${error.sl_loi || ''}</td>`;
                     } else {
                         content += `<td style="border-right: 1px solid black; border-bottom: 0.5px dashed #d3d3d3; background: #fde9d9; padding: 1px;"></td>`;
                         content += `<td style="border-right: 1px solid black; border-bottom: 0.5px dashed #d3d3d3; background: #fde9d9; padding: 1px;"></td>`;
@@ -2326,8 +2345,8 @@
                     }
                 }
 
-                content += `<td style="border-right: 1px solid black; border-bottom: 0.5px dashed #d3d3d3; padding: 1px; text-align: center; height: 20px;  font-weight: bold;">${item.so_lan_loi || ''}</td>`;
-                content += `<td style="border-right: 1px solid black; border-bottom: 0.5px dashed #d3d3d3; padding: 1px; text-align: center; height: 20px;  font-weight: bold; color: ${item.ty_le_loi > 5 ? 'red' : item.ty_le_loi > 2 ? 'orange' : 'green'};">${item.ty_le_loi || ''}%</td>`;
+                content += `<td style="border-right: 1px solid black; border-bottom: 0.5px dashed #d3d3d3; padding: 1px; text-align: center; height: 20px;">${item.so_lan_loi || ''}</td>`;
+                content += `<td style="border-right: 1px solid black; border-bottom: 0.5px dashed #d3d3d3; padding: 1px; text-align: center; height: 20px;">${item.ty_le_loi || ''}%</td>`;
                 content += `<td style="border-right: 1px solid black; border-bottom: 0.5px dashed #d3d3d3; padding: 1px; font-size: 7px; text-align: center;">${item.bo_phan || ''}</td>`;
                 content += `<td style="border-right: 1px solid black; border-bottom: 0.5px dashed #d3d3d3; padding: 1px; font-size: 7px;"></td>`;
                 content += `<td style="border-right: 1px solid black; border-bottom: 0.5px dashed #d3d3d3; padding: 1px; font-size: 7px;"></td>`;
