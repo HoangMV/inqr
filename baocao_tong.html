@@ -93,9 +93,8 @@
                             <select id="shift3d" onchange="applyFilter3D()"
                                 class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">
                                 <option value="">Tất cả ca</option>
-                                <option value="1">Ca 1 (6h-14h)</option>
-                                <option value="2">Ca 2 (14h-22h)</option>
-                                <option value="3">Ca 3 (22h-6h)</option>
+                                <option value="day">Ca ngày (7h-19h)</option>
+                                <option value="night">Ca đêm (19h-7h)</option>
                             </select>
                         </div>
                     </div>
@@ -249,8 +248,11 @@
                     <h4 class="text-lg font-semibold mb-4">Chi tiết dữ liệu sản lượng</h4>
                     <div class="overflow-x-auto">
                         <table class="min-w-full bg-white border border-gray-200">
+                            <!-- Tìm phần table header trong báo cáo sản lượng và thay thế -->
                             <thead class="bg-gray-50">
                                 <tr>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Ngày
+                                    </th>
                                     <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Nhóm
                                     </th>
                                     <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Tổ</th>
@@ -258,6 +260,8 @@
                                     </th>
                                     <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">SL thực
                                         tế</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Số người
+                                        làm</th>
                                     <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Thời
                                         gian thực tế</th>
                                     <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Thời
@@ -692,9 +696,7 @@
 
         // Global data storage - Lưu trữ toàn bộ dữ liệu
         let globalData = {
-            data3DMain: [],
-            data3DDetail: [],
-            dataTamDung: [],
+            data3D: [], // Chỉ cần 1 bảng data3D
             dataProduction: [],
             dataError: [],
             dataPolishing: [],
@@ -702,6 +704,14 @@
             dataDelivery: [],
             isLoaded: false
         };
+
+        // Helper function to get yesterday's date
+        function getYesterday() {
+            const today = new Date();
+            const yesterday = new Date(today);
+            yesterday.setDate(today.getDate() - 1);
+            return yesterday.toISOString().split('T')[0];
+        }
 
         // Function to fetch data from AppSheet
         async function fetchAppSheetData(tableName) {
@@ -753,20 +763,16 @@
                 showLoading(true);
                 showToast('Đang tải toàn bộ dữ liệu...', 'warning');
 
-                // Load all tables in parallel
+                // Load all tables in parallel - Bỏ 2 bảng cũ của 3D
                 const [
-                    data3DMain,
-                    data3DDetail,
-                    dataTamDung,
+                    data3D,
                     dataProduction,
                     dataError,
                     dataPolishing,
                     dataReceive,
                     dataDelivery
                 ] = await Promise.all([
-                    fetchAppSheetData('trien_khai_3d_laze'),
-                    fetchAppSheetData('trien_khai_3d_laze_dt'),
-                    fetchAppSheetData('tam_dung'),
+                    fetchAppSheetData('trien_khai_3d_laze_dt'), // Chỉ load bảng này
                     fetchAppSheetData('ke_hoach_pkt_dt'),
                     fetchAppSheetData('tong_hop_loi'),
                     fetchAppSheetData('hoan_thien_danh_bong_dt'),
@@ -775,9 +781,7 @@
                 ]);
 
                 // Store in global data
-                globalData.data3DMain = data3DMain;
-                globalData.data3DDetail = data3DDetail;
-                globalData.dataTamDung = dataTamDung;
+                globalData.data3D = data3D;
                 globalData.dataProduction = dataProduction;
                 globalData.dataError = dataError;
                 globalData.dataPolishing = dataPolishing;
@@ -786,9 +790,7 @@
                 globalData.isLoaded = true;
 
                 console.log('All data loaded:', {
-                    '3D Main': data3DMain.length,
-                    '3D Detail': data3DDetail.length,
-                    'Tam Dung': dataTamDung.length,
+                    '3D Data': data3D.length,
                     'Production': dataProduction.length,
                     'Error': dataError.length,
                     'Polishing': dataPolishing.length,
@@ -813,41 +815,20 @@
             const select = document.getElementById('teamSL');
             if (!select) return;
 
-            const allTeams = new Set();
-            globalData.dataProduction.forEach(item => {
-                if (item.to) {
-                    const teamValue = item.to.toString();
-                    if (teamValue.includes(',')) {
-                        teamValue.split(',').forEach(team => {
-                            allTeams.add(team.trim());
-                        });
-                    } else {
-                        allTeams.add(teamValue);
-                    }
-                }
-            });
+            // Gom nhóm các tổ
+            const teamGroups = {
+                '0': 'Tổ Hành chính',
+                '1': 'Tổ 1',
+                '2': 'Tổ 2',
+                '3': 'Tổ 3'
+            };
 
             select.innerHTML = '<option value="">Tất cả tổ</option>';
 
-            // Sắp xếp và hiển thị các tổ với tên thân thiện
-            const sortedTeams = Array.from(allTeams).sort();
-            sortedTeams.forEach(team => {
+            Object.entries(teamGroups).forEach(([value, label]) => {
                 const option = document.createElement('option');
-                option.value = team;
-
-                // Hiển thị tên thân thiện
-                if (team === '0') {
-                    option.textContent = 'Tổ Hành chính';
-                } else if (team === '1/3') {
-                    option.textContent = 'Tổ 1';
-                } else if (team === '2/3') {
-                    option.textContent = 'Tổ 2';
-                } else if (team === '3/3') {
-                    option.textContent = 'Tổ 3';
-                } else {
-                    option.textContent = `Tổ ${team}`;
-                }
-
+                option.value = value;
+                option.textContent = label;
                 select.appendChild(option);
             });
         }
@@ -868,18 +849,61 @@
             });
         }
 
+        function populate3DShiftDropdown() {
+            const select = document.getElementById('shift3d');
+            if (!select) return;
+
+            select.innerHTML = '<option value="">Tất cả ca</option>';
+
+            // Chỉ có 2 ca: Ca ngày và Ca đêm
+            const shifts = [
+                { value: 'day', label: 'Ca ngày (7h-19h)' },
+                { value: 'night', label: 'Ca đêm (19h-7h)' }
+            ];
+
+            shifts.forEach(shift => {
+                const option = document.createElement('option');
+                option.value = shift.value;
+                option.textContent = shift.label;
+                select.appendChild(option);
+            });
+        }
+
+        // Hàm phân loại ca dựa trên thời gian
+        function getShiftFromDateTime(dateTimeString) {
+            if (!dateTimeString) return null;
+
+            try {
+                const date = new Date(dateTimeString);
+                const hour = date.getHours();
+
+                // Ca ngày: 7h-19h, Ca đêm: 19h-7h
+                if (hour >= 7 && hour < 19) {
+                    return 'day';
+                } else {
+                    return 'night';
+                }
+            } catch (error) {
+                console.error('Error parsing datetime:', error);
+                return null;
+            }
+        }
+
         // Populate all dropdowns with real data
         function populateAllDropdowns() {
-            // 3D Machine dropdowns
-            const machines = [...new Set(globalData.data3DMain.map(item => item.so_may).filter(Boolean))];
-            populateDropdown('machine3d', machines, 'Tất cả máy');
+            // 3D Machine dropdowns - Sử dụng data3D thay vì data3DMain
+            const machines = [...new Set(globalData.data3D.map(item => item.so_may).filter(Boolean))];
+            populateDropdown('machine3d', machines.sort(), 'Tất cả máy');
 
-            // Production dropdowns
+            // Thêm dropdown ca làm việc mới
+            populate3DShiftDropdown();
+
+            // Production dropdowns - Sắp xếp nhóm theo thứ tự
             const groups = [...new Set(globalData.dataProduction.map(item => item.nhom).filter(Boolean))];
-            populateDropdown('groupSL', groups, 'Tất cả nhóm');
+            populateDropdown('groupSL', groups.sort(), 'Tất cả nhóm');
             populateTeamDropdown(); // Sử dụng hàm riêng cho tổ
 
-            // Error position dropdown - sử dụng hàm riêng với 4 vị trí cố định
+            // Error position dropdown
             populateErrorPositionDropdown();
         }
 
@@ -996,8 +1020,15 @@
             return data.filter(item => {
                 // Date filter
                 if (filters.dateFrom && filters.dateTo && item[filters.dateField]) {
-                    const itemDate = new Date(item[filters.dateField]).toISOString().split('T')[0];
-                    if (itemDate < filters.dateFrom || itemDate > filters.dateTo) {
+                    const itemDate = new Date(item[filters.dateField]);
+                    const fromDate = new Date(filters.dateFrom);
+                    const toDate = new Date(filters.dateTo);
+
+                    fromDate.setHours(0, 0, 0, 0);
+                    toDate.setHours(23, 59, 59, 999);
+                    itemDate.setHours(0, 0, 0, 0);
+
+                    if (itemDate < fromDate || itemDate > toDate) {
                         return false;
                     }
                 }
@@ -1006,7 +1037,50 @@
                 for (const [field, value] of Object.entries(filters)) {
                     if (field.startsWith('date') || !value) continue;
 
-                    if (field === 'position' && filters.position) {
+                    // Xử lý ca làm việc mới
+                    if (field === 'ca_lam_viec' && value) {
+                        // Sử dụng thoi_gian_bat_dau để xác định ca
+                        const shift = getShiftFromDateTime(item.thoi_gian_bat_dau);
+                        if (shift !== value) {
+                            return false;
+                        }
+                    }
+                    else if (field === 'to' && filters.to) {
+                        // Logic lọc tổ gom nhóm - SỬA LẠI CHÍNH XÁC
+                        const teamValue = item.to ? item.to.toString() : '';
+                        if (filters.to === '0') {
+                            // Tổ hành chính
+                            if (teamValue !== '0') return false;
+                        } else {
+                            // Kiểm tra chính xác theo pattern
+                            let isMatch = false;
+                            if (teamValue.includes(',')) {
+                                // Trường hợp có nhiều tổ như "1/3, 2/3"
+                                const teams = teamValue.split(',').map(t => t.trim());
+                                isMatch = teams.some(team => {
+                                    if (filters.to === '1') {
+                                        return team.startsWith('1/') || team === '1';
+                                    } else if (filters.to === '2') {
+                                        return team.startsWith('2/') || team === '2';
+                                    } else if (filters.to === '3') {
+                                        return team.startsWith('3/') || team === '3';
+                                    }
+                                    return false;
+                                });
+                            } else {
+                                // Trường hợp chỉ có 1 tổ
+                                if (filters.to === '1') {
+                                    isMatch = teamValue.startsWith('1/') || teamValue === '1';
+                                } else if (filters.to === '2') {
+                                    isMatch = teamValue.startsWith('2/') || teamValue === '2';
+                                } else if (filters.to === '3') {
+                                    isMatch = teamValue.startsWith('3/') || teamValue === '3';
+                                }
+                            }
+
+                            if (!isMatch) return false;
+                        }
+                    } else if (field === 'position' && filters.position) {
                         if (!item.noi_phat_sinh_loi || !item.noi_phat_sinh_loi.includes(value)) {
                             return false;
                         }
@@ -1029,39 +1103,18 @@
                 ca_lam_viec: document.getElementById('shift3d').value
             };
 
-            // Map detail data with main data
-            const mappedDetails = [];
-            globalData.data3DDetail.forEach(detail => {
-                const mainRecord = globalData.data3DMain.find(main => main.id === detail.id_trien_khai_3d_laze_dt);
-                if (mainRecord) {
-                    mappedDetails.push({
-                        ...detail,
-                        mainId: mainRecord.id,
-                        ngay_tao: mainRecord.ngay_tao,
-                        so_may: mainRecord.so_may,
-                        ca_lam_viec: mainRecord.ca_lam_viec
-                    });
-                }
-            });
-
-            // Filter data
-            const filteredData3D = filterData(mappedDetails, filters);
-
-            // Get corresponding tam_dung data
-            const mainIds = filteredData3D.map(item => item.mainId);
-            const filteredTamDung = globalData.dataTamDung.filter(item =>
-                mainIds.includes(item.id_trien_khai_3d_laze)
-            );
+            // Filter data từ bảng trien_khai_3d_laze_dt
+            const filteredData = filterData(globalData.data3D, filters);
 
             // Process and update display
-            const processedData = process3DData(filteredData3D, filteredTamDung);
+            const processedData = process3DData(filteredData);
             update3DSummary(processedData);
             update3DChart(processedData);
             update3DTable(processedData);
         }
 
-        function process3DData(data3D, dataTamDung) {
-            const allMachines = [...new Set(data3D.map(item => item.so_may).filter(Boolean))];
+        function process3DData(data) {
+            const allMachines = [...new Set(data.map(item => item.so_may).filter(Boolean))];
             const machines = allMachines.length > 0 ? allMachines : ['3D AUTO2', '3D CƠ', '3D AUTO3'];
 
             const processedData = {
@@ -1070,7 +1123,7 @@
                 chayThu: [],
                 giaCong: [],
                 gaLap: [],
-                tamDung: [],
+                tamDung: [], // Sẽ tính từ thời gian chờ/dừng
                 tableData: [],
                 summary: {
                     totalTime: 0,
@@ -1081,11 +1134,7 @@
             };
 
             machines.forEach(machine => {
-                const machineData = data3D.filter(item => item.so_may === machine);
-                const mainIds = machineData.map(item => item.mainId);
-                const downTimeData = dataTamDung.filter(item =>
-                    mainIds.includes(item.id_trien_khai_3d_laze)
-                );
+                const machineData = data.filter(item => item.so_may === machine);
 
                 let totalTime = 0;
                 let chuanBiTime = 0;
@@ -1094,25 +1143,23 @@
                 let gaLapTime = 0;
                 let tamDungTime = 0;
 
-                // Calculate times from detail data
+                // Tính thời gian từ các cột trong bảng trien_khai_3d_laze_dt
                 machineData.forEach(item => {
                     const cb = parseFloat(item.thoi_gian_chuan_bi || 0);
                     const ct = parseFloat(item.thoi_gian_chay_thu || 0);
                     const gc = parseFloat(item.thoi_gian_gia_cong || 0);
                     const gl = parseFloat(item.tong_thoi_gian_ga_lap || 0);
 
+                    // Tính thời gian dừng = tổng thời gian - (chuẩn bị + chạy thử + gia công + gá lắp)
+                    const tongThoiGian = parseFloat(item.tong_thoi_gian || 0);
+                    const td = Math.max(0, tongThoiGian - (cb + ct + gc + gl));
+
                     chuanBiTime += cb;
                     chayThuTime += ct;
                     giaCongTime += gc;
                     gaLapTime += gl;
-                    totalTime += cb + ct + gc + gl;
-                });
-
-                // Calculate downtime
-                downTimeData.forEach(item => {
-                    const tdTime = parseFloat(item.thoi_gian_dung || 0);
-                    tamDungTime += tdTime;
-                    totalTime += tdTime;
+                    tamDungTime += td;
+                    totalTime += tongThoiGian;
                 });
 
                 // Convert to percentages
@@ -1156,9 +1203,9 @@
         }
 
         function update3DSummary(data) {
-            document.getElementById('totalTime3d').textContent = Math.round(data.summary.totalTime) + 'h';
-            document.getElementById('workingTime3d').textContent = Math.round(data.summary.workingTime) + 'h';
-            document.getElementById('downTime3d').textContent = Math.round(data.summary.downTime) + 'h';
+            document.getElementById('totalTime3d').textContent = Math.round(data.summary.totalTime) + ' phút';
+            document.getElementById('workingTime3d').textContent = Math.round(data.summary.workingTime) + ' phút';
+            document.getElementById('downTime3d').textContent = Math.round(data.summary.downTime) + ' phút';
             document.getElementById('efficiency3d').textContent = data.summary.efficiency + '%';
         }
 
@@ -1249,18 +1296,41 @@
             const tbody = document.getElementById('table3d');
             tbody.innerHTML = '';
 
-            data.tableData.forEach(row => {
+            // Nhóm dữ liệu theo máy và ca
+            const groupedData = {};
+
+            // Lọc dữ liệu theo ca được chọn
+            const selectedShift = document.getElementById('shift3d').value;
+            let filteredTableData = data.tableData;
+
+            if (selectedShift) {
+                filteredTableData = data.tableData.filter(row => {
+                    // Giả sử ta có thể truy cập dữ liệu gốc để kiểm tra ca
+                    return true; // Tạm thời hiển thị tất cả, logic này cần điều chỉnh dựa trên dữ liệu thực tế
+                });
+            }
+
+            filteredTableData.forEach(row => {
                 const tr = document.createElement('tr');
                 tr.className = 'hover:bg-gray-50';
+
+                // Hiển thị ca theo selection
+                let shiftDisplay = 'Tất cả';
+                if (selectedShift === 'day') {
+                    shiftDisplay = 'Ca ngày';
+                } else if (selectedShift === 'night') {
+                    shiftDisplay = 'Ca đêm';
+                }
+
                 tr.innerHTML = `
-                   <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">${row.machine}</td>
-                   <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${row.shift}</td>
-                   <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${row.chuanBi}%</td>
-                   <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${row.chayThu}%</td>
-                   <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${row.giaCong}%</td>
-                   <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${row.gaLap}%</td>
-                   <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${row.tamDung}%</td>
-               `;
+           <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">${row.machine}</td>
+           <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${shiftDisplay}</td>
+           <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${row.chuanBi}%</td>
+           <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${row.chayThu}%</td>
+           <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${row.giaCong}%</td>
+           <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${row.gaLap}%</td>
+           <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${row.tamDung}%</td>
+       `;
                 tbody.appendChild(tr);
             });
         }
@@ -1285,7 +1355,6 @@
         }
 
         function processProductionData(data) {
-            // Lọc dữ liệu theo nhóm và tổ được chọn
             const selectedGroup = document.getElementById('groupSL').value;
             const selectedTeam = document.getElementById('teamSL').value;
 
@@ -1293,29 +1362,41 @@
             if (selectedGroup) {
                 filteredData = filteredData.filter(item => item.nhom === selectedGroup);
             }
+
+            // Lọc theo tổ gom nhóm - SỬA LẠI CHÍNH XÁC
             if (selectedTeam) {
                 filteredData = filteredData.filter(item => {
                     const teamValue = item.to ? item.to.toString() : '';
-                    return teamValue === selectedTeam;
+                    if (selectedTeam === '0') {
+                        return teamValue === '0';
+                    } else {
+                        // Kiểm tra chính xác
+                        if (teamValue.includes(',')) {
+                            // Trường hợp có nhiều tổ
+                            const teams = teamValue.split(',').map(t => t.trim());
+                            return teams.some(team => {
+                                if (selectedTeam === '1') {
+                                    return team.startsWith('1/') || team === '1';
+                                } else if (selectedTeam === '2') {
+                                    return team.startsWith('2/') || team === '2';
+                                } else if (selectedTeam === '3') {
+                                    return team.startsWith('3/') || team === '3';
+                                }
+                                return false;
+                            });
+                        } else {
+                            // Trường hợp chỉ có 1 tổ
+                            if (selectedTeam === '1') {
+                                return teamValue.startsWith('1/') || teamValue === '1';
+                            } else if (selectedTeam === '2') {
+                                return teamValue.startsWith('2/') || teamValue === '2';
+                            } else if (selectedTeam === '3') {
+                                return teamValue.startsWith('3/') || teamValue === '3';
+                            }
+                            return false;
+                        }
+                    }
                 });
-            }
-
-            // Nếu chọn cụ thể 1 nhóm và 1 tổ, hiển thị chi tiết theo tổ
-            // Nếu không, hiển thị tổng hợp theo nhóm
-            const groupByTeam = selectedGroup && selectedTeam;
-
-            let groups;
-            if (groupByTeam) {
-                // Hiển thị chi tiết các tổ trong nhóm được chọn
-                const teamsInGroup = [...new Set(filteredData.map(item => item.to).filter(Boolean))];
-                groups = teamsInGroup;
-            } else if (selectedGroup) {
-                // Hiển thị tất cả tổ trong nhóm được chọn
-                const teamsInGroup = [...new Set(filteredData.map(item => item.to).filter(Boolean))];
-                groups = teamsInGroup.length > 0 ? teamsInGroup : [selectedGroup];
-            } else {
-                // Hiển thị theo nhóm
-                groups = [...new Set(filteredData.map(item => item.nhom).filter(Boolean))];
             }
 
             const processedData = {
@@ -1331,78 +1412,227 @@
                 }
             };
 
-            groups.forEach(group => {
-                let groupData;
-                let displayLabel;
+            let finalData;
 
-                if (groupByTeam || selectedGroup) {
-                    // Lọc theo tổ
-                    groupData = filteredData.filter(item => item.to === group);
-                    displayLabel = `Tổ ${formatTeamName(group)}`;
-                } else {
-                    // Lọc theo nhóm
-                    groupData = filteredData.filter(item => item.nhom === group);
-                    displayLabel = group;
-                }
+            // Chỉ tách riêng khi có lọc tổ cụ thể
+            if (selectedTeam) {
+                // Tách từng record thành các dòng riêng biệt theo tổ
+                const expandedData = [];
 
-                let actualTime = 0;
-                let theoreticalTime = 0;
-                let production = 0;
-                let workers = 0;
-
-                groupData.forEach(item => {
-                    const itemActualTime = parseFloat(item.Thoi_Gian_Thuc_Te || 0);
-                    const itemTheoreticalTime = parseFloat(item.hoan_thanh_dk || 0);
-                    const itemProduction = parseInt(item.sl_thuc_te || 0);
-                    const itemWorkers = parseInt(item.so_nguoi_lam || 0);
-
-                    // Xử lý trường hợp có nhiều tổ (ví dụ: "1/3, 2/3")
+                filteredData.forEach(item => {
                     const teamValue = item.to ? item.to.toString() : '';
+
                     if (teamValue.includes(',')) {
-                        // Chia đều cho các tổ
+                        // Nếu có nhiều tổ, tách thành các dòng riêng
                         const teams = teamValue.split(',').map(t => t.trim());
-                        const teamCount = teams.length;
-                        actualTime += itemActualTime / teamCount;
-                        theoreticalTime += itemTheoreticalTime / teamCount;
-                        production += itemProduction / teamCount;
-                        workers += itemWorkers / teamCount;
+
+                        // Chỉ lấy các tổ thuộc nhóm được chọn
+                        const validTeams = teams.filter(team => {
+                            if (selectedTeam === '1') {
+                                return team.startsWith('1/') || team === '1';
+                            } else if (selectedTeam === '2') {
+                                return team.startsWith('2/') || team === '2';
+                            } else if (selectedTeam === '3') {
+                                return team.startsWith('3/') || team === '3';
+                            }
+                            return false;
+                        });
+
+                        const teamCount = teams.length; // Chia theo tổng số tổ gốc
+
+                        validTeams.forEach(team => {
+                            expandedData.push({
+                                ...item,
+                                to: team,
+                                // Chia đều dữ liệu cho các tổ
+                                sl_thuc_te: Math.round((parseInt(item.sl_thuc_te || 0)) / teamCount),
+                                so_nguoi_lam: Math.round((parseInt(item.so_nguoi_lam || 0)) / teamCount),
+                                Thoi_Gian_Thuc_Te: (parseFloat(item.Thoi_Gian_Thuc_Te || 0)) / teamCount,
+                                hoan_thanh_dk: (parseFloat(item.hoan_thanh_dk || 0)) / teamCount
+                            });
+                        });
                     } else {
-                        actualTime += itemActualTime;
-                        theoreticalTime += itemTheoreticalTime;
-                        production += itemProduction;
-                        workers += itemWorkers;
+                        // Nếu chỉ có 1 tổ, giữ nguyên
+                        expandedData.push(item);
                     }
                 });
+
+                finalData = expandedData;
+            } else {
+                // Không lọc tổ - giữ nguyên dữ liệu gốc
+                finalData = filteredData;
+            }
+
+            // Hiển thị dữ liệu
+            finalData.forEach(item => {
+                const actualTime = parseFloat(item.Thoi_Gian_Thuc_Te || 0);
+                const theoreticalTime = parseFloat(item.hoan_thanh_dk || 0);
+                const production = parseInt(item.sl_thuc_te || 0);
+                const workers = parseInt(item.so_nguoi_lam || 0);
 
                 const efficiency = theoreticalTime > 0 && actualTime > 0 ?
                     Math.round((theoreticalTime / actualTime) * 100) : 0;
 
-                processedData.labels.push(displayLabel);
-                processedData.actual.push(actualTime);
-                processedData.theoretical.push(theoreticalTime);
-                processedData.pieData.push(Math.round(production));
+                // Format ngày từ thoi_gian_bat_dau
+                let formattedDate = '-';
+                let sortDate = ''; // Thêm biến để sort
+                if (item.thoi_gian_bat_dau) {
+                    try {
+                        const date = new Date(item.thoi_gian_bat_dau);
+                        formattedDate = date.toLocaleDateString('vi-VN');
+                        sortDate = item.thoi_gian_bat_dau; // Lưu ngày gốc để sort
+                    } catch (e) {
+                        formattedDate = '-';
+                        sortDate = '';
+                    }
+                }
+
+                // Format tên tổ dựa trên việc có lọc hay không
+                let teamDisplay;
+                if (selectedTeam) {
+                    // Khi có lọc tổ - hiển thị số tổ đơn giản
+                    teamDisplay = formatTeamNameSimple(item.to);
+                } else {
+                    // Khi không lọc - hiển thị tên tổ gốc
+                    teamDisplay = formatTeamNameOriginal(item.to);
+                }
 
                 processedData.tableData.push({
-                    group: selectedGroup || (groupByTeam ? selectedGroup : group),
-                    team: groupByTeam || selectedGroup ? formatTeamName(group) : 'Tất cả',
-                    maCV: groupData.length > 0 ? (groupData[0].ma_cv || '-') : '-',
-                    production: Math.round(production),
+                    date: formattedDate,
+                    sortDate: sortDate, // Thêm field để sort
+                    group: item.nhom || '-',
+                    team: teamDisplay,
+                    maCV: item.ma_cv || '-',
+                    production: production,
+                    workers: workers,
                     actualTime: actualTime,
                     theoreticalTime: theoreticalTime,
                     efficiency: efficiency
                 });
 
-                processedData.summary.totalProduction += Math.round(production);
-                processedData.summary.totalWorkers += Math.round(workers);
+                processedData.summary.totalProduction += production;
+                processedData.summary.totalWorkers += workers;
             });
 
+            // SẮP XẾP THEO NGÀY MỚI NHẤT LEN ĐẦU
+            processedData.tableData.sort((a, b) => {
+                if (!a.sortDate && !b.sortDate) return 0;
+                if (!a.sortDate) return 1;
+                if (!b.sortDate) return -1;
+
+                // Sắp xếp giảm dần (mới nhất lên đầu)
+                return new Date(b.sortDate) - new Date(a.sortDate);
+            });
+
+            // Chuẩn bị dữ liệu cho chart
+            if (selectedTeam) {
+                // Khi có lọc tổ - nhóm theo tổ con
+                const chartGroups = {};
+
+                finalData.forEach(item => {
+                    const teamValue = item.to ? item.to.toString() : '';
+                    const displayLabel = formatTeamNameSimple(teamValue);
+
+                    if (!chartGroups[teamValue]) {
+                        chartGroups[teamValue] = {
+                            label: displayLabel,
+                            actualTime: 0,
+                            theoreticalTime: 0,
+                            production: 0
+                        };
+                    }
+
+                    chartGroups[teamValue].actualTime += parseFloat(item.Thoi_Gian_Thuc_Te || 0);
+                    chartGroups[teamValue].theoreticalTime += parseFloat(item.hoan_thanh_dk || 0);
+                    chartGroups[teamValue].production += parseInt(item.sl_thuc_te || 0);
+                });
+
+                Object.values(chartGroups).forEach(group => {
+                    processedData.labels.push(group.label);
+                    processedData.actual.push(group.actualTime);
+                    processedData.theoretical.push(group.theoreticalTime);
+                    processedData.pieData.push(Math.round(group.production));
+                });
+            } else {
+                // Khi không lọc tổ - nhóm theo nhóm
+                const groups = [...new Set(finalData.map(item => item.nhom).filter(Boolean))];
+
+                groups.forEach(group => {
+                    const groupData = finalData.filter(item => item.nhom === group);
+
+                    let actualTime = 0;
+                    let theoreticalTime = 0;
+                    let production = 0;
+
+                    groupData.forEach(item => {
+                        actualTime += parseFloat(item.Thoi_Gian_Thuc_Te || 0);
+                        theoreticalTime += parseFloat(item.hoan_thanh_dk || 0);
+                        production += parseInt(item.sl_thuc_te || 0);
+                    });
+
+                    processedData.labels.push(group);
+                    processedData.actual.push(actualTime);
+                    processedData.theoretical.push(theoreticalTime);
+                    processedData.pieData.push(Math.round(production));
+                });
+            }
+
             const totalEfficiency = processedData.tableData.reduce((sum, item) => sum + item.efficiency, 0);
-            processedData.summary.avgEfficiency = groups.length > 0 ? Math.round(totalEfficiency / groups.length) : 0;
+            processedData.summary.avgEfficiency = processedData.tableData.length > 0 ?
+                Math.round(totalEfficiency / processedData.tableData.length) : 0;
 
             return processedData;
         }
 
-        // Hàm helper để format tên tổ
+        // Hàm format tên tổ đơn giản (khi có lọc)
+        function formatTeamNameSimple(teamValue) {
+            if (!teamValue) return 'Không xác định';
+
+            const teamStr = teamValue.toString();
+
+            if (teamStr === '0') return 'Hành chính';
+            if (teamStr === '1/3') return '1';
+            if (teamStr === '2/3') return '2';
+            if (teamStr === '3/3') return '3';
+            if (teamStr === '1/2') return '1';
+            if (teamStr === '2/2') return '2';
+
+            // Các trường hợp khác - lấy số đầu tiên
+            const match = teamStr.match(/^(\d+)/);
+            return match ? match[1] : teamStr;
+        }
+
+        // Hàm format tên tổ gốc (khi không lọc)
+        function formatTeamNameOriginal(teamValue) {
+            if (!teamValue) return 'Không xác định';
+
+            const teamStr = teamValue.toString();
+
+            if (teamStr === '0') return 'Hành chính';
+            if (teamStr.includes(',')) {
+                // Trường hợp có nhiều tổ như "1/3, 2/3"
+                return teamStr.split(',').map(t => {
+                    const clean = t.trim();
+                    if (clean === '1/3') return '1';
+                    if (clean === '2/3') return '2';
+                    if (clean === '3/3') return '3';
+                    if (clean === '1/2') return '1';
+                    if (clean === '2/2') return '2';
+                    return clean;
+                }).join(', ');
+            }
+
+            // Trường hợp tổ đơn lẻ
+            if (teamStr === '1/3') return '1';
+            if (teamStr === '2/3') return '2';
+            if (teamStr === '3/3') return '3';
+            if (teamStr === '1/2') return '1';
+            if (teamStr === '2/2') return '2';
+
+            return teamStr;
+        }
+
+        // Cập nhật hàm formatTeamName để hiển thị tên tổ chi tiết
         function formatTeamName(teamValue) {
             if (!teamValue) return 'Không xác định';
 
@@ -1412,16 +1642,8 @@
             if (teamStr === '1/3') return '1';
             if (teamStr === '2/3') return '2';
             if (teamStr === '3/3') return '3';
-            if (teamStr.includes('/')) {
-                // Trường hợp có nhiều tổ như "1/3, 2/3"
-                return teamStr.split(',').map(t => {
-                    const clean = t.trim();
-                    if (clean === '1/3') return '1';
-                    if (clean === '2/3') return '2';
-                    if (clean === '3/3') return '3';
-                    return clean;
-                }).join(', ');
-            }
+            if (teamStr === '1/2') return '1';
+            if (teamStr === '2/2') return '2';
 
             return teamStr;
         }
@@ -1440,17 +1662,17 @@
             const ctx = document.getElementById('chartSL').getContext('2d');
             charts.chartSL = new Chart(ctx, {
                 type: 'bar',
-                data: {
+                data: {  // THÊM PHẦN NÀY - BỊ THIẾU
                     labels: data.labels,
                     datasets: [
                         {
-                            label: 'Thời gian thực tế (h)',
+                            label: 'Thời gian thực tế (phút)',
                             data: data.actual,
                             backgroundColor: '#ef4444',
                             borderWidth: 1
                         },
                         {
-                            label: 'Thời gian lý thuyết (h)',
+                            label: 'Thời gian lý thuyết (phút)',
                             data: data.theoretical,
                             backgroundColor: '#22c55e',
                             borderWidth: 1
@@ -1465,7 +1687,7 @@
                             beginAtZero: true,
                             ticks: {
                                 callback: function (value) {
-                                    return value + 'h';
+                                    return value + ' phút';
                                 }
                             }
                         }
@@ -1534,15 +1756,19 @@
                 const efficiencyClass = row.efficiency >= 100 ? 'text-green-600' :
                     row.efficiency >= 80 ? 'text-yellow-600' : 'text-red-600';
 
+                const workersClass = row.workers >= 5 ? 'text-blue-600 font-medium' : 'text-gray-600';
+
                 tr.innerHTML = `
-                   <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">${row.group}</td>
-                   <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${row.team}</td>
-                   <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${row.maCV}</td>
-                   <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${row.production.toLocaleString()}</td>
-                   <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${row.actualTime.toFixed(1)}h</td>
-                   <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${row.theoreticalTime.toFixed(1)}h</td>
-                   <td class="px-6 py-4 whitespace-nowrap text-sm font-medium ${efficiencyClass}">${row.efficiency}%</td>
-               `;
+           <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">${row.date}</td>
+           <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">${row.group}</td>
+           <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${row.team}</td>
+           <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${row.maCV}</td>
+           <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${row.production.toLocaleString()}</td>
+           <td class="px-6 py-4 whitespace-nowrap text-sm ${workersClass}">${row.workers} người</td>
+           <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${row.actualTime.toFixed(1)} phút</td>
+           <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${row.theoreticalTime.toFixed(1)} phút</td>
+           <td class="px-6 py-4 whitespace-nowrap text-sm font-medium ${efficiencyClass}">${row.efficiency}%</td>
+       `;
                 tbody.appendChild(tr);
             });
         }
@@ -1896,7 +2122,7 @@
 
         function updatePolishingSummary(data) {
             document.getElementById('totalProductionDB').textContent = data.summary.totalProduction.toLocaleString();
-            document.getElementById('avgTimeDB').textContent = data.summary.avgTime.toFixed(1) + 'h';
+            document.getElementById('avgTimeDB').textContent = data.summary.avgTime.toFixed(1) + ' phút';
             document.getElementById('efficiencyDB').textContent = data.summary.efficiency + '%';
         }
 
@@ -1951,13 +2177,13 @@
                     row.efficiency >= 80 ? 'text-yellow-600' : 'text-red-600';
 
                 tr.innerHTML = `
-                   <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">${row.date}</td>
-                   <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">${row.maCV}</td>
-                   <td class="px-6 py-4 text-sm text-gray-500 max-w-xs truncate">${row.tenChiTiet}</td>
-                   <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">${row.production.toLocaleString()}</td>
-                   <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${row.actualTime.toFixed(1)}h</td>
-                   <td class="px-6 py-4 whitespace-nowrap text-sm font-medium ${efficiencyClass}">${row.efficiency}%</td>
-               `;
+           <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">${row.date}</td>
+           <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">${row.maCV}</td>
+           <td class="px-6 py-4 text-sm text-gray-500 max-w-xs truncate">${row.tenChiTiet}</td>
+           <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">${row.production.toLocaleString()}</td>
+           <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${row.actualTime.toFixed(1)} phút</td>
+           <td class="px-6 py-4 whitespace-nowrap text-sm font-medium ${efficiencyClass}">${row.efficiency}%</td>
+       `;
                 tbody.appendChild(tr);
             });
         }
@@ -2372,9 +2598,13 @@
         }
 
         function resetFilter3D() {
-            const today = new Date().toISOString().split('T')[0];
-            document.getElementById('dateFrom3d').value = today;
-            document.getElementById('dateTo3d').value = today;
+            const today = new Date();
+            const yesterday = new Date(today);
+            yesterday.setDate(today.getDate() - 1);
+            const yesterdayStr = yesterday.toISOString().split('T')[0];
+
+            document.getElementById('dateFrom3d').value = yesterdayStr;
+            document.getElementById('dateTo3d').value = yesterdayStr;
             document.getElementById('machine3d').value = '';
             document.getElementById('shift3d').value = '';
             load3DReport();
@@ -2385,9 +2615,13 @@
         }
 
         function resetFilterSL() {
-            const today = new Date().toISOString().split('T')[0];
-            document.getElementById('dateFromSL').value = today;
-            document.getElementById('dateToSL').value = today;
+            const today = new Date();
+            const yesterday = new Date(today);
+            yesterday.setDate(today.getDate() - 1);
+            const yesterdayStr = yesterday.toISOString().split('T')[0];
+
+            document.getElementById('dateFromSL').value = yesterdayStr;
+            document.getElementById('dateToSL').value = yesterdayStr;
             document.getElementById('groupSL').value = '';
             document.getElementById('teamSL').value = '';
             loadProductionReport();
@@ -2398,10 +2632,13 @@
         }
 
         function resetFilterLoi() {
-            const today = new Date().toISOString().split('T')[0];
-            const weekAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
-            document.getElementById('dateFromLoi').value = weekAgo;
-            document.getElementById('dateToLoi').value = today;
+            const today = new Date();
+            const yesterday = new Date(today);
+            yesterday.setDate(today.getDate() - 1);
+            const yesterdayStr = yesterday.toISOString().split('T')[0];
+
+            document.getElementById('dateFromLoi').value = yesterdayStr;
+            document.getElementById('dateToLoi').value = yesterdayStr;
             document.getElementById('positionLoi').value = '';
             loadErrorReport();
         }
@@ -2411,10 +2648,13 @@
         }
 
         function resetFilterDB() {
-            const today = new Date().toISOString().split('T')[0];
-            const weekAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
-            document.getElementById('dateFromDB').value = weekAgo;
-            document.getElementById('dateToDB').value = today;
+            const today = new Date();
+            const yesterday = new Date(today);
+            yesterday.setDate(today.getDate() - 1);
+            const yesterdayStr = yesterday.toISOString().split('T')[0];
+
+            document.getElementById('dateFromDB').value = yesterdayStr;
+            document.getElementById('dateToDB').value = yesterdayStr;
             loadPolishingReport();
         }
 
@@ -2423,10 +2663,13 @@
         }
 
         function resetFilterHN() {
-            const today = new Date().toISOString().split('T')[0];
-            const monthAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
-            document.getElementById('dateFromHN').value = monthAgo;
-            document.getElementById('dateToHN').value = today;
+            const today = new Date();
+            const yesterday = new Date(today);
+            yesterday.setDate(today.getDate() - 1);
+            const yesterdayStr = yesterday.toISOString().split('T')[0];
+
+            document.getElementById('dateFromHN').value = yesterdayStr;
+            document.getElementById('dateToHN').value = yesterdayStr;
             document.getElementById('periodHN').value = 'daily';
             loadReceiveReport();
         }
@@ -2436,39 +2679,46 @@
         }
 
         function resetFilterHG() {
-            const today = new Date().toISOString().split('T')[0];
-            const monthAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
-            document.getElementById('dateFromHG').value = monthAgo;
-            document.getElementById('dateToHG').value = today;
+            const today = new Date();
+            const yesterday = new Date(today);
+            yesterday.setDate(today.getDate() - 1);
+            const yesterdayStr = yesterday.toISOString().split('T')[0];
+
+            document.getElementById('dateFromHG').value = yesterdayStr;
+            document.getElementById('dateToHG').value = yesterdayStr;
             document.getElementById('periodHG').value = 'daily';
             loadDeliveryReport();
         }
 
         // ========== INITIALIZATION ==========
         document.addEventListener('DOMContentLoaded', async function () {
-            // Set default dates
-            const today = new Date().toISOString().split('T')[0];
+            // Set default dates - Ngày hôm qua
+            const today = new Date();
+            const yesterday = new Date(today);
+            yesterday.setDate(today.getDate() - 1);
+            const yesterdayStr = yesterday.toISOString().split('T')[0];
+
             const weekAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
             const monthAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
 
-            // Set dates for all reports
-            document.getElementById('dateFrom3d').value = today;
-            document.getElementById('dateTo3d').value = today;
+            // Set dates for all reports - Mặc định là ngày hôm qua
+            document.getElementById('dateFrom3d').value = yesterdayStr;
+            document.getElementById('dateTo3d').value = yesterdayStr;
 
-            document.getElementById('dateFromSL').value = today;
-            document.getElementById('dateToSL').value = today;
+            document.getElementById('dateFromSL').value = yesterdayStr;
+            document.getElementById('dateToSL').value = yesterdayStr;
 
-            document.getElementById('dateFromLoi').value = weekAgo;
-            document.getElementById('dateToLoi').value = today;
+            document.getElementById('dateFromLoi').value = yesterdayStr;
+            document.getElementById('dateToLoi').value = yesterdayStr;
 
-            document.getElementById('dateFromDB').value = weekAgo;
-            document.getElementById('dateToDB').value = today;
+            document.getElementById('dateFromDB').value = yesterdayStr;
+            document.getElementById('dateToDB').value = yesterdayStr;
 
-            document.getElementById('dateFromHN').value = monthAgo;
-            document.getElementById('dateToHN').value = today;
+            document.getElementById('dateFromHN').value = yesterdayStr;
+            document.getElementById('dateToHN').value = yesterdayStr;
 
-            document.getElementById('dateFromHG').value = monthAgo;
-            document.getElementById('dateToHG').value = today;
+            document.getElementById('dateFromHG').value = yesterdayStr;
+            document.getElementById('dateToHG').value = yesterdayStr;
 
             // Load all data once at startup
             await loadAllData();
