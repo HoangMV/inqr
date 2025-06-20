@@ -1,0 +1,943 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hợp Đồng Mua Bán</title>
+
+    <!-- Thêm các thư viện cần thiết cho xuất Word -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/docxtemplater/3.37.11/docxtemplater.js"></script>
+    <script src="https://unpkg.com/pizzip@3.1.4/dist/pizzip.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/1.6.2/axios.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        @page {
+            size: A4;
+            margin: 20mm;
+        }
+
+        body {
+            font-family: "Times New Roman", serif;
+            font-size: 12pt;
+            line-height: 1.5;
+            background: white;
+            width: 210mm;
+            margin: 0 auto;
+            padding: 20mm;
+            min-height: 297mm;
+            position: relative;
+        }
+
+        .container {
+            width: 100%;
+            text-align: justify;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .header-title {
+            font-weight: bold;
+            text-transform: uppercase;
+            font-size: 13pt;
+            margin-bottom: 5px;
+        }
+
+        .header-subtitle {
+            font-style: italic;
+            margin-bottom: 5px;
+        }
+
+        .header-separator {
+            margin: 10px 0;
+        }
+
+        .contract-title {
+            font-weight: bold;
+            text-transform: uppercase;
+            font-size: 18pt;
+            margin: 15px 0;
+        }
+
+        .contract-number {
+            font-weight: bold;
+            font-size: 13pt;
+            margin-bottom: 20px;
+        }
+
+        .basis {
+            margin: 20px 0;
+            font-style: italic;
+        }
+
+        .basis p {
+            margin: 3px 0;
+        }
+
+        .opening-text {
+            font-style: italic;
+            margin: 20px 0;
+            padding-left: 20px;
+        }
+
+        .party-info {
+            margin: 15px 0;
+        }
+
+        .party-title {
+            font-weight: bold;
+            text-transform: uppercase;
+            margin-bottom: 10px;
+        }
+
+        .info-table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0;
+            margin: 10px 0;
+        }
+
+        .info-table td {
+            padding: 3px 5px;
+            border: none;
+            vertical-align: top;
+        }
+
+        .info-table .label {
+            width: 120px;
+            font-weight: normal;
+        }
+
+        .info-table .separator {
+            width: 20px;
+            text-align: center;
+        }
+
+        .info-table .value {
+            font-weight: bold;
+        }
+
+        .party-role {
+            margin: 10px 0;
+            font-style: italic;
+        }
+
+        .article-title {
+            text-transform: uppercase;
+            font-weight: bold;
+            margin: 25px 0 15px 0;
+            font-size: 13pt;
+        }
+
+        .product-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 15px 0;
+        }
+
+        .product-table th,
+        .product-table td {
+            border: 1px solid black;
+            padding: 8px 5px;
+            text-align: center;
+            vertical-align: middle;
+        }
+
+        .product-table th {
+            font-weight: bold;
+            background-color: #f9f9f9;
+        }
+
+        .product-table .product-name {
+            text-align: left;
+        }
+
+        .product-table .amount {
+            text-align: right;
+        }
+
+        .total-row {
+            font-weight: bold;
+        }
+
+        .amount-words {
+            font-style: italic;
+            margin: 10px 0;
+        }
+
+        .bullet-point {
+            margin: 8px 0;
+            padding-left: 15px;
+            position: relative;
+        }
+
+        .bullet-point::before {
+            content: "> ";
+            position: absolute;
+            left: 0;
+            font-weight: bold;
+        }
+
+        .article-content {
+            margin: 15px 0;
+            padding-left: 20px;
+        }
+
+        .article-content ul {
+            list-style-type: none;
+            padding-left: 0;
+        }
+
+        .article-content li {
+            margin: 8px 0;
+            padding-left: 15px;
+            position: relative;
+        }
+
+        .article-content li::before {
+            content: "- ";
+            position: absolute;
+            left: 0;
+            font-weight: bold;
+        }
+
+        .signatures {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 50px;
+            text-align: center;
+        }
+
+        .signature-block {
+            width: 45%;
+        }
+
+        .signature-title {
+            font-weight: bold;
+            text-transform: uppercase;
+            font-size: 13pt;
+            margin-bottom: 60px;
+        }
+
+        .signature-name {
+            font-weight: bold;
+            font-size: 13pt;
+        }
+
+        /* Button styles */
+        .button-container {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            display: flex;
+            gap: 10px;
+            z-index: 1000;
+        }
+
+        .button {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 14px;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            font-family: "Times New Roman", serif;
+        }
+
+        .print-button {
+            background-color: #4CAF50;
+            color: white;
+        }
+
+        .print-button:hover {
+            background-color: #45a049;
+        }
+
+        .export-button {
+            background-color: #2b579a;
+            color: white;
+        }
+
+        .export-button:hover {
+            background-color: #1e3f6f;
+        }
+
+        #loading-message {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: rgba(0, 0, 0, 0.7);
+            color: white;
+            padding: 20px;
+            border-radius: 5px;
+            z-index: 2000;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        .error-message {
+            color: red;
+            padding: 10px;
+            margin: 10px 0;
+            border: 1px solid red;
+            background-color: #fff3f3;
+        }
+
+        @media print {
+            body {
+                width: 210mm;
+                height: 297mm;
+                margin: 0;
+                padding: 20mm;
+            }
+
+            .button-container {
+                display: none;
+            }
+        }
+
+        @media screen {
+            body {
+                box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+                margin: 20px auto;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Button Container -->
+    <div class="button-container">
+        <button class="button print-button" onclick="window.print()">
+            <i class="fas fa-print"></i> In Hợp Đồng
+        </button>
+        <button class="button export-button" onclick="exportToWordTemplate()">
+            <i class="fas fa-file-word"></i> Xuất Word
+        </button>
+    </div>
+
+    <!-- Loading Message -->
+    <div id="loading-message" class="hidden">Đang tải dữ liệu...</div>
+
+    <div class="container" id="contractContainer">
+        <!-- Contract content will be dynamically inserted here -->
+    </div>
+
+    <script>
+        // API Configuration
+        const API_CONFIG = {
+            APP_ID: 'c07f5cf2-070c-4880-beef-5e19090a304d',
+            ACCESS_KEY: 'V2-iYnp7-TnM4u-Dxx6U-dq2ob-cj0kM-61r33-Bf9Mf-7mplO',
+            REGION: 'www',
+            BASE_URL: 'https://www.appsheet.com/api/v2/apps'
+        };
+
+        // Biến toàn cục để lưu dữ liệu
+        let globalContractData = null;
+
+        // Utility Functions
+        const utils = {
+            formatCurrency(amount) {
+                return new Intl.NumberFormat('vi-VN', {
+                    minimumFractionDigits: 0,
+                    maximumFractionDigits: 0,
+                    useGrouping: true
+                }).format(amount);
+            },
+
+            formatDate(dateString) {
+                if (!dateString) return '';
+                try {
+                    const date = new Date(dateString);
+                    const day = date.getDate();
+                    const month = date.getMonth() + 1;
+                    const year = date.getFullYear();
+                    return `ngày ${day} tháng ${month} năm ${year}`;
+                } catch (error) {
+                    console.error('Error formatting date:', error);
+                    return dateString;
+                }
+            },
+
+            showLoading() {
+                document.getElementById('loading-message').classList.remove('hidden');
+            },
+
+            hideLoading() {
+                document.getElementById('loading-message').classList.add('hidden');
+            }
+        };
+
+        // Chuyển số thành chữ
+        function numberToWords(number) {
+            const digits = ['không', 'một', 'hai', 'ba', 'bốn', 'năm', 'sáu', 'bảy', 'tám', 'chín'];
+            const positions = ['', 'nghìn', 'triệu', 'tỷ', 'nghìn tỷ', 'triệu tỷ'];
+
+            if (number === 0) return 'Không đồng';
+            if (number < 0) return 'Âm ' + numberToWords(Math.abs(number));
+
+            number = Math.round(number);
+            let numStr = number.toString();
+            while (numStr.length % 3 !== 0) {
+                numStr = '0' + numStr;
+            }
+
+            const groups = [];
+            for (let i = 0; i < numStr.length; i += 3) {
+                groups.push(numStr.slice(i, i + 3));
+            }
+
+            function readGroup(group) {
+                const hundreds = parseInt(group[0]);
+                const tens = parseInt(group[1]);
+                const ones = parseInt(group[2]);
+                let result = '';
+
+                if (hundreds === 0 && tens === 0 && ones === 0) return '';
+
+                if (hundreds > 0) {
+                    result += digits[hundreds] + ' trăm ';
+                }
+
+                if (tens === 0) {
+                    if (ones > 0 && hundreds > 0) {
+                        result += 'lẻ ';
+                    }
+                } else if (tens === 1) {
+                    result += 'mười ';
+                } else {
+                    result += digits[tens] + ' mươi ';
+                }
+
+                if (ones > 0) {
+                    if (tens >= 2 && ones === 1) {
+                        result += 'mốt';
+                    } else if (tens >= 1 && ones === 5) {
+                        result += 'lăm';
+                    } else if (tens === 0 && ones === 1 && hundreds > 0) {
+                        result += 'một';
+                    } else {
+                        result += digits[ones];
+                    }
+                }
+
+                return result.trim();
+            }
+
+            let resultArray = [];
+            for (let i = 0; i < groups.length; i++) {
+                const groupWords = readGroup(groups[i]);
+                if (groupWords) {
+                    resultArray.push(groupWords + ' ' + positions[groups.length - 1 - i]);
+                }
+            }
+
+            let result = resultArray.join(' ').trim();
+            result = result.charAt(0).toUpperCase() + result.slice(1);
+            result = result.replace(/\s+/g, ' ').trim();
+            return result + ' đồng';
+        }
+
+        // Get contract ID from URL
+        function getContractIDFromURL() {
+            const urlParams = new URLSearchParams(window.location.search);
+            return urlParams.get('id') || urlParams.get('quoteId') || urlParams.get('id_baogia');
+        }
+
+        // API Service
+        const apiService = {
+            createAxiosInstance() {
+                return axios.create({
+                    baseURL: `${API_CONFIG.BASE_URL}/${API_CONFIG.APP_ID}/tables`,
+                    headers: {
+                        'ApplicationAccessKey': API_CONFIG.ACCESS_KEY,
+                        'Content-Type': 'application/json'
+                    }
+                });
+            },
+
+            async request(tableName, action, data = {}, select = {}) {
+                try {
+                    const api = this.createAxiosInstance();
+                    const requestBody = {
+                        Action: action,
+                        Properties: {
+                            UserSettings: {
+                                "User name": "Admin",
+                                "Password": "123456"
+                            },
+                            ...select
+                        },
+                        ...data
+                    };
+
+                    const response = await api.post(`/${tableName}/Action`, requestBody);
+                    return response.data;
+                } catch (error) {
+                    console.error('API request failed:', error);
+                    throw error;
+                }
+            },
+
+            async fetchContractHeader(contractId) {
+                return this.request('BAOGIA', 'Find', {}, {
+                    Selector: `Filter(BAOGIA, [id_baogia] = '${contractId}')`
+                });
+            },
+
+            async fetchContractDetails(contractId) {
+                return this.request('BAOGIA_CHITIET', 'Find', {}, {
+                    Selector: `Filter(BAOGIA_CHITIET, [Mã báo giá] = '${contractId}')`
+                });
+            }
+        };
+
+        // Main function to fetch contract data
+        async function fetchContractData() {
+            const contractId = getContractIDFromURL();
+            console.log("Contract ID from URL:", contractId);
+
+            if (!contractId) {
+                utils.hideLoading();
+                showError('Không tìm thấy ID hợp đồng trong URL.');
+                return;
+            }
+
+            try {
+                utils.showLoading();
+
+                console.log('Fetching contract:', contractId);
+                const [header, details] = await Promise.all([
+                    apiService.fetchContractHeader(contractId),
+                    apiService.fetchContractDetails(contractId)
+                ]);
+
+                console.log('Header response:', header);
+                console.log('Details response:', details);
+
+                if (!header || header.length === 0) {
+                    throw new Error('Không tìm thấy hợp đồng với ID: ' + contractId);
+                }
+
+                // Lưu dữ liệu vào biến toàn cục
+                globalContractData = {
+                    header: header[0],
+                    details: details || []
+                };
+
+                // Render contract
+                renderContract(globalContractData);
+
+                utils.hideLoading();
+                console.log("Hoàn thành tải dữ liệu hợp đồng!");
+
+            } catch (error) {
+                console.error('Lỗi:', error);
+                utils.hideLoading();
+                showError('Đã xảy ra lỗi khi lấy dữ liệu: ' + error.message);
+            }
+        }
+
+        // Calculate totals
+        function calculateTotals(contractData) {
+            if (!contractData?.header) return null;
+
+            const header = contractData.header;
+            const tongTienHang = parseFloat(header['Tổng tiền hàng'] || 0);
+            const tienUuDai = parseFloat(header['Tiền ưu đãi'] || 0);
+            const thanhTien = parseFloat(header['Tổng tiền hàng'] || 0) - parseFloat(header['Tiền ưu đãi'] || 0);
+            const tienVAT = parseFloat(header['Tiền VAT'] || 0);
+            const tongTienCuoi = thanhTien + tienVAT;
+
+            return {
+                subtotal: tongTienHang,
+                discount: tienUuDai,
+                afterDiscount: thanhTien,
+                vat: tienVAT,
+                total: tongTienCuoi
+            };
+        }
+
+        // Render contract content
+        function renderContract(contractData) {
+            const container = document.getElementById('contractContainer');
+            const totals = calculateTotals(contractData);
+
+            const contractHTML = `
+                <div class="header">
+                    <div class="header-title">CỘNG HÒA XÃ HỘI CHỦ NGHĨA VIỆT NAM</div>
+                    <div class="header-subtitle">Độc Lập - Tự do - Hạnh Phúc</div>
+                    <div class="header-separator">--------oOo--------</div>
+                    <div class="contract-title">HỢP ĐỒNG MUA BÁN</div>
+                    <div class="contract-number">SỐ: ${contractData.header['Mã báo giá'] || contractData.header['id_baogia']}</div>
+                </div>
+
+                <div class="basis">
+                    <p>♦ Căn cứ vào Bộ Luật Dân Sự của Nước Cộng Hòa Xã Hội Chủ Nghĩa Việt Nam.</p>
+                    <p>♦ Căn cứ vào Luật Thương Mại của nước Cộng Hòa xã hội Chủ Nghĩa Việt Nam.</p>
+                    <p>♦ Căn cứ vào nhu cầu của hai bên.</p>
+                </div>
+
+                <div class="opening-text">
+                    Hôm nay, ${utils.formatDate(contractData.header['Ngày tạo'])}, chúng tôi gồm có:
+                </div>
+
+                <div class="party-info">
+                    <div class="party-title">BÊN A : ${contractData.header['Tên khách hàng']}</div>
+                    <table class="info-table">
+                        <tr>
+                            <td class="label">Đại diện</td>
+                            <td class="separator">:</td>
+                            <td class="value">${contractData.header['Tên khách hàng'] || ''}</td>
+                        </tr>
+                        <tr>
+                            <td class="label">Địa chỉ</td>
+                            <td class="separator">:</td>
+                            <td>${contractData.header['Địa chỉ'] || ''}</td>
+                        </tr>
+                        <tr>
+                            <td class="label">Điện thoại</td>
+                            <td class="separator">:</td>
+                            <td>${contractData.header['Số điện thoại'] || ''}</td>
+                        </tr>
+                        <tr>
+                            <td class="label">Mã số thuế</td>
+                            <td class="separator">:</td>
+                            <td>${contractData.header['Mã số thuế'] || ''}</td>
+                        </tr>
+                        <tr>
+                            <td class="label">Tài khoản</td>
+                            <td class="separator">:</td>
+                            <td>${contractData.header['Thông tin chuyển khoản'] || ''}</td>
+                        </tr>
+                    </table>
+                    <div class="party-role">(Người Mua)</div>
+                </div>
+
+                <div class="party-info">
+                    <div class="party-title">BÊN B : CÔNG TY MỘC TRẦN.</div>
+                    <table class="info-table">
+                        <tr>
+                            <td class="label">Người đại diện</td>
+                            <td class="separator">:</td>
+                            <td class="value">(Ông) Trần Mộc</td>
+                            <td>Chức vụ: Tổng giám đốc</td>
+                        </tr>
+                        <tr>
+                            <td class="label">Địa chỉ</td>
+                            <td class="separator">:</td>
+                            <td colspan="2">Thành phố Hồ Chí Minh</td>
+                        </tr>
+                        <tr>
+                            <td class="label">Điện thoại</td>
+                            <td class="separator">:</td>
+                            <td colspan="2">0123456789</td>
+                        </tr>
+                        <tr>
+                            <td class="label">Mã số thuế</td>
+                            <td class="separator">:</td>
+                            <td colspan="2">9874563210</td>
+                        </tr>
+                        <tr>
+                            <td class="label">Tài khoản</td>
+                            <td class="separator">:</td>
+                            <td colspan="2">0123456987 NH TMCP Á Châu</td>
+                        </tr>
+                    </table>
+                    <div class="party-role">(Người bán)</div>
+                </div>
+
+                <p>Sau khi bàn bạc trao đổi hai bên đồng ý ký kết hợp đồng mua bán này dựa vào thông số và điều khoản sau đây:</p>
+
+                <div class="article-title">ĐIỀU 1: TÊN HÀNG - SỐ LƯỢNG - GIÁ CẢ</div>
+
+                // Trong function renderContract, thay thế phần bảng sản phẩm:
+
+<table class="product-table">
+    <thead>
+        <tr>
+            <th>STT</th>
+            <th>Mô tả hàng hoá</th>
+            <th>ĐVT</th>  
+            <th>Số lượng</th>
+            <th>Đơn giá<br/>(VNĐ)</th>
+            <th>Thành tiền<br/>(VNĐ)</th>
+            <th>Ghi chú</th>
+        </tr>
+    </thead>
+    <tbody>
+        ${contractData.details.map((item, index) => `
+            <tr>
+                <td>${index + 1}</td>
+                <td class="product-name">${item['Tên hàng hóa'] || ''}</td>
+                <td>${item['Đơn vị tính'] || 'Cái'}</td>
+                <td>${item['Số lượng'] || 0}</td>
+                <td class="amount">${utils.formatCurrency(item['Đơn giá'] || 0)}</td>
+                <td class="amount">${utils.formatCurrency(item['Thành tiền'] || 0)}</td>
+                <td>${item['Ghi chú'] || ''}</td>
+            </tr>
+        `).join('')}
+        <tr class="total-row">
+            <td colspan="5"><strong>Tổng giá trị tiền hàng chưa bao gồm thuế GTGT</strong></td>
+            <td class="amount">${utils.formatCurrency(totals.subtotal)}</td>
+            <td></td>
+        </tr>
+        ${totals.discount > 0 ? `
+        <tr class="total-row">
+            <td colspan="5"><strong>Tiền ưu đãi</strong></td>
+            <td class="amount">-${utils.formatCurrency(totals.discount)}</td>
+            <td></td>
+        </tr>
+        <tr class="total-row">
+            <td colspan="5"><strong>Tổng tiền sau ưu đãi</strong></td>
+            <td class="amount">${utils.formatCurrency(totals.afterDiscount)}</td>
+            <td></td>
+        </tr>
+        ` : ''}
+        <tr class="total-row">
+            <td colspan="5"><strong>VAT 10%</strong></td>
+            <td class="amount">${utils.formatCurrency(totals.vat)}</td>
+            <td></td>
+        </tr>
+        <tr class="total-row">
+            <td colspan="5"><strong>Tổng giá trị tiền hàng đã bao gồm thuế GTGT</strong></td>
+            <td class="amount">${utils.formatCurrency(totals.total)}</td>
+            <td></td>
+        </tr>
+    </tbody>
+</table>
+
+                <div class="amount-words">Bằng chữ: ${numberToWords(totals.total)}</div>
+
+                <div class="article-title">ĐIỀU 2. THỜI GIAN VÀ ĐỊA ĐIỂM GIAO HÀNG</div>
+                <div class="article-content">
+                    <div class="bullet-point">Thời gian giao hàng: Trong vòng 3-5 ngày sau khi nhận được thanh toán.</div>
+                    <div class="bullet-point">Địa điểm giao hàng: Tp Hồ Chi Minh</div>
+                </div>
+
+                <div class="article-title">ĐIỀU 3. PHƯƠNG THỨC THANH TOÁN</div>
+                <div class="article-content">
+                    <p>Phương thức thanh toán: chuyển khoản như sau</p>
+                    <p>Đợt 1: Thanh toán cho 50% giá trị Hợp đồng số tiền là <strong>${utils.formatCurrency(totals.total / 2)}</strong> (Bằng chữ: ${numberToWords(totals.total / 2)}) ngay sau khi ký hợp đồng.</p>
+                    <p>Đợt 2: Thanh toán tổng giá trị còn lại của đơn hàng trong vòng 20 ngày sau khi nhận hàng hóa đúng chủng loại/ số lượng/ chất lượng và bộ hồ sơ thanh toán hợp lệ Bên A có trách nhiệm thanh toán đúng thời gian nêu trên.</p>
+                </div>
+
+                <div class="article-title">ĐIỀU 4. CHẤT LƯỢNG HÀNG HÓA VÀ ĐIỀU KIỆN BẢO HÀNH</div>
+                <div class="article-content">
+                    <ul>
+                        <li>Hàng hóa được giao là mới 100%.</li>
+                        <li>Bên B có trách nhiệm giao hàng đúng chủng loại như đã thỏa thuận, Bên A có quyền trả lại hàng nếu hàng hóa không đúng theo thỏa thuận tại Điều 1 của Hợp đồng.</li>
+                    </ul>
+                </div>
+
+                <div class="article-title">ĐIỀU 5. CÁC ĐIỀU KHOẢN KHÁC</div>
+                <div class="article-content">
+                    <ul>
+                        <li>Hợp đồng sẽ tự động thanh lý sau khi Bên B đã bàn giao đầy đủ hàng hóa, chứng từ và Bên A đã thanh toán đủ cho Bên B.</li>
+                        <li>Hợp đồng này được lập thành 02 (hai) bản, mỗi bên giữ 01 (một) bản có giá trị như nhau và có hiệu lực kể từ ngày ký.</li>
+                    </ul>
+                </div>
+
+                <div class="signatures">
+                    <div class="signature-block">
+                        <div class="signature-title">ĐẠI DIỆN BÊN A</div>
+                        <div class="signature-name">${contractData.header['Tên khách hàng'] || 'Người đại diện'}</div>
+                    </div>
+                    <div class="signature-block">
+                        <div class="signature-title">ĐẠI DIỆN BÊN B</div>
+                        <div class="signature-name">Trần Mộc</div>
+                    </div>
+                </div>
+            `;
+
+            container.innerHTML = contractHTML;
+        }
+
+        // Show error message
+        function showError(message) {
+            const container = document.getElementById('contractContainer');
+            container.innerHTML = `<div class="error-message">${message}</div>`;
+        }
+
+        // Export to Word template function
+        async function exportToWordTemplate() {
+            try {
+                if (!globalContractData) {
+                    alert('Dữ liệu chưa được tải. Vui lòng đợi dữ liệu tải xong.');
+                    return;
+                }
+
+                utils.showLoading();
+                document.getElementById('loading-message').textContent = 'Đang xuất file Word...';
+
+                const { header, details } = globalContractData;
+                const totals = calculateTotals(globalContractData);
+
+                // Chuẩn bị dữ liệu cho template Word
+                // Trong function exportToWordTemplate, cập nhật templateData:
+
+                const templateData = {
+                    contract_number: header['Mã báo giá'] || header['id_baogia'] || '',
+                    contract_date: utils.formatDate(header['Ngày tạo']) || '',
+                    customer_name: header['Tên khách hàng'] || '',
+                    customer_contact: header['Tên khách hàng'] || '',
+                    customer_address: header['Địa chỉ'] || '',
+                    customer_phone: header['Số điện thoại'] || '',
+                    customer_tax_code: header['Mã số thuế'] || '',
+                    customer_account: header['Thông tin chuyển khoản'] || '',
+
+                    // Danh sách sản phẩm
+                    products: details.map((item, index) => ({
+                        index: index + 1,
+                        name: item['Tên hàng hóa'] || '',
+                        unit: item['Đơn vị tính'] || 'Cái',
+                        quantity: item['Số lượng'] || 0,
+                        price_formatted: utils.formatCurrency(item['Đơn giá'] || 0),
+                        total_formatted: utils.formatCurrency(item['Thành tiền'] || 0),
+                        note: item['Ghi chú'] || ''
+                    })),
+
+                    // Các tổng tiền - format cho hiển thị
+                    subtotal_formatted: utils.formatCurrency(totals.subtotal),
+                    discount_formatted: utils.formatCurrency(totals.discount),
+                    after_discount_formatted: utils.formatCurrency(totals.afterDiscount),
+                    vat_amount_formatted: utils.formatCurrency(totals.vat),
+                    total_formatted: utils.formatCurrency(totals.total),
+
+                    // Số bằng chữ
+                    total_in_words: numberToWords(totals.total),
+
+                    // Thanh toán
+                    first_payment_formatted: utils.formatCurrency(totals.total / 2),
+                    first_payment_words: numberToWords(totals.total / 2),
+
+                    // Các giá trị raw (không format) cho tính toán trong Word nếu cần
+                    subtotal_raw: totals.subtotal,
+                    discount_raw: totals.discount,
+                    after_discount_raw: totals.afterDiscount,
+                    vat_amount_raw: totals.vat,
+                    total_raw: totals.total,
+
+                    // Thông tin ưu đãi
+                    has_discount: totals.discount > 0,
+                    discount_percent: totals.discount > 0 ? Math.round((totals.discount / totals.subtotal) * 100) : 0,
+
+                    // Thông tin VAT
+                    vat_rate: '10%',
+
+                    // Ngày tháng năm riêng lẻ
+                    contract_day: new Date(header['Ngày tạo']).getDate() || '',
+                    contract_month: (new Date(header['Ngày tạo']).getMonth() + 1) || '',
+                    contract_year: new Date(header['Ngày tạo']).getFullYear() || ''
+                };
+
+                console.log('Template data:', templateData);
+
+                // Lấy template từ server (bạn cần upload template lên server của bạn)
+                const templateUrl = 'https://hoangmv.github.io/inqr/hopdong_template.docx';
+
+                try {
+                    const response = await fetch(templateUrl);
+                    if (!response.ok) {
+                        throw new Error(`Không thể tải template Word: ${response.status}`);
+                    }
+
+                    const templateContent = await response.arrayBuffer();
+                    const zip = new PizZip(templateContent);
+
+                    const doc = new window.docxtemplater(zip, {
+                        paragraphLoop: true,
+                        linebreaks: true,
+                        nullGetter() {
+                            return "";
+                        }
+                    });
+
+                    // Đặt dữ liệu vào template
+                    doc.setData(templateData);
+                    doc.render();
+
+                    // Tạo và tải file
+                    const blob = doc.getZip().generate({
+                        type: "blob",
+                        mimeType: "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+                    });
+
+                    const fileName = `HopDong_${header['Mã báo giá'] || header['id_baogia'] || 'Export'}.docx`;
+                    saveAs(blob, fileName);
+
+                    alert('Xuất file Word thành công!');
+
+                } catch (templateError) {
+                    console.error('Template error:', templateError);
+                    // Fallback: tạo file Word đơn giản
+                    // await generateSimpleWordDocument(templateData);
+                }
+
+            } catch (error) {
+                console.error('Error exporting to Word:', error);
+                alert('Có lỗi khi xuất file Word: ' + error.message);
+            } finally {
+                document.getElementById('loading-message').textContent = 'Đang tải dữ liệu...';
+                utils.hideLoading();
+            }
+        }
+
+
+        // Load data when page loads
+        document.addEventListener('DOMContentLoaded', fetchContractData);
+
+        // Keyboard shortcuts
+        document.addEventListener('keydown', function (e) {
+            // Ctrl+P for print
+            if (e.ctrlKey && e.key === 'p') {
+                e.preventDefault();
+                window.print();
+            }
+            // Ctrl+E for export Word
+            if (e.ctrlKey && e.key === 'e') {
+                e.preventDefault();
+                exportToWordTemplate();
+            }
+        });
+
+        // Disable right-click and F12 for security
+        document.addEventListener('contextmenu', function (e) {
+            e.preventDefault();
+        }, false);
+
+        document.onkeydown = function (e) {
+            if (e.keyCode == 123) {
+                return false;
+            }
+            if (e.ctrlKey && e.shiftKey && e.keyCode == 'I'.charCodeAt(0)) {
+                return false;
+            }
+            if (e.ctrlKey && e.shiftKey && e.keyCode == 'J'.charCodeAt(0)) {
+                return false;
+            }
+            if (e.ctrlKey && e.keyCode == 'U'.charCodeAt(0)) {
+                return false;
+            }
+        };
+    </script>
+</body>
+
+</html>
