@@ -1,0 +1,1379 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Báo Giá - Mộc Ấn</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/1.6.2/axios.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Times New Roman', Times, serif;
+            background-color: white;
+            padding: 15px;
+            font-size: 13px;
+        }
+
+        .container {
+            max-width: 210mm;
+            margin: 0 auto;
+            background: white;
+        }
+
+        /* Print Controls */
+        .print-controls {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 1000;
+            background: white;
+            padding: 10px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            border: 1px solid #ddd;
+        }
+
+        .print-btn {
+            background: #e74c3c;
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: bold;
+            transition: background 0.3s;
+        }
+
+        .print-btn:hover {
+            background: #c0392b;
+        }
+
+        .print-btn:disabled {
+            background: #bdc3c7;
+            cursor: not-allowed;
+        }
+
+        /* Header */
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+        }
+
+        .logo-section {
+            display: flex;
+            align-items: center;
+        }
+
+        .logo-circle {
+            width: 50px;
+            height: 50px;
+            background: linear-gradient(135deg, #ff4444, #ffaa00, #44aa44);
+            border-radius: 50%;
+            margin-right: 10px;
+        }
+
+        .logo-text h1 {
+            color: #e74c3c;
+            font-size: 28px;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+
+        .logo-subtext {
+            font-size: 9px;
+            color: #888;
+            line-height: 1.2;
+        }
+
+        .contact-info {
+            text-align: right;
+            font-size: 14px;
+        }
+
+        .phone-icon::before {
+            content: "📞";
+            margin-right: 5px;
+        }
+
+        .website {
+            background: #e74c3c;
+            color: white;
+            padding: 3px 8px;
+            border-radius: 3px;
+            font-size: 13px;
+            display: inline-block;
+            margin-top: 5px;
+        }
+
+        /* Title */
+        .title {
+            text-align: center;
+            font-size: 20px;
+            font-weight: bold;
+            margin: 0 0 5px 0;
+            letter-spacing: 2px;
+        }
+
+        .order-number {
+            text-align: center;
+            font-size: 13px;
+            margin-bottom: 20px;
+            font-weight: bold;
+        }
+
+        /* Customer Info Table */
+        .customer-info {
+            width: 100%;
+            border-collapse: collapse;
+            border: 1px solid #000;
+            margin-bottom: 15px;
+        }
+
+        .customer-info td {
+            border: 1px solid #000;
+            padding: 6px 8px;
+            font-size: 13px;
+            vertical-align: top;
+        }
+
+        /* Product Table */
+        .product-table {
+            width: 100%;
+            border-collapse: collapse;
+            border: 1px solid #000;
+            margin-bottom: 15px;
+        }
+
+        .product-table th,
+        .product-table td {
+            border: 1px solid #000;
+            padding: 6px 4px;
+            text-align: center;
+            font-size: 13px;
+            vertical-align: middle;
+        }
+
+        .product-table th {
+            background-color: #f8f9fa;
+            font-weight: bold;
+            height: 40px;
+        }
+
+        .product-name {
+            text-align: left !important;
+            width: 205px;
+            padding-left: 8px !important;
+            font-weight: bold;
+        }
+
+        .stt-col {
+            width: 30px;
+        }
+
+        .dvt-col {
+            width: 40px;
+        }
+
+        .quantity-col {
+            width: 60px;
+        }
+
+        .price-col {
+            width: 70px;
+        }
+
+        .total-col {
+            width: 100px;
+        }
+
+        .product-table tr {
+            height: auto;
+        }
+
+        .product-table td {
+            vertical-align: middle;
+            height: auto;
+        }
+
+        .image-col {
+            width: 80px;
+            min-width: 80px;
+            vertical-align: middle;
+        }
+
+        .delivery-col {
+            width: 60px;
+        }
+
+        .product-image {
+            width: 70px;
+            height: auto;
+            min-height: 50px;
+            background: #f0f0f0;
+            margin: 2px auto;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            padding: 2px;
+        }
+
+        .product-image img {
+            max-width: 100%;
+            max-height: none;
+            width: auto;
+            height: auto;
+            object-fit: contain;
+            cursor: pointer;
+            border-radius: 2px;
+        }
+
+        .product-image .no-image {
+            font-size: 10px;
+            color: #999;
+            text-align: center;
+        }
+
+        /* Image loading indicator */
+        .image-loading {
+            font-size: 9px;
+            color: #666;
+            text-align: center;
+        }
+
+        .total-row {
+            font-weight: bold;
+        }
+
+        .total-row td {
+            font-size: 13px;
+        }
+
+        /* Notes */
+        .notes {
+            border: 1px solid #000;
+            padding: 8px;
+            margin-bottom: 15px;
+            font-size: 13px;
+            font-style: italic;
+        }
+
+        /* Bottom Section */
+        .bottom-section {
+            display: flex;
+            gap: 0;
+            margin-bottom: 20px;
+        }
+
+        .left-info {
+            width: 60%;
+            border: 1px solid #000;
+            border-right: none;
+            padding: 10px;
+            font-size: 13px;
+            line-height: 1.4;
+            color: #081b3af0;
+        }
+
+        .right-info {
+            flex: 1;
+            border: 1px solid #000;
+            padding: 10px;
+            font-size: 13px;
+            line-height: 1.4;
+        }
+
+        .right-info h4 {
+            font-size: 13px;
+            margin-bottom: 8px;
+            text-align: center;
+        }
+
+        /* Signature */
+        .signature-table {
+            width: 100%;
+            border-collapse: collapse;
+            border: 1px solid #000;
+        }
+
+        .signature-table td {
+            border: 1px solid #000;
+            padding: 6px 8px;
+            text-align: center;
+            font-size: 13px;
+            font-weight: bold;
+            vertical-align: top;
+            width: 33.33%;
+        }
+
+        .signature-name {
+            margin-top: 30px;
+            font-weight: bold;
+        }
+
+        /* Format numbers */
+        .number {
+            text-align: right;
+        }
+
+        /* Loading & Error */
+        .loading {
+            text-align: center;
+            padding: 20px;
+            font-style: italic;
+            color: #666;
+        }
+
+        .error {
+            color: red;
+            text-align: center;
+            padding: 20px;
+        }
+
+        .warning {
+            color: orange;
+            text-align: center;
+            padding: 20px;
+            font-style: italic;
+        }
+
+        .loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(255, 255, 255, 0.8);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+        }
+
+        /* Modal styles for image viewing */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0, 0, 0, 0.9);
+        }
+
+        .modal-content {
+            margin: auto;
+            display: block;
+            position: relative;
+            top: 50%;
+            transform: translateY(-50%);
+            width: auto;
+            height: auto;
+            max-width: 80%;
+            max-height: 80vh;
+        }
+
+        #modalImage {
+            width: auto;
+            height: auto;
+            max-width: 100%;
+            max-height: 80vh;
+            display: block;
+            margin: auto;
+            object-fit: contain;
+        }
+
+        .close {
+            position: absolute;
+            right: 15px;
+            top: -40px;
+            color: #f1f1f1;
+            font-size: 40px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        /* Print Status */
+        .print-status {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(0, 0, 0, 0.8);
+            color: white;
+            padding: 20px;
+            border-radius: 5px;
+            z-index: 10000;
+            display: none;
+        }
+
+        @media print {
+            .product-image {
+                height: auto !important;
+                min-height: 40px !important;
+                padding: 1px !important;
+            }
+
+            .product-image img {
+                max-width: 70px !important;
+                max-height: none !important;
+                width: auto !important;
+                height: auto !important;
+                print-color-adjust: exact;
+                -webkit-print-color-adjust: exact;
+            }
+
+            .product-table tr {
+                height: auto !important;
+                page-break-inside: avoid;
+            }
+        }
+
+        /* Print Styles */
+        @media print {
+            html {
+                print-color-adjust: exact;
+                -webkit-print-color-adjust: exact;
+            }
+
+            body {
+                padding: 0;
+                margin: 0;
+                font-size: 13px;
+                background: white !important;
+            }
+
+            .container {
+                max-width: none;
+                width: 100%;
+                margin: 0;
+                padding: 0;
+            }
+
+            .print-controls {
+                display: none !important;
+            }
+
+            .modal {
+                display: none !important;
+            }
+
+            .loading-overlay {
+                display: none !important;
+            }
+
+            .customer-info,
+            .product-table,
+            .signature-table {
+                border-collapse: collapse;
+                page-break-inside: avoid;
+            }
+
+            .product-table {
+                page-break-inside: auto;
+            }
+
+            .product-table tr {
+                page-break-inside: avoid;
+                page-break-after: auto;
+            }
+
+            .product-table thead {
+                display: table-header-group;
+            }
+
+            .product-table tfoot {
+                display: table-footer-group;
+            }
+
+            .product-image img {
+                cursor: default;
+            }
+
+            .signature-table {
+                page-break-inside: avoid;
+                margin-top: 20px;
+            }
+
+            .bottom-section {
+                page-break-inside: avoid;
+            }
+
+            .title {
+                font-size: 18px;
+            }
+
+            .customer-info td,
+            .product-table th,
+            .product-table td,
+            .signature-table td {
+                padding: 6px 8px !important;
+                font-size: 12px !important;
+            }
+
+            .left-info,
+            .right-info {
+                font-size: 12px !important;
+                line-height: 1.4 !important;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Print Controls -->
+    <div class="print-controls">
+        <button class="print-btn" onclick="printDocument()" id="printBtn">
+            🖨️ In báo giá
+        </button>
+    </div>
+
+    <!-- Print Status -->
+    <div class="print-status" id="printStatus">
+        Đang chuẩn bị in...
+    </div>
+
+    <!-- Image Modal -->
+    <div id="imageModal" class="modal" style="display: none;">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <img id="modalImage" src="" alt="Enlarged image">
+        </div>
+    </div>
+
+    <!-- Loading Overlay -->
+    <div id="loadingOverlay" class="loading-overlay" style="display: none;">
+        <div style="text-align: center;">
+            <p>Đang tải dữ liệu...</p>
+        </div>
+    </div>
+
+    <div class="container">
+        <!-- Header -->
+        <div class="header">
+            <div class="logo-section">
+                <div class="logo-circle"></div>
+                <div class="logo-text">
+                    <h1>MỘC TRẦN</h1>
+                    <div class="logo-subtext">
+                        Sản xuất nội thất gỗ<br>
+                        Thiết kế thi công nội thất<br>
+                    </div>
+                </div>
+            </div>
+            <div class="contact-info">
+                <div class="phone-icon">0123456789</div>
+                <div class="phone-icon">0123456789</div>
+            </div>
+        </div>
+        <BR>
+
+        <!-- Title -->
+        <div class="title">BẢNG BÁO GIÁ</div>
+        <div class="order-number" id="orderNumber">Số: <span id="soPhieu">Đang tải...</span></div>
+
+        <!-- Customer Info -->
+        <table class="customer-info">
+            <tr>
+                <td colspan="2" style="width: 33.3%;">Khách hàng: <strong id="tenKhachHang">Đang tải...</strong></td>
+                <td style="width: 33.3%;">Ngày tạo: <strong id="ngayTao">Đang tải...</strong></td>
+            </tr>
+            <tr>
+                <td colspan="2">Địa chỉ: <strong id="diaChi">Đang tải...</strong></td>
+                <td>Nhân viên phụ trách: <strong id="nhanVienPhuTrach">Đang tải...</strong></td>
+            </tr>
+            <tr>
+                <td>Hiệu lực từ: <strong id="hieuLucBatDau">Đang tải...</strong></td>
+                <td style="width: 33.3%;">Đến: <strong id="hieuLucKetThuc">Đang tải...</strong></td>
+                <td>Trạng thái: <strong id="trangThai">Đang tải...</strong></td>
+            </tr>
+        </table>
+
+        <!-- Product Table -->
+        <table class="product-table">
+            <thead>
+                <tr>
+                    <th class="stt-col">STT</th>
+                    <th class="product-name">Tên sản phẩm</th>
+                    <th class="dvt-col">ĐVT</th>
+                    <th class="quantity-col">Số lượng</th>
+                    <th class="price-col">Đơn giá<br>(chưa VAT)</th>
+                    <th class="total-col">Thành tiền<br>(chưa VAT)</th>
+                    <th class="image-col">Hình ảnh</th>
+                    <th class="delivery-col">Ghi chú</th>
+                </tr>
+            </thead>
+            <tbody id="productTableBody">
+                <tr>
+                    <td colspan="8" class="loading">Đang tải dữ liệu...</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <!-- Bottom Section -->
+        <div class="bottom-section">
+            <div class="left-info">
+                <p style="color: #000;"><strong>Ghi chú: <span id="ghichubaogiagia"></span></strong></p>
+                <p>- Giá trên chưa bao gồm VAT</p>
+                <p>- Báo giá có hiệu lực trong thời gian quy định</p>
+                <p>- Sản phẩm được sản xuất theo đúng yêu cầu kỹ thuật của khách hàng</p>
+                <p>- Thời gian giao hàng: Theo thỏa thuận giữa hai bên</p>
+                <p>- Chất lượng sản phẩm được đảm bảo theo tiêu chuẩn ngành</p>
+            </div>
+            <div class="right-info">
+                <p><strong>THÔNG TIN CHUYỂN KHOẢN:</strong></p>
+                <p><strong>CÔNG TY TNHH MỘC TRẦN FURNITURE</strong></p>
+                <p><strong>STK: 0123456789</strong></p>
+                <p><strong>Tại Ngân Hàng TMCP Á Châu</strong></p>
+            </div>
+        </div>
+
+        <!-- Signature Section -->
+        <table class="signature-table">
+            <tr>
+                <td><strong>XÁC NHẬN KHÁCH HÀNG</strong></td>
+                <td><strong>Phê duyệt</strong></td>
+                <td><strong>Nhân viên phụ trách</strong></td>
+            </tr>
+            <tr>
+                <td>
+                    <div style="height: 50px;"></div>
+                </td>
+                <td>
+                    <div style="height: 50px;"></div>
+                    <div class="signature-name">Phòng Kinh Doanh</div>
+                </td>
+                <td>
+                    <div style="height: 30px;"></div>
+                    <div class="signature-name" id="nguoiLapKy">Đang tải...</div>
+                </td>
+            </tr>
+        </table>
+    </div>
+
+    <script>
+        // API Configuration
+        const API_CONFIG = {
+            APP_ID: 'c07f5cf2-070c-4880-beef-5e19090a304d',
+            ACCESS_KEY: 'V2-iYnp7-TnM4u-Dxx6U-dq2ob-cj0kM-61r33-Bf9Mf-7mplO',
+            REGION: 'www',
+            BASE_URL: 'https://www.appsheet.com/api/v2/apps',
+            APP_NAME: 'MộcTrầnFurniture-66572971-25-06-05'
+        };
+
+        // Set document title for printing
+        function setDocumentTitle(soPhieu) {
+            if (soPhieu && soPhieu !== 'Đang tải...') {
+                document.title = soPhieu;
+            }
+        }
+
+        // State Management
+        let state = {
+            orderData: null,
+            loading: false
+        };
+
+        // Print Functions
+        const PrintManager = {
+            // Print document
+            print: async () => {
+                try {
+                    // Check if data is loaded
+                    if (!state.orderData) {
+                        alert('Vui lòng đợi dữ liệu tải xong trước khi in!');
+                        return;
+                    }
+
+                    // Disable print button during printing
+                    const printBtn = document.getElementById('printBtn');
+                    const originalText = printBtn.innerHTML;
+                    printBtn.disabled = true;
+                    printBtn.innerHTML = '⏳ Đang in...';
+
+                    // Show print status
+                    PrintManager.showPrintStatus('Đang chuẩn bị in...');
+
+                    // Set document title for printing filename
+                    const soPhieu = document.getElementById('soPhieu').textContent;
+                    if (soPhieu && soPhieu !== 'Đang tải...') {
+                        document.title = `BaoGia_${soPhieu}`;
+                    }
+
+                    // Wait for images to load
+                    await PrintManager.waitForImages();
+
+                    // Hide print status
+                    PrintManager.hidePrintStatus();
+
+                    // Trigger print
+                    window.print();
+
+                    // Re-enable print button
+                    setTimeout(() => {
+                        printBtn.disabled = false;
+                        printBtn.innerHTML = originalText;
+                    }, 1000);
+
+                } catch (error) {
+                    console.error('Print error:', error);
+                    alert('Có lỗi xảy ra khi in. Vui lòng thử lại!');
+
+                    // Re-enable print button
+                    const printBtn = document.getElementById('printBtn');
+                    printBtn.disabled = false;
+                    printBtn.innerHTML = '🖨️ In báo giá';
+
+                    PrintManager.hidePrintStatus();
+                }
+            },
+
+            // Wait for all images to load
+            waitForImages: () => {
+                return new Promise((resolve) => {
+                    const images = document.querySelectorAll('.product-image img');
+                    let loadedCount = 0;
+                    const totalImages = images.length;
+
+                    if (totalImages === 0) {
+                        resolve();
+                        return;
+                    }
+
+                    const checkComplete = () => {
+                        loadedCount++;
+                        if (loadedCount >= totalImages) {
+                            resolve();
+                        }
+                    };
+
+                    images.forEach((img) => {
+                        if (img.complete) {
+                            checkComplete();
+                        } else {
+                            img.onload = checkComplete;
+                            img.onerror = checkComplete;
+                        }
+                    });
+
+                    // Timeout after 5 seconds
+                    setTimeout(() => {
+                        resolve();
+                    }, 5000);
+                });
+            },
+
+            // Show print status
+            showPrintStatus: (message) => {
+                const status = document.getElementById('printStatus');
+                status.textContent = message;
+                status.style.display = 'block';
+            },
+
+            // Hide print status
+            hidePrintStatus: () => {
+                const status = document.getElementById('printStatus');
+                status.style.display = 'none';
+            }
+        };
+
+        // Global print function
+        function printDocument() {
+            PrintManager.print();
+        }
+
+        // API Service
+        // API Service
+        const apiService = {
+            createAxiosInstance() {
+                return axios.create({
+                    baseURL: `${API_CONFIG.BASE_URL}/${API_CONFIG.APP_ID}/tables`,
+                    headers: {
+                        'ApplicationAccessKey': API_CONFIG.ACCESS_KEY,
+                        'Content-Type': 'application/json'
+                    }
+                });
+            },
+
+            async request(tableName, action, data = {}, select = {}) {
+                try {
+                    const api = this.createAxiosInstance();
+                    const requestBody = {
+                        Action: action,
+                        Properties: {
+                            UserSettings: {
+                                "User name": "Admin",
+                                "Password": "123456"
+                            },
+                            ...select
+                        },
+                        ...data
+                    };
+
+                    const response = await api.post(`/${tableName}/Action`, requestBody);
+                    return response.data;
+                } catch (error) {
+                    console.error('API request failed:', error);
+                    throw error;
+                }
+            },
+
+            // Lấy thông tin sản phẩm từ DMSP
+            async getProductInfo(maHangHoa) {
+                try {
+                    console.log(`Fetching product info for Mã hàng hóa: ${maHangHoa}`);
+                    const response = await this.request('DMSP', 'Find', {}, {
+                        Selector: `Filter(DMSP, [Mã SP] = '${maHangHoa}')`
+                    });
+                    console.log(`Product info response for ${maHangHoa}:`, response);
+                    return response && response.length > 0 ? response[0] : null;
+                } catch (error) {
+                    console.error('Error fetching product info:', error);
+                    return null;
+                }
+            },
+
+            // Lấy thông tin nhiều sản phẩm cùng lúc
+            async getMultipleProductsInfo(productCodes) {
+                try {
+                    console.log('Fetching multiple product info for:', productCodes);
+
+                    // Tạo filter condition cho nhiều sản phẩm
+                    const filterConditions = productCodes.map(code => `[Mã SP] = '${code}'`).join(' OR ');
+                    const selector = `Filter(DMSP, ${filterConditions})`;
+
+                    const response = await this.request('DMSP', 'Find', {}, {
+                        Selector: selector
+                    });
+
+                    console.log('Multiple products response:', response);
+                    return response || [];
+                } catch (error) {
+                    console.error('Error fetching multiple products info:', error);
+                    return [];
+                }
+            },
+
+            // Hàm lấy hình ảnh từ bảng DMSP (hàm gốc)
+            getImageUrl: (fileName) => {
+                if (!fileName) return '';
+
+                const cleanFileName = fileName.trim();
+                console.log('Original fileName:', cleanFileName);
+
+                const baseUrl = 'https://www.appsheet.com/image/getimageurl';
+
+                const params = new URLSearchParams({
+                    appName: API_CONFIG.APP_NAME,
+                    tableName: 'DMSP',
+                    fileName: cleanFileName
+                });
+
+                const finalUrl = `${baseUrl}?${params.toString()}`;
+                console.log('Generated URL:', finalUrl);
+
+                return finalUrl;
+            },
+
+            // Hàm mới để lấy hình ảnh từ bảng bất kỳ
+            getImageUrlFromTable: (fileName, tableName) => {
+                if (!fileName) return '';
+
+                const cleanFileName = fileName.trim();
+                console.log('Original fileName for table', tableName, ':', cleanFileName);
+
+                const baseUrl = 'https://www.appsheet.com/image/getimageurl';
+
+                const params = new URLSearchParams({
+                    appName: API_CONFIG.APP_NAME,
+                    tableName: tableName,
+                    fileName: cleanFileName
+                });
+
+                const finalUrl = `${baseUrl}?${params.toString()}`;
+                console.log('Generated URL for table', tableName, ':', finalUrl);
+
+                return finalUrl;
+            }
+        };
+
+        // Image handling functions
+        const imageHandler = {
+            updateImageInContainer: (container, imageUrl) => {
+                if (!container || !imageUrl) {
+                    if (container) {
+                        container.innerHTML = '<div class="no-image">No Image</div>';
+                    }
+                    return;
+                }
+
+                console.log('Loading image with URL:', imageUrl);
+                container.innerHTML = '<div class="image-loading">Đang tải...</div>';
+
+                const newImg = document.createElement('img');
+                newImg.alt = 'Product Image';
+
+                newImg.onload = function () {
+                    console.log('Image loaded successfully:', imageUrl);
+
+                    // Tạo thẻ <a> bao quanh ảnh
+                    const linkElement = document.createElement('a');
+                    linkElement.href = imageUrl;
+                    linkElement.target = '_blank'; // Mở trong tab mới
+                    linkElement.style.display = 'block';
+                    linkElement.style.cursor = 'pointer';
+
+                    // Đặt ảnh vào trong thẻ <a>
+                    linkElement.appendChild(this);
+
+                    // Thay thế nội dung container
+                    container.innerHTML = '';
+                    container.appendChild(linkElement);
+                };
+
+                newImg.onerror = function () {
+                    console.error('Image load failed:', imageUrl);
+                    container.innerHTML = '<div class="no-image" style="font-size: 9px;">Lỗi tải ảnh</div>';
+                };
+
+                newImg.src = imageUrl;
+            },
+
+            showModal: (imgSrc) => {
+                const modal = document.getElementById('imageModal');
+                const modalImg = document.getElementById('modalImage');
+                if (modal && modalImg) {
+                    modal.style.display = 'block';
+                    modalImg.src = imgSrc;
+                }
+            }
+        };
+
+        // Loading Management
+        const showLoading = () => {
+            document.getElementById('loadingOverlay').style.display = 'flex';
+            state.loading = true;
+        };
+
+        const hideLoading = () => {
+            document.getElementById('loadingOverlay').style.display = 'none';
+            state.loading = false;
+        };
+
+        // Utility Functions
+        function formatNumber(num) {
+            if (num === null || num === undefined || isNaN(num)) return '0';
+            return new Intl.NumberFormat('vi-VN').format(num);
+        }
+
+        function formatDate(dateString) {
+            if (!dateString) return '';
+            try {
+                const date = new Date(dateString);
+                if (isNaN(date.getTime())) return dateString;
+                return date.toLocaleDateString('vi-VN');
+            } catch (error) {
+                return dateString;
+            }
+        }
+
+        function numberToWords(num) {
+            if (num === 0 || num === null || num === undefined) return 'không đồng';
+
+            const ones = ['', 'một', 'hai', 'ba', 'bốn', 'năm', 'sáu', 'bảy', 'tám', 'chín'];
+            const tens = ['', '', 'hai mươi', 'ba mươi', 'bốn mươi', 'năm mươi', 'sáu mươi', 'bảy mươi', 'tám mươi', 'chín mươi'];
+            const scales = ['', 'nghìn', 'triệu', 'tỷ'];
+
+            function convertHundreds(n) {
+                let result = '';
+
+                const hundred = Math.floor(n / 100);
+                const remainder = n % 100;
+                const ten = Math.floor(remainder / 10);
+                const one = remainder % 10;
+
+                if (hundred > 0) {
+                    result += ones[hundred] + ' trăm';
+                }
+
+                if (ten > 1) {
+                    result += (result ? ' ' : '') + tens[ten];
+                    if (one > 0) {
+                        result += ' ' + ones[one];
+                    }
+                } else if (ten === 1) {
+                    result += (result ? ' ' : '') + 'mười';
+                    if (one > 0) {
+                        result += ' ' + ones[one];
+                    }
+                } else if (one > 0 && hundred > 0) {
+                    result += ' lẻ ' + ones[one];
+                } else if (one > 0) {
+                    result += (result ? ' ' : '') + ones[one];
+                }
+
+                return result;
+            }
+
+            function convertNumber(num) {
+                if (num === 0) return 'không';
+
+                let result = '';
+                let scaleIndex = 0;
+
+                while (num > 0) {
+                    const chunk = num % 1000;
+                    if (chunk !== 0) {
+                        const chunkWords = convertHundreds(chunk);
+                        const scale = scales[scaleIndex];
+                        result = chunkWords + (scale ? ' ' + scale : '') + (result ? ' ' + result : '');
+                    }
+                    num = Math.floor(num / 1000);
+                    scaleIndex++;
+                }
+
+                return result;
+            }
+
+            const words = convertNumber(Math.floor(num));
+            return words.charAt(0).toUpperCase() + words.slice(1) + ' đồng';
+        }
+
+        // Fetch Quote Data
+        async function fetchQuoteData(quoteId) {
+            try {
+                showLoading();
+
+                const [header, details] = await Promise.all([
+                    apiService.request('BAOGIA', 'Find', {}, {
+                        Selector: `Filter(BAOGIA, [id_baogia] = '${quoteId}')`
+                    }),
+                    apiService.request('BAOGIA_CHITIET', 'Find', {}, {
+                        Selector: `Filter(BAOGIA_CHITIET, [Mã báo giá] = '${quoteId}')`
+                    })
+                ]);
+
+                if (!header || header.length === 0) {
+                    throw new Error(`Không tìm thấy báo giá với ID: ${quoteId}`);
+                }
+
+                state.orderData = {
+                    header: header[0],
+                    details: details || []
+                };
+
+                return state.orderData;
+            } catch (error) {
+                console.error('Error fetching quote:', error);
+                throw error;
+            } finally {
+                hideLoading();
+            }
+        }
+
+        // Populate Quote Header
+        function populateQuoteHeader(baoGia) {
+            try {
+                // Sử dụng Mã báo giá để hiển thị, nhưng id_baogia để query
+                const maBaoGia = baoGia['Mã báo giá'] || baoGia['id_baogia'] || ' ';
+                document.getElementById('soPhieu').textContent = maBaoGia;
+
+                // Set document title for printing
+                setDocumentTitle(maBaoGia);
+
+                document.getElementById('tenKhachHang').textContent = baoGia['Tên khách hàng'] || ' ';
+                document.getElementById('ngayTao').textContent = formatDate(baoGia['Ngày tạo']);
+                document.getElementById('diaChi').textContent = baoGia['Địa chỉ'] || ' ';
+                document.getElementById('nhanVienPhuTrach').textContent = baoGia['Nhân viên phụ trách'] || ' ';
+                document.getElementById('hieuLucBatDau').textContent = formatDate(baoGia['Hiệu lực bắt đầu']);
+                document.getElementById('hieuLucKetThuc').textContent = formatDate(baoGia['Hiệu lực kết thúc']);
+                document.getElementById('trangThai').textContent = baoGia['Trạng thái'] || ' ';
+                document.getElementById('nguoiLapKy').textContent = baoGia['Nhân viên phụ trách'] || ' ';
+                document.getElementById('ghichubaogiagia').textContent = baoGia['Ghi chú'] || '';
+            } catch (error) {
+                console.error('Error populating header:', error);
+                throw error;
+            }
+        }
+
+        // Populate Product Table
+        // Sửa lại hàm populateProductTable
+        async function populateProductTable(chiTietBaoGia) {
+            const tbody = document.getElementById('productTableBody');
+            tbody.innerHTML = '';
+
+            try {
+                // DEBUG: In ra dữ liệu nhận được
+                console.log('chiTietBaoGia data:', chiTietBaoGia);
+                console.log('chiTietBaoGia length:', chiTietBaoGia.length);
+
+                if (chiTietBaoGia.length === 0) {
+                    console.log('Full order data:', state.orderData);
+                    tbody.innerHTML = '<tr><td colspan="8" class="warning">⚠️ Không có chi tiết sản phẩm cho báo giá này</td></tr>';
+                    return;
+                }
+
+                // Tạo tất cả rows và load hình ảnh
+                const imageLoadPromises = [];
+
+                for (let index = 0; index < chiTietBaoGia.length; index++) {
+                    const item = chiTietBaoGia[index];
+
+                    const soLuong = parseFloat(item['Số lượng']) || 0;
+                    const donGia = parseFloat(item['Đơn giá']) || 0;
+                    const thanhTien = parseFloat(item['Thành tiền']) || (soLuong * donGia);
+
+                    const row = document.createElement('tr');
+
+                    row.innerHTML = `
+                <td>${index + 1}</td>
+                <td class="product-name">${item['Tên hàng hóa'] || ' '} - ${item['Mô tả'] || ' '}</td>
+                <td>${item['Đơn vị tính'] || 'Cái'}</td>
+                <td class="number">${formatNumber(soLuong)}</td>
+                <td class="number">${formatNumber(donGia)}</td>
+                <td class="number">${formatNumber(thanhTien)}</td>
+                <td>
+                    <div class="product-image">
+                        <div class="image-loading">Đang tải...</div>
+                    </div>
+                </td>
+                <td>${item['Ghi chú'] || ''}</td>
+            `;
+                    tbody.appendChild(row);
+
+                    // Lấy hình ảnh trực tiếp từ cột Hình ảnh trong BAOGIA_CHITIET
+                    const imageFileName = item['Hình ảnh'];
+                    console.log(`Image filename for row ${index + 1}:`, imageFileName);
+
+                    const container = row.querySelector('.product-image');
+
+                    if (imageFileName) {
+                        // Sử dụng BAOGIA_CHITIET thay vì DMSP cho hình ảnh
+                        const imageUrl = apiService.getImageUrlFromTable(imageFileName, 'BAOGIA_CHITIET');
+                        console.log(`Image URL for row ${index + 1}:`, imageUrl);
+
+                        // Thêm promise load hình ảnh vào danh sách
+                        imageLoadPromises.push(
+                            new Promise((resolve) => {
+                                imageHandler.updateImageInContainer(container, imageUrl);
+                                setTimeout(resolve, 50);
+                            })
+                        );
+                    } else {
+                        console.log(`No image found for row ${index + 1}`);
+                        if (container) {
+                            container.innerHTML = '<div class="no-image">No Image</div>';
+                        }
+                    }
+                }
+
+                // Phần tính tổng tiền giữ nguyên...
+                const baoGia = state.orderData.header;
+                const tongTienHang = parseFloat(baoGia['Tổng tiền hàng'] || 0);
+                const tienUuDai = parseFloat(baoGia['Tiền ưu đãi'] || 0);
+                const thanhTienFromDB = parseFloat(baoGia['Thành tiền'] || 0);
+                const vatRate = parseFloat(baoGia['VAT'] || 0);
+                const tienVAT = parseFloat(baoGia['Tiền VAT'] || 0);
+                const tongTienCuoi = thanhTienFromDB + tienVAT;
+                const vatPercent = `${Math.round(vatRate * 100)}%`;
+
+                // Format các số
+                const tongTienHangDisplay = formatNumber(tongTienHang);
+                const tienUuDaiDisplay = formatNumber(tienUuDai);
+                const thanhTienDisplay = formatNumber(thanhTienFromDB);
+                const tienVATDisplay = formatNumber(tienVAT);
+                const tongTienCuoiDisplay = formatNumber(tongTienCuoi);
+
+                // Add subtotal row
+                const subtotalRow = document.createElement('tr');
+                subtotalRow.className = 'total-row';
+                subtotalRow.innerHTML = `
+            <td colspan="5" style="padding: 6px; text-align: center; font-weight: bold;">Tổng tiền hàng</td>
+            <td style="padding: 6px; text-align: right; font-weight: bold;">${tongTienHangDisplay} VNĐ</td>
+            <td colspan="2"></td>
+        `;
+                tbody.appendChild(subtotalRow);
+
+                // Add discount row if applicable
+                if (tienUuDai > 0) {
+                    const discountRow = document.createElement('tr');
+                    discountRow.className = 'total-row';
+                    discountRow.innerHTML = `
+                <td colspan="5" style="padding: 6px; text-align: center; font-weight: bold;">Tiền ưu đãi</td>
+                <td style="padding: 6px; text-align: right; font-weight: bold;">-${tienUuDaiDisplay} VNĐ</td>
+                <td colspan="2"></td>
+            `;
+                    tbody.appendChild(discountRow);
+                }
+
+                // Add total after discount row
+                const totalRow = document.createElement('tr');
+                totalRow.className = 'total-row';
+                totalRow.innerHTML = `
+            <td colspan="5" style="padding: 6px; text-align: center; font-weight: bold;">Thành tiền</td>
+            <td style="padding: 6px; text-align: right; font-weight: bold;">${thanhTienDisplay} VNĐ</td>
+            <td colspan="2"></td>
+        `;
+                tbody.appendChild(totalRow);
+
+                // Add VAT row
+                const vatRow = document.createElement('tr');
+                vatRow.className = 'total-row';
+                vatRow.innerHTML = `
+            <td colspan="5" style="padding: 6px; text-align: center; font-weight: bold;">VAT ${vatPercent}</td>
+            <td style="padding: 6px; text-align: right; font-weight: bold;">${tienVATDisplay} VNĐ</td>
+            <td colspan="2"></td>
+        `;
+                tbody.appendChild(vatRow);
+
+                // Add grand total row
+                const grandTotalRow = document.createElement('tr');
+                grandTotalRow.className = 'total-row';
+                grandTotalRow.innerHTML = `
+            <td colspan="5" style="padding: 6px; text-align: center; font-weight: bold;">TỔNG TIỀN THANH TOÁN</td>
+            <td style="padding: 6px; text-align: right; font-weight: bold;">${tongTienCuoiDisplay} VNĐ</td>
+            <td colspan="2"></td>
+        `;
+                tbody.appendChild(grandTotalRow);
+
+                // Add notes row
+                const notesRow = document.createElement('tr');
+                notesRow.innerHTML = `
+            <td colspan="8" style="padding: 6px; text-align: left; font-style: italic;">
+                <strong>Viết bằng chữ: ${numberToWords(tongTienCuoi)}</strong>
+            </td>
+        `;
+                tbody.appendChild(notesRow);
+
+                // Đợi tất cả hình ảnh bắt đầu load
+                await Promise.all(imageLoadPromises);
+                console.log('All images started loading');
+
+            } catch (error) {
+                console.error('Error in populateProductTable:', error);
+                throw error;
+            }
+        }
+
+        // Show Error
+        function showError(message) {
+            const tbody = document.getElementById('productTableBody');
+            tbody.innerHTML = `<tr><td colspan="8" class="error">❌ Lỗi: ${message}</td></tr>`;
+
+            const fields = ['soPhieu', 'tenKhachHang', 'ngayTao', 'diaChi', 'nhanVienPhuTrach', 'hieuLucBatDau', 'hieuLucKetThuc', 'trangThai', 'nguoiLapKy', 'ghichubaogiagia'];
+            fields.forEach(field => {
+                const element = document.getElementById(field);
+                if (element) element.textContent = 'Lỗi tải dữ liệu';
+            });
+        }
+
+        // Get URL Parameter
+        function getUrlParameter(name) {
+            const urlParams = new URLSearchParams(window.location.search);
+            return urlParams.get(name);
+        }
+
+        // Keyboard shortcuts
+        document.addEventListener('keydown', function (e) {
+            // Ctrl+P for print
+            if (e.ctrlKey && e.key === 'p') {
+                e.preventDefault();
+                printDocument();
+            }
+        });
+
+        // Print event listeners
+        window.addEventListener('beforeprint', function () {
+            console.log('Before print event triggered');
+        });
+
+        window.addEventListener('afterprint', function () {
+            console.log('After print event triggered');
+        });
+
+        // Initialize - Modal and Document Ready
+        document.addEventListener('DOMContentLoaded', function () {
+            // Close modal when clicking X
+            const closeBtn = document.querySelector('.close');
+            if (closeBtn) {
+                closeBtn.addEventListener('click', function () {
+                    document.getElementById('imageModal').style.display = 'none';
+                });
+            }
+
+            // Close modal when clicking outside image
+            const modal = document.getElementById('imageModal');
+            if (modal) {
+                modal.addEventListener('click', function (e) {
+                    if (e.target === modal) {
+                        modal.style.display = 'none';
+                    }
+                });
+            }
+
+            // Initialize quote data loading
+            initializeQuoteData();
+        });
+
+        // Initialize Quote Data
+        async function initializeQuoteData() {
+            try {
+                // Có thể sử dụng cả quoteId hoặc id_baogia
+                const quoteId = getUrlParameter('quoteId') || getUrlParameter('id_baogia');
+
+                if (!quoteId) {
+                    throw new Error('Vui lòng cung cấp quoteId hoặc id_baogia trong URL (ví dụ: ?quoteId=BG001 hoặc ?id_baogia=BG001)');
+                }
+
+                const quoteData = await fetchQuoteData(quoteId);
+                populateQuoteHeader(quoteData.header);
+                await populateProductTable(quoteData.details);
+
+                // Enable print control after data is loaded
+                document.getElementById('printBtn').disabled = false;
+
+            } catch (error) {
+                console.error('Error initializing quote data:', error);
+                showError(error.message);
+
+                // Disable print control if data loading fails
+                document.getElementById('printBtn').disabled = true;
+            }
+        }
+
+        // Export functions for external use
+        window.PrintManager = PrintManager;
+        window.printDocument = printDocument;
+
+        document.addEventListener('contextmenu', function (e) {
+            e.preventDefault();
+        }, false);
+
+        document.onkeydown = function (e) {
+            if (e.keyCode == 123) {
+                return false;
+            }
+            if (e.ctrlKey && e.shiftKey && e.keyCode == 'I'.charCodeAt(0)) {
+                return false;
+            }
+            if (e.ctrlKey && e.shiftKey && e.keyCode == 'J'.charCodeAt(0)) {
+                return false;
+            }
+            if (e.ctrlKey && e.keyCode == 'U'.charCodeAt(0)) {
+                return false;
+            }
+        };
+    </script>
+</body>
+
+</html>
