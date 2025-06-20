@@ -348,7 +348,7 @@
                         </div>
                     </div>
                     <div class="bg-white border rounded-lg p-4">
-                        <h4 class="text-lg font-semibold mb-4">Xu hướng lỗi theo thời gian</h4>
+                        <h4 class="text-lg font-semibold mb-4">Top mã lỗi phát sinh</h4>
                         <div class="h-80">
                             <canvas id="chartLoiLine"></canvas>
                         </div>
@@ -365,7 +365,7 @@
                                     <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">STT</th>
                                     <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Mã lỗi
                                     </th>
-                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Số lần
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Số lỗi
                                     </th>
                                     <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Vị trí
                                         phát sinh</th>
@@ -1123,7 +1123,7 @@
                 chayThu: [],
                 giaCong: [],
                 gaLap: [],
-                tamDung: [], // Sẽ tính từ thời gian chờ/dừng
+                tamDung: [],
                 tableData: [],
                 summary: {
                     totalTime: 0,
@@ -1133,73 +1133,152 @@
                 }
             };
 
+            // DEBUG: Kiểm tra dữ liệu đầu vào
+            console.log('Processing 3D Data:', data);
+            console.log('Found machines:', machines);
+
             machines.forEach(machine => {
                 const machineData = data.filter(item => item.so_may === machine);
 
-                let totalTime = 0;
+                console.log(`Processing machine ${machine}:`, machineData);
+
                 let chuanBiTime = 0;
                 let chayThuTime = 0;
                 let giaCongTime = 0;
                 let gaLapTime = 0;
                 let tamDungTime = 0;
 
-                // Tính thời gian từ các cột trong bảng trien_khai_3d_laze_dt
+                // Tính tổng thời gian từ dữ liệu
                 machineData.forEach(item => {
+                    // Validate và parse dữ liệu
                     const cb = parseFloat(item.thoi_gian_chuan_bi || 0);
                     const ct = parseFloat(item.thoi_gian_chay_thu || 0);
                     const gc = parseFloat(item.thoi_gian_gia_cong || 0);
                     const gl = parseFloat(item.tong_thoi_gian_ga_lap || 0);
+                    const td = parseFloat(item.thoi_gian_tam_dung || 0);
 
-                    // Tính thời gian dừng = tổng thời gian - (chuẩn bị + chạy thử + gia công + gá lắp)
-                    const tongThoiGian = parseFloat(item.tong_thoi_gian || 0);
-                    const td = Math.max(0, tongThoiGian - (cb + ct + gc + gl));
+                    // Debug từng record
+                    console.log(`Item data:`, {
+                        machine: item.so_may,
+                        chuanBi: cb,
+                        chayThu: ct,
+                        giaCong: gc,
+                        gaLap: gl,
+                        tamDung: td
+                    });
 
                     chuanBiTime += cb;
                     chayThuTime += ct;
                     giaCongTime += gc;
                     gaLapTime += gl;
                     tamDungTime += td;
-                    totalTime += tongThoiGian;
                 });
 
-                // Convert to percentages
-                if (totalTime > 0) {
-                    processedData.chuanBi.push(Math.round((chuanBiTime / totalTime) * 100));
-                    processedData.chayThu.push(Math.round((chayThuTime / totalTime) * 100));
-                    processedData.giaCong.push(Math.round((giaCongTime / totalTime) * 100));
-                    processedData.gaLap.push(Math.round((gaLapTime / totalTime) * 100));
-                    processedData.tamDung.push(Math.round((tamDungTime / totalTime) * 100));
+                // TÍNH TỔNG THỜI GIAN THỰC TẾ (từ các thành phần)
+                const actualTotalTime = chuanBiTime + chayThuTime + giaCongTime + gaLapTime + tamDungTime;
+
+                console.log(`Machine ${machine} totals:`, {
+                    chuanBi: chuanBiTime,
+                    chayThu: chayThuTime,
+                    giaCong: giaCongTime,
+                    gaLap: gaLapTime,
+                    tamDung: tamDungTime,
+                    total: actualTotalTime
+                });
+
+                // TÍNH % DựA TRÊN TỔNG THỰC TẾ
+                if (actualTotalTime > 0) {
+                    const chuanBiPercent = Math.round((chuanBiTime / actualTotalTime) * 100);
+                    const chayThuPercent = Math.round((chayThuTime / actualTotalTime) * 100);
+                    const giaCongPercent = Math.round((giaCongTime / actualTotalTime) * 100);
+                    const gaLapPercent = Math.round((gaLapTime / actualTotalTime) * 100);
+                    const tamDungPercent = Math.round((tamDungTime / actualTotalTime) * 100);
+
+                    processedData.chuanBi.push(chuanBiPercent);
+                    processedData.chayThu.push(chayThuPercent);
+                    processedData.giaCong.push(giaCongPercent);
+                    processedData.gaLap.push(gaLapPercent);
+                    processedData.tamDung.push(tamDungPercent);
+
+                    // THÊM VÀO TABLE DATA
+                    processedData.tableData.push({
+                        machine: machine,
+                        shift: 'Tất cả', // Sẽ được cập nhật dựa trên filter
+                        chuanBi: chuanBiPercent,
+                        chayThu: chayThuPercent,
+                        giaCong: giaCongPercent,
+                        gaLap: gaLapPercent,
+                        tamDung: tamDungPercent,
+                        // Thêm thời gian thực để debug
+                        actualTimes: {
+                            chuanBi: chuanBiTime,
+                            chayThu: chayThuTime,
+                            giaCong: giaCongTime,
+                            gaLap: gaLapTime,
+                            tamDung: tamDungTime,
+                            total: actualTotalTime
+                        }
+                    });
                 } else {
+                    // Nếu không có dữ liệu thời gian
                     processedData.chuanBi.push(0);
                     processedData.chayThu.push(0);
                     processedData.giaCong.push(0);
                     processedData.gaLap.push(0);
                     processedData.tamDung.push(0);
+
+                    // Vẫn thêm vào table với giá trị 0
+                    processedData.tableData.push({
+                        machine: machine,
+                        shift: 'Tất cả',
+                        chuanBi: 0,
+                        chayThu: 0,
+                        giaCong: 0,
+                        gaLap: 0,
+                        tamDung: 0,
+                        actualTimes: {
+                            chuanBi: 0,
+                            chayThu: 0,
+                            giaCong: 0,
+                            gaLap: 0,
+                            tamDung: 0,
+                            total: 0
+                        }
+                    });
                 }
 
-                // Add to table data
-                processedData.tableData.push({
-                    machine: machine,
-                    shift: 'Tất cả',
-                    chuanBi: totalTime > 0 ? Math.round((chuanBiTime / totalTime) * 100) : 0,
-                    chayThu: totalTime > 0 ? Math.round((chayThuTime / totalTime) * 100) : 0,
-                    giaCong: totalTime > 0 ? Math.round((giaCongTime / totalTime) * 100) : 0,
-                    gaLap: totalTime > 0 ? Math.round((gaLapTime / totalTime) * 100) : 0,
-                    tamDung: totalTime > 0 ? Math.round((tamDungTime / totalTime) * 100) : 0
-                });
-
-                // Update summary
-                processedData.summary.totalTime += totalTime;
+                // CẬP NHẬT SUMMARY
+                processedData.summary.totalTime += actualTotalTime;
                 processedData.summary.workingTime += giaCongTime;
                 processedData.summary.downTime += tamDungTime;
             });
 
-            // Calculate efficiency
+            // Tính hiệu suất tổng thể
             if (processedData.summary.totalTime > 0) {
                 processedData.summary.efficiency = Math.round((processedData.summary.workingTime / processedData.summary.totalTime) * 100);
             }
 
             return processedData;
+        }
+
+        // Thêm kiểm tra dữ liệu
+        function validateTimeData(item) {
+            const times = [
+                parseFloat(item.thoi_gian_chuan_bi || 0),
+                parseFloat(item.thoi_gian_chay_thu || 0),
+                parseFloat(item.thoi_gian_gia_cong || 0),
+                parseFloat(item.tong_thoi_gian_ga_lap || 0),
+                parseFloat(item.thoi_gian_tam_dung || 0)
+            ];
+
+            // Cảnh báo nếu có giá trị bất thường
+            times.forEach((time, index) => {
+                if (time > 1440) { // > 24 giờ
+                    console.warn(`Thời gian bất thường: ${time} phút cho máy ${item.so_may}`);
+                }
+            });
+
+            return times;
         }
 
         function update3DSummary(data) {
@@ -1223,31 +1302,31 @@
                         {
                             label: 'Chuẩn bị',
                             data: data.chuanBi,
-                            backgroundColor: '#ef4444',
+                            backgroundColor: '#FFA500', // Màu vàng cam cho Chuẩn bị
                             borderWidth: 1
                         },
                         {
                             label: 'Chạy thử',
                             data: data.chayThu,
-                            backgroundColor: '#f97316',
+                            backgroundColor: '#3B82F6', // Màu xanh dương cho Chạy thử
                             borderWidth: 1
                         },
                         {
                             label: 'Gia công',
                             data: data.giaCong,
-                            backgroundColor: '#22c55e',
+                            backgroundColor: '#22C55E', // Màu xanh lá cho Gia công
                             borderWidth: 1
                         },
                         {
                             label: 'Gá lắp',
                             data: data.gaLap,
-                            backgroundColor: '#3b82f6',
+                            backgroundColor: '#9CA3AF', // Màu xám cho Gá lắp
                             borderWidth: 1
                         },
                         {
                             label: 'Tạm dừng',
                             data: data.tamDung,
-                            backgroundColor: '#6b7280',
+                            backgroundColor: '#FF4500', // Màu cam đỏ cho Tạm dừng (Dừng)
                             borderWidth: 1
                         }
                     ]
@@ -1798,18 +1877,18 @@
             const processedData = {
                 pieLabels: predefinedPositions,
                 pieData: [],
-                lineLabels: [],
-                lineData: [],
+                barLabels: [],
+                barData: [],
                 tableData: [],
                 summary: {
-                    totalErrors: data.length,
+                    totalErrors: 0,
                     todayErrors: 0,
                     topPosition: '',
                     avgErrorRate: 0
                 }
             };
 
-            // Đếm lỗi theo từng vị trí (tách chuỗi nếu có nhiều vị trí)
+            // Đếm lỗi theo từng vị trí - CHIA ĐỀU CHO CÁC VỊ TRÍ
             const positionCounts = {
                 'Phôi': 0,
                 'PKY': 0,
@@ -1817,22 +1896,49 @@
                 'PKT': 0
             };
 
+            // Tính tổng số lỗi thực tế từ cột sl_loi
+            let totalActualErrors = 0;
+
             data.forEach(item => {
+                const errorCount = parseInt(item.sl_loi || 0);
+                totalActualErrors += errorCount;
+
                 if (item.noi_phat_sinh_loi) {
-                    const positions = item.noi_phat_sinh_loi.toString().split(',').map(p => p.trim());
-                    positions.forEach(pos => {
-                        // Kiểm tra từng vị trí có chứa trong chuỗi không
-                        if (pos.includes('Phôi')) positionCounts['Phôi']++;
-                        else if (pos.includes('PKY')) positionCounts['PKY']++;
-                        else if (pos.includes('PSX')) positionCounts['PSX']++;
-                        else if (pos.includes('PKT')) positionCounts['PKT']++;
+                    const positionString = item.noi_phat_sinh_loi.toString();
+
+                    // Tìm tất cả vị trí hợp lệ trong bản ghi này
+                    const validPositions = [];
+
+                    predefinedPositions.forEach(pos => {
+                        if (positionString.includes(pos)) {
+                            validPositions.push(pos);
+                        }
                     });
+
+                    // CHIA ĐỀU SỐ LƯỢNG LỖI CHO CÁC VỊ TRÍ HỢP LỆ
+                    if (validPositions.length > 0) {
+                        const errorPerPosition = errorCount / validPositions.length;
+
+                        validPositions.forEach(position => {
+                            positionCounts[position] += errorPerPosition;
+                        });
+
+                        // Debug log để kiểm tra
+                        console.log(`Mã lỗi: ${item.ma_loi}, SL: ${errorCount}, Vị trí: [${validPositions.join(', ')}], Chia mỗi vị trí: ${errorPerPosition}`);
+                    }
                 }
             });
 
-            // Chuẩn bị dữ liệu cho pie chart
+            // Debug tổng kết
+            console.log('Tổng kết phân bổ lỗi theo vị trí:', positionCounts);
+            console.log('Tổng lỗi ban đầu:', totalActualErrors);
+            console.log('Tổng sau khi chia:', Object.values(positionCounts).reduce((a, b) => a + b, 0));
+
+            processedData.summary.totalErrors = totalActualErrors;
+
+            // Chuẩn bị dữ liệu cho pie chart - Làm tròn số liệu
             predefinedPositions.forEach(pos => {
-                processedData.pieData.push(positionCounts[pos]);
+                processedData.pieData.push(Math.round(positionCounts[pos]));
             });
 
             // Tìm vị trí có nhiều lỗi nhất
@@ -1843,29 +1949,33 @@
             const today = new Date().toISOString().split('T')[0];
             processedData.summary.todayErrors = data.filter(item =>
                 item.ngay_bao_loi && item.ngay_bao_loi.toString().includes(today)
-            ).length;
+            ).reduce((sum, item) => sum + parseInt(item.sl_loi || 0), 0);
 
-            // Nhóm lỗi theo ngày cho line chart
-            const dateGroups = {};
+            // Nhóm lỗi theo mã lỗi cho bar chart
+            const errorCodeGroups = {};
             data.forEach(item => {
-                const date = item.ngay_bao_loi ? item.ngay_bao_loi.toString().split('T')[0] : '';
-                if (date) {
-                    dateGroups[date] = (dateGroups[date] || 0) + 1;
+                const errorCode = item.ma_loi || 'Không xác định';
+                const errorCount = parseInt(item.sl_loi || 0);
+
+                if (errorCode && errorCode !== 'Không xác định') {
+                    errorCodeGroups[errorCode] = (errorCodeGroups[errorCode] || 0) + errorCount;
                 }
             });
 
-            // Sắp xếp ngày và chuẩn bị dữ liệu line chart
-            const sortedDates = Object.keys(dateGroups).sort();
-            processedData.lineLabels = sortedDates.map(date => {
-                const d = new Date(date);
-                return d.toLocaleDateString('vi-VN');
-            });
-            processedData.lineData = sortedDates.map(date => dateGroups[date]);
+            // Sắp xếp theo số lượng lỗi giảm dần
+            const sortedErrorCodes = Object.entries(errorCodeGroups)
+                .sort((a, b) => b[1] - a[1])
+                .slice(0, 10);
+
+            processedData.barLabels = sortedErrorCodes.map(([code, count]) => code);
+            processedData.barData = sortedErrorCodes.map(([code, count]) => count);
 
             // Đếm lỗi theo mã lỗi cho bảng
             const errorCounts = {};
             data.forEach(item => {
                 const errorCode = item.ma_loi || 'Không xác định';
+                const errorCount = parseInt(item.sl_loi || 0);
+
                 if (!errorCounts[errorCode]) {
                     errorCounts[errorCode] = {
                         count: 0,
@@ -1873,9 +1983,8 @@
                         handlers: new Set()
                     };
                 }
-                errorCounts[errorCode].count++;
+                errorCounts[errorCode].count += errorCount;
 
-                // Xử lý vị trí phát sinh (tách chuỗi nếu có nhiều vị trí)
                 if (item.noi_phat_sinh_loi) {
                     const positions = item.noi_phat_sinh_loi.toString().split(',').map(p => p.trim());
                     positions.forEach(pos => {
@@ -1883,7 +1992,6 @@
                     });
                 }
 
-                // Xử lý nơi xử lý lỗi
                 if (item.noi_xu_ly_loi) {
                     const handlers = item.noi_xu_ly_loi.toString().split(',').map(h => h.trim());
                     handlers.forEach(handler => {
@@ -1892,14 +2000,14 @@
                 }
             });
 
-            // Chuyển đổi thành dữ liệu bảng và sắp xếp theo số lượng
+            // Sắp xếp bảng theo số lượng lỗi giảm dần
             processedData.tableData = Object.entries(errorCounts)
                 .map(([code, info]) => ({
                     errorCode: code,
                     count: info.count,
                     positions: Array.from(info.positions).join(', '),
                     handlers: Array.from(info.handlers).join(', '),
-                    percentage: data.length > 0 ? Math.round((info.count / data.length) * 100) : 0
+                    percentage: totalActualErrors > 0 ? Math.round((info.count / totalActualErrors) * 100) : 0
                 }))
                 .sort((a, b) => b.count - a.count)
                 .slice(0, 10)
@@ -1909,10 +2017,91 @@
                 }));
 
             // Tính tỷ lệ lỗi trung bình
-            processedData.summary.avgErrorRate = data.length > 0 ?
-                Math.round((data.length / Math.max(sortedDates.length, 1)) * 10) / 10 : 0;
+            const uniqueDates = [...new Set(data.map(item =>
+                item.ngay_bao_loi ? item.ngay_bao_loi.toString().split('T')[0] : ''
+            ).filter(Boolean))];
+
+            processedData.summary.avgErrorRate = uniqueDates.length > 0 ?
+                Math.round((totalActualErrors / uniqueDates.length) * 10) / 10 : 0;
 
             return processedData;
+        }
+
+        function updateErrorBarChart(data) {
+            if (charts.chartLoiBar) {  // Đổi tên từ chartLoiLine thành chartLoiBar
+                charts.chartLoiBar.destroy();
+            }
+
+            const ctx = document.getElementById('chartLoiLine').getContext('2d'); // Vẫn dùng element cũ
+            charts.chartLoiBar = new Chart(ctx, {
+                type: 'bar', // Đổi từ 'line' thành 'bar'
+                data: {
+                    labels: data.barLabels,
+                    datasets: [{
+                        label: 'Số lượng lỗi',
+                        data: data.barData,
+                        backgroundColor: [
+                            '#ef4444', '#f97316', '#eab308', '#22c55e', '#06b6d4',
+                            '#3b82f6', '#8b5cf6', '#ec4899', '#f59e0b', '#10b981'
+                        ],
+                        borderColor: '#ffffff',
+                        borderWidth: 2
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                stepSize: 1,
+                                callback: function (value) {
+                                    return value + ' lỗi';
+                                }
+                            }
+                        },
+                        x: {
+                            ticks: {
+                                maxRotation: 45,
+                                minRotation: 0
+                            }
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            display: false // Ẩn legend vì chỉ có 1 dataset
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function (context) {
+                                    const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                                    const percentage = total > 0 ? Math.round((context.raw / total) * 100) : 0;
+                                    return context.label + ': ' + context.raw + ' lỗi (' + percentage + '%)';
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        // Cập nhật hàm loadErrorReport để gọi hàm mới
+        function loadErrorReport() {
+            const filters = {
+                dateFrom: document.getElementById('dateFromLoi').value,
+                dateTo: document.getElementById('dateToLoi').value,
+                dateField: 'ngay_bao_loi',
+                position: document.getElementById('positionLoi').value
+            };
+
+            const filteredData = filterData(globalData.dataError, filters);
+            const processedData = processErrorData(filteredData);
+
+            updateErrorSummary(processedData);
+            updateErrorPieChart(processedData);
+            updateErrorBarChart(processedData); // Đổi từ updateErrorLineChart thành updateErrorBarChart
+            updateErrorTable(processedData);
         }
 
         function updateErrorSummary(data) {
@@ -1960,10 +2149,17 @@
                         },
                         tooltip: {
                             callbacks: {
+                                title: function (context) {
+                                    return 'Vị trí: ' + context[0].label;
+                                },
                                 label: function (context) {
                                     const total = context.dataset.data.reduce((a, b) => a + b, 0);
                                     const percentage = total > 0 ? Math.round((context.raw / total) * 100) : 0;
-                                    return context.label + ': ' + context.raw + ' lỗi (' + percentage + '%)';
+                                    return [
+                                        'Số lỗi phân bổ: ' + context.raw,
+                                        'Tỷ lệ: ' + percentage + '%',
+                                        '(Đã chia đều cho các vị trí chung)'
+                                    ];
                                 }
                             }
                         }
@@ -2268,19 +2464,29 @@
                 dailyData[date] += parseInt(item.sl_nhan || 0);
             });
 
-            const sortedDates = Object.keys(dailyData).sort();
+            // SẮP XẾP THEO NGÀY MỚI NHẤT LEN ĐẦU
+            const sortedDates = Object.keys(dailyData).sort((a, b) => new Date(b) - new Date(a));
+
             processedData.tableData = sortedDates.map((date, index) => {
-                const prevDate = index > 0 ? sortedDates[index - 1] : null;
-                const prevQuantity = prevDate ? dailyData[prevDate] : 0;
                 const quantity = dailyData[date];
-                const change = quantity - prevQuantity;
-                const changePercent = prevQuantity > 0 ? Math.round((change / prevQuantity) * 100) : 0;
+                let change = 0;
+                let changePercent = 0;
+                let prevQuantity = 0;
+
+                // TÌM NGÀY LIỀN KỀ TRƯỚC ĐÓ TRONG DANH SÁCH (không phải theo lịch)
+                if (index < sortedDates.length - 1) {
+                    const prevDate = sortedDates[index + 1]; // Ngày trước đó trong danh sách đã sắp xếp
+                    prevQuantity = dailyData[prevDate] || 0;
+                    change = quantity - prevQuantity;
+                    changePercent = prevQuantity > 0 ? Math.round((change / prevQuantity) * 100) : 0;
+                }
 
                 return {
                     date: new Date(date).toLocaleDateString('vi-VN'),
                     quantity: quantity,
                     change: change,
-                    changePercent: changePercent
+                    changePercent: changePercent,
+                    sortDate: date
                 };
             });
 
@@ -2470,19 +2676,29 @@
                 dailyData[date] += parseInt(item.sll || 0);
             });
 
-            const sortedDates = Object.keys(dailyData).sort();
+            // SẮP XẾP THEO NGÀY MỚI NHẤT LEN ĐẦU
+            const sortedDates = Object.keys(dailyData).sort((a, b) => new Date(b) - new Date(a));
+
             processedData.tableData = sortedDates.map((date, index) => {
-                const prevDate = index > 0 ? sortedDates[index - 1] : null;
-                const prevQuantity = prevDate ? dailyData[prevDate] : 0;
                 const quantity = dailyData[date];
-                const change = quantity - prevQuantity;
-                const changePercent = prevQuantity > 0 ? Math.round((change / prevQuantity) * 100) : 0;
+                let change = 0;
+                let changePercent = 0;
+                let prevQuantity = 0;
+
+                // TÌM NGÀY LIỀN KỀ TRƯỚC ĐÓ TRONG DANH SÁCH (không phải theo lịch)
+                if (index < sortedDates.length - 1) {
+                    const prevDate = sortedDates[index + 1]; // Ngày trước đó trong danh sách đã sắp xếp
+                    prevQuantity = dailyData[prevDate] || 0;
+                    change = quantity - prevQuantity;
+                    changePercent = prevQuantity > 0 ? Math.round((change / prevQuantity) * 100) : 0;
+                }
 
                 return {
                     date: new Date(date).toLocaleDateString('vi-VN'),
                     quantity: quantity,
                     change: change,
-                    changePercent: changePercent
+                    changePercent: changePercent,
+                    sortDate: date
                 };
             });
 
@@ -2767,30 +2983,24 @@
             }
         });
 
-        document.addEventListener('contextmenu', function (e) {
-            e.preventDefault();
-        }, false);
+        // document.addEventListener('contextmenu', function (e) {
+        //     e.preventDefault();
+        // }, false);
 
-        document.onkeydown = function (e) {
-            if (e.keyCode == 123) {
-                return false;
-            }
-            if (e.ctrlKey && e.shiftKey && e.keyCode == 'I'.charCodeAt(0)) {
-                return false;
-            }
-            if (e.ctrlKey && e.shiftKey && e.keyCode == 'J'.charCodeAt(0)) {
-                return false;
-            }
-            if (e.ctrlKey && e.keyCode == 'U'.charCodeAt(0)) {
-                return false;
-            }
-        };
-
-        // Auto-refresh every 10 minutes (less frequent since we load all data)
-        setInterval(function () {
-            refreshAllData();
-            showToast('Dữ liệu đã được tự động làm mới', 'warning');
-        }, 600000); // 10 minutes
+        // document.onkeydown = function (e) {
+        //     if (e.keyCode == 123) {
+        //         return false;
+        //     }
+        //     if (e.ctrlKey && e.shiftKey && e.keyCode == 'I'.charCodeAt(0)) {
+        //         return false;
+        //     }
+        //     if (e.ctrlKey && e.shiftKey && e.keyCode == 'J'.charCodeAt(0)) {
+        //         return false;
+        //     }
+        //     if (e.ctrlKey && e.keyCode == 'U'.charCodeAt(0)) {
+        //         return false;
+        //     }
+        // };
 
     </script>
 
