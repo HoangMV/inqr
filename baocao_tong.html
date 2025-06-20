@@ -13,9 +13,19 @@
 <body class="bg-gray-50 min-h-screen">
     <!-- Header -->
     <header class="bg-gradient-to-r from-blue-600 to-blue-800 text-white shadow-lg">
-        <div class="container mx-auto px-4 py-6">
-            <h1 class="text-3xl font-bold text-center">Báo Cáo Sản Xuất</h1>
-            <p class="text-center text-blue-100 mt-2">Dashboard Theo Dõi Hoạt Động Sản Xuất</p>
+        <div class="container mx-auto px-4 py-2">
+            <div class="flex items-center justify-center space-x-4">
+                <!-- Logo -->
+                <div class="flex-shrink-0">
+                    <img src="https://hoangmv.github.io/inqr/AMJ.jpg" alt="August Mechanical JSC"
+                        class="h-12 w-auto md:h-16 object-contain">
+                </div>
+                <!-- Title and subtitle -->
+                <div class="text-center">
+                    <h1 class="text-2xl md:text-3xl font-bold">Báo Cáo Sản Xuất</h1>
+                    <!-- <p class="text-blue-100 mt-1 md:mt-2 text-sm md:text-base">Dashboard Theo Dõi Hoạt Động Sản Xuất</p> -->
+                </div>
+            </div>
         </div>
     </header>
 
@@ -153,6 +163,8 @@
                                         (%)</th>
                                     <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Tạm dừng
                                         (%)</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Ghi chú
+                                    </th>
                                 </tr>
                             </thead>
                             <tbody id="table3d" class="divide-y divide-gray-200">
@@ -174,10 +186,10 @@
                     </h2>
                 </div>
 
-                <!-- Filters -->
+                <!-- Trong phần Filters của báo cáo Sản Lượng Nhóm -->
                 <div class="bg-gray-50 rounded-lg p-4 mb-6">
                     <h3 class="text-lg font-semibold mb-4">Bộ lọc dữ liệu</h3>
-                    <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                    <div class="grid grid-cols-1 md:grid-cols-5 gap-4"> <!-- Đổi từ grid-cols-4 thành grid-cols-5 -->
                         <div>
                             <label class="block text-sm font-medium text-gray-700 mb-2">Từ ngày</label>
                             <input type="date" id="dateFromSL" onchange="applyFilterSL()"
@@ -200,6 +212,14 @@
                             <select id="teamSL" onchange="applyFilterSL()"
                                 class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">
                                 <option value="">Tất cả tổ</option>
+                            </select>
+                        </div>
+                        <!-- THÊM DROPDOWN CA LÀM VIỆC MỚI -->
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Ca Làm Việc</label>
+                            <select id="shiftSL" onchange="applyFilterSL()"
+                                class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">
+                                <option value="">Tất cả ca</option>
                             </select>
                         </div>
                     </div>
@@ -248,7 +268,7 @@
                     <h4 class="text-lg font-semibold mb-4">Chi tiết dữ liệu sản lượng</h4>
                     <div class="overflow-x-auto">
                         <table class="min-w-full bg-white border border-gray-200">
-                            <!-- Tìm phần table header trong báo cáo sản lượng và thay thế -->
+                            <!-- Trong phần Data Table của báo cáo Sản Lượng Nhóm -->
                             <thead class="bg-gray-50">
                                 <tr>
                                     <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Ngày
@@ -256,6 +276,8 @@
                                     <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Nhóm
                                     </th>
                                     <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Tổ</th>
+                                    <!-- THÊM DÒNG NÀY -->
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Ca</th>
                                     <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Mã CV
                                     </th>
                                     <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">SL thực
@@ -268,6 +290,8 @@
                                         gian lý thuyết</th>
                                     <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Hiệu
                                         suất</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Ghi chú
+                                    </th>
                                 </tr>
                             </thead>
                             <tbody id="tableSL" class="divide-y divide-gray-200">
@@ -395,9 +419,10 @@
                 </div>
 
                 <!-- Filters -->
+                <!-- Trong phần Filters của báo cáo Đánh Bóng -->
                 <div class="bg-gray-50 rounded-lg p-4 mb-6">
                     <h3 class="text-lg font-semibold mb-4">Bộ lọc dữ liệu</h3>
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4"> <!-- Đổi từ grid-cols-2 thành grid-cols-3 -->
                         <div>
                             <label class="block text-sm font-medium text-gray-700 mb-2">Từ ngày</label>
                             <input type="date" id="dateFromDB" onchange="applyFilterDB()"
@@ -407,6 +432,14 @@
                             <label class="block text-sm font-medium text-gray-700 mb-2">Đến ngày</label>
                             <input type="date" id="dateToDB" onchange="applyFilterDB()"
                                 class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">
+                        </div>
+                        <!-- THÊM DROPDOWN CA LÀM VIỆC MỚI -->
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Ca Làm Việc</label>
+                            <select id="shiftDB" onchange="applyFilterDB()"
+                                class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">
+                                <option value="">Tất cả ca</option>
+                            </select>
                         </div>
                     </div>
                     <div class="mt-4">
@@ -446,6 +479,7 @@
                     <h4 class="text-lg font-semibold mb-4">Chi tiết hoàn thiện đánh bóng</h4>
                     <div class="overflow-x-auto">
                         <table class="min-w-full bg-white border border-gray-200">
+                            <!-- Trong phần Data Table của báo cáo Đánh Bóng -->
                             <thead class="bg-gray-50">
                                 <tr>
                                     <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Ngày
@@ -454,12 +488,18 @@
                                     </th>
                                     <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Tên chi
                                         tiết</th>
+                                    <!-- THÊM DÒNG NÀY -->
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Ca</th>
                                     <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">SL thực
                                         tế</th>
                                     <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Thời
                                         gian thực tế</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Thời
+                                        gian lý thuyết</th>
                                     <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Hiệu
                                         suất (%)</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Ghi chú
+                                    </th>
                                 </tr>
                             </thead>
                             <tbody id="tableDB" class="divide-y divide-gray-200">
@@ -853,55 +893,86 @@
             const select = document.getElementById('shift3d');
             if (!select) return;
 
-            select.innerHTML = '<option value="">Tất cả ca</option>';
+            // Lấy các giá trị ca_lam_viec từ dữ liệu thực tế
+            const shifts = [...new Set(globalData.data3D
+                .map(item => item.ca_lam_viec)
+                .filter(Boolean)
+                .map(shift => shift.toString().trim())
+            )].sort();
 
-            // Chỉ có 2 ca: Ca ngày và Ca đêm
-            const shifts = [
-                { value: 'day', label: 'Ca ngày (7h-19h)' },
-                { value: 'night', label: 'Ca đêm (19h-7h)' }
-            ];
+            select.innerHTML = '<option value="">Tất cả ca</option>';
 
             shifts.forEach(shift => {
                 const option = document.createElement('option');
-                option.value = shift.value;
-                option.textContent = shift.label;
+                option.value = shift;
+                option.textContent = shift;
                 select.appendChild(option);
             });
         }
 
-        // Hàm phân loại ca dựa trên thời gian
-        function getShiftFromDateTime(dateTimeString) {
-            if (!dateTimeString) return null;
+        // Thêm hàm populate ca làm việc cho Sản Lượng Nhóm
+        function populateProductionShiftDropdown() {
+            const select = document.getElementById('shiftSL');
+            if (!select) return;
 
-            try {
-                const date = new Date(dateTimeString);
-                const hour = date.getHours();
+            // Lấy các giá trị ca_lam_viec từ dữ liệu sản lượng
+            const shifts = [...new Set(globalData.dataProduction
+                .map(item => item.ca_lam_viec)
+                .filter(Boolean)
+                .map(shift => shift.toString().trim())
+            )].sort();
 
-                // Ca ngày: 7h-19h, Ca đêm: 19h-7h
-                if (hour >= 7 && hour < 19) {
-                    return 'day';
-                } else {
-                    return 'night';
-                }
-            } catch (error) {
-                console.error('Error parsing datetime:', error);
-                return null;
-            }
+            select.innerHTML = '<option value="">Tất cả ca</option>';
+
+            shifts.forEach(shift => {
+                const option = document.createElement('option');
+                option.value = shift;
+                option.textContent = shift;
+                select.appendChild(option);
+            });
+        }
+
+        // Thêm hàm populate ca làm việc cho Đánh Bóng
+        function populatePolishingShiftDropdown() {
+            const select = document.getElementById('shiftDB');
+            if (!select) return;
+
+            // Lấy các giá trị ca_lam_viec từ dữ liệu đánh bóng
+            const shifts = [...new Set(globalData.dataPolishing
+                .map(item => item.ca_lam_viec)
+                .filter(Boolean)
+                .map(shift => shift.toString().trim())
+            )].sort();
+
+            select.innerHTML = '<option value="">Tất cả ca</option>';
+
+            shifts.forEach(shift => {
+                const option = document.createElement('option');
+                option.value = shift;
+                option.textContent = shift;
+                select.appendChild(option);
+            });
         }
 
         // Populate all dropdowns with real data
         function populateAllDropdowns() {
-            // 3D Machine dropdowns - Sử dụng data3D thay vì data3DMain
+            // 3D Machine dropdowns - Sử dụng data3D
             const machines = [...new Set(globalData.data3D.map(item => item.so_may).filter(Boolean))];
             populateDropdown('machine3d', machines.sort(), 'Tất cả máy');
 
-            // Thêm dropdown ca làm việc mới
+            // Populate ca làm việc cho 3D từ dữ liệu thực
             populate3DShiftDropdown();
 
             // Production dropdowns - Sắp xếp nhóm theo thứ tự
             const groups = [...new Set(globalData.dataProduction.map(item => item.nhom).filter(Boolean))];
             populateDropdown('groupSL', groups.sort(), 'Tất cả nhóm');
             populateTeamDropdown(); // Sử dụng hàm riêng cho tổ
+
+            // Populate ca làm việc cho Sản Lượng
+            populateProductionShiftDropdown();
+
+            // THÊM DÒNG NÀY - Populate ca làm việc cho Đánh Bóng
+            populatePolishingShiftDropdown();
 
             // Error position dropdown
             populateErrorPositionDropdown();
@@ -1037,11 +1108,10 @@
                 for (const [field, value] of Object.entries(filters)) {
                     if (field.startsWith('date') || !value) continue;
 
-                    // Xử lý ca làm việc mới
+                    // Xử lý ca làm việc từ cột ca_lam_viec
                     if (field === 'ca_lam_viec' && value) {
-                        // Sử dụng thoi_gian_bat_dau để xác định ca
-                        const shift = getShiftFromDateTime(item.thoi_gian_bat_dau);
-                        if (shift !== value) {
+                        const itemShift = item.ca_lam_viec ? item.ca_lam_viec.toString().trim() : '';
+                        if (itemShift !== value) {
                             return false;
                         }
                     }
@@ -1100,7 +1170,7 @@
                 dateTo: document.getElementById('dateTo3d').value,
                 dateField: 'ngay_tao',
                 so_may: document.getElementById('machine3d').value,
-                ca_lam_viec: document.getElementById('shift3d').value
+                ca_lam_viec: document.getElementById('shift3d').value // Đổi thành ca_lam_viec
             };
 
             // Filter data từ bảng trien_khai_3d_laze_dt
@@ -1209,6 +1279,7 @@
                         giaCong: giaCongPercent,
                         gaLap: gaLapPercent,
                         tamDung: tamDungPercent,
+                        note: machineData.length > 0 ? (machineData[0].giai_trinh || '-') : '-', // Thêm ghi chú
                         // Thêm thời gian thực để debug
                         actualTimes: {
                             chuanBi: chuanBiTime,
@@ -1236,6 +1307,7 @@
                         giaCong: 0,
                         gaLap: 0,
                         tamDung: 0,
+                        note: '-', // Thêm ghi chú mặc định
                         actualTimes: {
                             chuanBi: 0,
                             chayThu: 0,
@@ -1375,31 +1447,25 @@
             const tbody = document.getElementById('table3d');
             tbody.innerHTML = '';
 
-            // Nhóm dữ liệu theo máy và ca
-            const groupedData = {};
-
-            // Lọc dữ liệu theo ca được chọn
+            // Lấy giá trị ca được chọn
             const selectedShift = document.getElementById('shift3d').value;
-            let filteredTableData = data.tableData;
 
-            if (selectedShift) {
-                filteredTableData = data.tableData.filter(row => {
-                    // Giả sử ta có thể truy cập dữ liệu gốc để kiểm tra ca
-                    return true; // Tạm thời hiển thị tất cả, logic này cần điều chỉnh dựa trên dữ liệu thực tế
-                });
-            }
-
-            filteredTableData.forEach(row => {
+            data.tableData.forEach(row => {
                 const tr = document.createElement('tr');
                 tr.className = 'hover:bg-gray-50';
 
-                // Hiển thị ca theo selection
+                // Hiển thị ca từ dữ liệu thực tế hoặc theo selection
                 let shiftDisplay = 'Tất cả';
-                if (selectedShift === 'day') {
-                    shiftDisplay = 'Ca ngày';
-                } else if (selectedShift === 'night') {
-                    shiftDisplay = 'Ca đêm';
+                if (selectedShift) {
+                    shiftDisplay = selectedShift;
+                } else {
+                    // Nếu không có filter, có thể hiển thị tất cả ca từ dữ liệu
+                    shiftDisplay = 'Tất cả ca';
                 }
+
+                // Xử lý ghi chú - giới hạn độ dài hiển thị
+                const noteDisplay = row.note && row.note !== '-' ?
+                    (row.note.length > 50 ? row.note.substring(0, 50) + '...' : row.note) : '-';
 
                 tr.innerHTML = `
            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">${row.machine}</td>
@@ -1409,6 +1475,7 @@
            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${row.giaCong}%</td>
            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${row.gaLap}%</td>
            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${row.tamDung}%</td>
+           <td class="px-6 py-4 text-sm text-gray-500 max-w-xs" title="${row.note}">${noteDisplay}</td>
        `;
                 tbody.appendChild(tr);
             });
@@ -1421,7 +1488,8 @@
                 dateTo: document.getElementById('dateToSL').value,
                 dateField: 'ngay_tao',
                 nhom: document.getElementById('groupSL').value,
-                to: document.getElementById('teamSL').value
+                to: document.getElementById('teamSL').value,
+                ca_lam_viec: document.getElementById('shiftSL').value // THÊM DÒNG NÀY
             };
 
             const filteredData = filterData(globalData.dataProduction, filters);
@@ -1436,10 +1504,19 @@
         function processProductionData(data) {
             const selectedGroup = document.getElementById('groupSL').value;
             const selectedTeam = document.getElementById('teamSL').value;
+            const selectedShift = document.getElementById('shiftSL').value; // THÊM MỚI
 
             let filteredData = data;
             if (selectedGroup) {
                 filteredData = filteredData.filter(item => item.nhom === selectedGroup);
+            }
+
+            // THÊM LOGIC LỌC CA LÀM VIỆC MỚI
+            if (selectedShift) {
+                filteredData = filteredData.filter(item => {
+                    const itemShift = item.ca_lam_viec ? item.ca_lam_viec.toString().trim() : '';
+                    return itemShift === selectedShift;
+                });
             }
 
             // Lọc theo tổ gom nhóm - SỬA LẠI CHÍNH XÁC
@@ -1581,12 +1658,14 @@
                     sortDate: sortDate, // Thêm field để sort
                     group: item.nhom || '-',
                     team: teamDisplay,
+                    shift: item.ca_lam_viec || '-', // THÊM CA LÀM VIỆC
                     maCV: item.ma_cv || '-',
                     production: production,
                     workers: workers,
                     actualTime: actualTime,
                     theoreticalTime: theoreticalTime,
-                    efficiency: efficiency
+                    efficiency: efficiency,
+                    note: item.giai_trinh || '-' // Thêm trường ghi chú
                 });
 
                 processedData.summary.totalProduction += production;
@@ -1632,8 +1711,35 @@
                     processedData.theoretical.push(group.theoreticalTime);
                     processedData.pieData.push(Math.round(group.production));
                 });
+            } else if (selectedShift) {
+                // THÊM MỚI: Khi có lọc ca - nhóm theo ca
+                const chartGroups = {};
+
+                finalData.forEach(item => {
+                    const shiftValue = item.ca_lam_viec || 'Không xác định';
+
+                    if (!chartGroups[shiftValue]) {
+                        chartGroups[shiftValue] = {
+                            label: shiftValue,
+                            actualTime: 0,
+                            theoreticalTime: 0,
+                            production: 0
+                        };
+                    }
+
+                    chartGroups[shiftValue].actualTime += parseFloat(item.Thoi_Gian_Thuc_Te || 0);
+                    chartGroups[shiftValue].theoreticalTime += parseFloat(item.hoan_thanh_dk || 0);
+                    chartGroups[shiftValue].production += parseInt(item.sl_thuc_te || 0);
+                });
+
+                Object.values(chartGroups).forEach(group => {
+                    processedData.labels.push(group.label);
+                    processedData.actual.push(group.actualTime);
+                    processedData.theoretical.push(group.theoreticalTime);
+                    processedData.pieData.push(Math.round(group.production));
+                });
             } else {
-                // Khi không lọc tổ - nhóm theo nhóm
+                // Khi không lọc tổ và ca - nhóm theo nhóm
                 const groups = [...new Set(finalData.map(item => item.nhom).filter(Boolean))];
 
                 groups.forEach(group => {
@@ -1837,16 +1943,25 @@
 
                 const workersClass = row.workers >= 5 ? 'text-blue-600 font-medium' : 'text-gray-600';
 
+                // Xử lý ghi chú - giới hạn độ dài hiển thị
+                const noteDisplay = row.note && row.note !== '-' ?
+                    (row.note.length > 50 ? row.note.substring(0, 50) + '...' : row.note) : '-';
+
+                // THÊM HIỂN THỊ CA LÀM VIỆC
+                const shiftDisplay = row.shift || '-';
+
                 tr.innerHTML = `
            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">${row.date}</td>
            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">${row.group}</td>
            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${row.team}</td>
+           <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${shiftDisplay}</td>
            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${row.maCV}</td>
            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${row.production.toLocaleString()}</td>
            <td class="px-6 py-4 whitespace-nowrap text-sm ${workersClass}">${row.workers} người</td>
            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${row.actualTime.toFixed(1)} phút</td>
            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${row.theoreticalTime.toFixed(1)} phút</td>
            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium ${efficiencyClass}">${row.efficiency}%</td>
+           <td class="px-6 py-4 text-sm text-gray-500 max-w-xs" title="${row.note}">${noteDisplay}</td>
        `;
                 tbody.appendChild(tr);
             });
@@ -1929,11 +2044,6 @@
                 }
             });
 
-            // Debug tổng kết
-            console.log('Tổng kết phân bổ lỗi theo vị trí:', positionCounts);
-            console.log('Tổng lỗi ban đầu:', totalActualErrors);
-            console.log('Tổng sau khi chia:', Object.values(positionCounts).reduce((a, b) => a + b, 0));
-
             processedData.summary.totalErrors = totalActualErrors;
 
             // Chuẩn bị dữ liệu cho pie chart - Làm tròn số liệu
@@ -1946,10 +2056,51 @@
             processedData.summary.topPosition = Object.keys(positionCounts).find(key => positionCounts[key] === maxErrors) || '-';
 
             // Đếm lỗi hôm nay
-            const today = new Date().toISOString().split('T')[0];
-            processedData.summary.todayErrors = data.filter(item =>
-                item.ngay_bao_loi && item.ngay_bao_loi.toString().includes(today)
-            ).reduce((sum, item) => sum + parseInt(item.sl_loi || 0), 0);
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+
+            processedData.summary.todayErrors = data.filter(item => {
+                if (!item.ngay_bao_loi) return false;
+
+                try {
+                    const itemDate = new Date(item.ngay_bao_loi);
+                    itemDate.setHours(0, 0, 0, 0);
+
+                    return itemDate.getTime() === today.getTime();
+                } catch (error) {
+                    console.error('Error parsing date for today errors:', item.ngay_bao_loi, error);
+                    return false;
+                }
+            }).reduce((sum, item) => sum + parseInt(item.sl_loi || 0), 0);
+
+            // ============ SỬA PHẦN NÀY - TÍNH TỶ LỆ LỖI THEO SẢN LƯỢNG ============
+            // Lấy bộ lọc từ UI để áp dụng cho dữ liệu sản lượng
+            const errorFilters = {
+                dateFrom: document.getElementById('dateFromLoi').value,
+                dateTo: document.getElementById('dateToLoi').value,
+                dateField: 'ngay_tao' // Dùng field ngày của bảng sản xuất
+            };
+
+            // Lọc dữ liệu sản lượng trong cùng khoảng thời gian với lỗi
+            const productionDataInSamePeriod = filterData(globalData.dataProduction, errorFilters);
+
+            // Tính tổng sản lượng trong khoảng thời gian này
+            const totalProduction = productionDataInSamePeriod.reduce((sum, item) => {
+                return sum + parseInt(item.sl_thuc_te || 0);
+            }, 0);
+
+            // Tính tỷ lệ lỗi = (Số lỗi / Tổng sản lượng) × 100%
+            processedData.summary.avgErrorRate = totalProduction > 0 ?
+                Math.round((totalActualErrors / totalProduction) * 100 * 100) / 100 : 0; // Làm tròn 2 chữ số thập phân
+
+            // Debug log để kiểm tra
+            console.log('Error Rate Calculation:', {
+                totalErrors: totalActualErrors,
+                totalProduction: totalProduction,
+                errorRate: processedData.summary.avgErrorRate + '%',
+                dateRange: `${errorFilters.dateFrom} to ${errorFilters.dateTo}`,
+                productionRecords: productionDataInSamePeriod.length
+            });
 
             // Nhóm lỗi theo mã lỗi cho bar chart
             const errorCodeGroups = {};
@@ -2016,25 +2167,17 @@
                     rank: index + 1
                 }));
 
-            // Tính tỷ lệ lỗi trung bình
-            const uniqueDates = [...new Set(data.map(item =>
-                item.ngay_bao_loi ? item.ngay_bao_loi.toString().split('T')[0] : ''
-            ).filter(Boolean))];
-
-            processedData.summary.avgErrorRate = uniqueDates.length > 0 ?
-                Math.round((totalActualErrors / uniqueDates.length) * 10) / 10 : 0;
-
             return processedData;
         }
 
         function updateErrorBarChart(data) {
-            if (charts.chartLoiBar) {  // Đổi tên từ chartLoiLine thành chartLoiBar
+            if (charts.chartLoiBar) {
                 charts.chartLoiBar.destroy();
             }
 
-            const ctx = document.getElementById('chartLoiLine').getContext('2d'); // Vẫn dùng element cũ
+            const ctx = document.getElementById('chartLoiLine').getContext('2d');
             charts.chartLoiBar = new Chart(ctx, {
-                type: 'bar', // Đổi từ 'line' thành 'bar'
+                type: 'bar',
                 data: {
                     labels: data.barLabels,
                     datasets: [{
@@ -2049,10 +2192,11 @@
                     }]
                 },
                 options: {
+                    indexAxis: 'y', // THÊM DÒNG NÀY ĐỂ XOAY BIỂU ĐỒ THÀNH DỌC
                     responsive: true,
                     maintainAspectRatio: false,
                     scales: {
-                        y: {
+                        x: { // Đổi từ y thành x (vì đã xoay)
                             beginAtZero: true,
                             ticks: {
                                 stepSize: 1,
@@ -2061,16 +2205,16 @@
                                 }
                             }
                         },
-                        x: {
+                        y: { // Đổi từ x thành y (vì đã xoay)
                             ticks: {
-                                maxRotation: 45,
+                                maxRotation: 0, // Không xoay label
                                 minRotation: 0
                             }
                         }
                     },
                     plugins: {
                         legend: {
-                            display: false // Ẩn legend vì chỉ có 1 dataset
+                            display: false
                         },
                         tooltip: {
                             callbacks: {
@@ -2085,6 +2229,7 @@
                 }
             });
         }
+
 
         // Cập nhật hàm loadErrorReport để gọi hàm mới
         function loadErrorReport() {
@@ -2108,7 +2253,9 @@
             document.getElementById('totalErrorsLoi').textContent = data.summary.totalErrors.toLocaleString();
             document.getElementById('todayErrorsLoi').textContent = data.summary.todayErrors.toLocaleString();
             document.getElementById('topErrorPositionLoi').textContent = data.summary.topPosition;
-            document.getElementById('avgErrorRateLoi').textContent = data.summary.avgErrorRate + '%';
+
+            // Hiển thị tỷ lệ lỗi với 2 chữ số thập phân
+            document.getElementById('avgErrorRateLoi').textContent = data.summary.avgErrorRate.toFixed(2) + '%';
         }
 
         function updateErrorPieChart(data) {
@@ -2136,16 +2283,17 @@
                 options: {
                     responsive: true,
                     maintainAspectRatio: false,
+                    layout: {
+                        padding: {
+                            top: 40,    // TĂNG PADDING ĐỂ TẠO KHÔNG GIAN CHO LABELS
+                            bottom: 40,
+                            left: 40,
+                            right: 40
+                        }
+                    },
                     plugins: {
                         legend: {
-                            position: 'bottom',
-                            labels: {
-                                padding: 20,
-                                usePointStyle: true,
-                                font: {
-                                    size: 12
-                                }
-                            }
+                            display: false // TẮT LEGEND MẶC ĐỊNH
                         },
                         tooltip: {
                             callbacks: {
@@ -2164,7 +2312,66 @@
                             }
                         }
                     }
-                }
+                },
+                plugins: [{
+                    afterDraw: function (chart) {
+                        const ctx = chart.ctx;
+                        const data = chart.data;
+                        const total = data.datasets[0].data.reduce((a, b) => a + b, 0);
+
+                        const chartArea = chart.chartArea;
+                        const centerX = (chartArea.left + chartArea.right) / 2;
+                        const centerY = (chartArea.top + chartArea.bottom) / 2;
+                        const radius = Math.min(chartArea.right - chartArea.left, chartArea.bottom - chartArea.top) / 2.5; // GIẢM THÊM RADIUS
+
+                        const colors = ['#ef4444', '#f97316', '#22c55e', '#3b82f6'];
+
+                        data.labels.forEach((label, index) => {
+                            const value = data.datasets[0].data[index];
+                            const percentage = total > 0 ? Math.round((value / total) * 100) : 0;
+
+                            // Tính góc cho mỗi segment
+                            let startAngle = -Math.PI / 2; // Bắt đầu từ 12 giờ
+                            for (let i = 0; i < index; i++) {
+                                startAngle += (data.datasets[0].data[i] / total) * 2 * Math.PI;
+                            }
+                            const endAngle = startAngle + (value / total) * 2 * Math.PI;
+                            const midAngle = (startAngle + endAngle) / 2;
+
+                            // Tính vị trí cho label - ĐIỀU CHỈNH KHOẢNG CÁCH
+                            const labelRadius = radius + 50; // GIẢM KHOẢNG CÁCH TỪ 60 XUỐNG 50
+                            const labelX = centerX + Math.cos(midAngle) * labelRadius;
+                            const labelY = centerY + Math.sin(midAngle) * labelRadius;
+
+                            // Vẽ đường nối
+                            ctx.beginPath();
+                            ctx.moveTo(centerX + Math.cos(midAngle) * radius, centerY + Math.sin(midAngle) * radius);
+                            ctx.lineTo(labelX - (Math.cos(midAngle) > 0 ? 8 : -8), labelY); // GIẢM OFFSET TỪ 10 XUỐNG 8
+                            ctx.strokeStyle = colors[index];
+                            ctx.lineWidth = 1;
+                            ctx.stroke();
+
+                            // Vẽ text với background
+                            const text = `${label}: ${percentage}%`;
+                            ctx.font = 'bold 10px Arial'; // GIẢM FONT SIZE TỪ 11px XUỐNG 10px
+                            ctx.textAlign = Math.cos(midAngle) > 0 ? 'left' : 'right';
+
+                            // Vẽ background cho text
+                            const textMetrics = ctx.measureText(text);
+                            const textWidth = textMetrics.width + 6; // GIẢM PADDING TỪ 8 XUỐNG 6
+                            const textHeight = 14; // GIẢM HEIGHT TỪ 16 XUỐNG 14
+                            const bgX = Math.cos(midAngle) > 0 ? labelX - 3 : labelX - textWidth + 3; // GIẢM OFFSET
+                            const bgY = labelY - textHeight / 2;
+
+                            ctx.fillStyle = 'rgba(255, 255, 255, 0.9)';
+                            ctx.fillRect(bgX, bgY, textWidth, textHeight);
+
+                            // Vẽ text
+                            ctx.fillStyle = colors[index];
+                            ctx.fillText(text, labelX, labelY + 2); // GIẢM OFFSET TỪ 3 XUỐNG 2
+                        });
+                    }
+                }]
             });
         }
 
@@ -2236,7 +2443,8 @@
             const filters = {
                 dateFrom: document.getElementById('dateFromDB').value,
                 dateTo: document.getElementById('dateToDB').value,
-                dateField: 'ngay_tao'
+                dateField: 'ngay_tao',
+                ca_lam_viec: document.getElementById('shiftDB').value // THÊM DÒNG NÀY
             };
 
             const filteredData = filterData(globalData.dataPolishing, filters);
@@ -2248,6 +2456,17 @@
         }
 
         function processPolishingData(data) {
+            const selectedShift = document.getElementById('shiftDB').value; // THÊM MỚI
+
+            // THÊM LOGIC LỌC CA LÀM VIỆC
+            let filteredData = data;
+            if (selectedShift) {
+                filteredData = data.filter(item => {
+                    const itemShift = item.ca_lam_viec ? item.ca_lam_viec.toString().trim() : '';
+                    return itemShift === selectedShift;
+                });
+            }
+
             const processedData = {
                 labels: [],
                 actualData: [],
@@ -2259,55 +2478,111 @@
                 }
             };
 
-            // Group by date
+            // Group by date hoặc shift tùy theo filter
             const dateGroups = {};
-            data.forEach(item => {
-                const date = item.ngay_tao ? item.ngay_tao.toString().split('T')[0] : '';
-                if (!dateGroups[date]) {
-                    dateGroups[date] = {
-                        production: 0,
-                        actualTime: 0,
-                        items: []
-                    };
-                }
-                dateGroups[date].production += parseInt(item.sl_thuc_te || 0);
-                dateGroups[date].actualTime += parseFloat(item.Thoi_Gian_Thuc_Te || 0);
-                dateGroups[date].items.push(item);
-            });
+
+            if (selectedShift) {
+                // Nếu có lọc ca - nhóm theo ngày trong ca đó
+                filteredData.forEach(item => {
+                    const date = item.ngay_tao ? item.ngay_tao.toString().split('T')[0] : '';
+                    const groupKey = `${date}_${item.ca_lam_viec || 'Unknown'}`;
+
+                    if (!dateGroups[groupKey]) {
+                        dateGroups[groupKey] = {
+                            production: 0,
+                            actualTime: 0,
+                            items: [],
+                            shift: item.ca_lam_viec || 'Không xác định',
+                            date: date
+                        };
+                    }
+                    dateGroups[groupKey].production += parseInt(item.sl_thuc_te || 0);
+                    dateGroups[groupKey].actualTime += parseFloat(item.Thoi_Gian_Thuc_Te || 0);
+                    dateGroups[groupKey].items.push(item);
+                });
+            } else {
+                // Nếu không lọc ca - nhóm theo ngày
+                filteredData.forEach(item => {
+                    const date = item.ngay_tao ? item.ngay_tao.toString().split('T')[0] : '';
+                    if (!dateGroups[date]) {
+                        dateGroups[date] = {
+                            production: 0,
+                            actualTime: 0,
+                            items: []
+                        };
+                    }
+                    dateGroups[date].production += parseInt(item.sl_thuc_te || 0);
+                    dateGroups[date].actualTime += parseFloat(item.Thoi_Gian_Thuc_Te || 0);
+                    dateGroups[date].items.push(item);
+                });
+            }
 
             // Sort dates and prepare chart data
-            const sortedDates = Object.keys(dateGroups).sort();
-            processedData.labels = sortedDates.map(date => {
-                const d = new Date(date);
-                return d.toLocaleDateString('vi-VN');
-            });
+            const sortedKeys = Object.keys(dateGroups).sort();
 
-            sortedDates.forEach(date => {
-                const group = dateGroups[date];
+            if (selectedShift) {
+                // Hiển thị theo ca + ngày
+                processedData.labels = sortedKeys.map(key => {
+                    const group = dateGroups[key];
+                    const date = new Date(group.date);
+                    return `${date.toLocaleDateString('vi-VN')} (${group.shift})`;
+                });
+            } else {
+                // Hiển thị theo ngày
+                processedData.labels = sortedKeys.map(date => {
+                    const d = new Date(date);
+                    return d.toLocaleDateString('vi-VN');
+                });
+            }
+
+            sortedKeys.forEach(key => {
+                const group = dateGroups[key];
                 processedData.actualData.push(group.production);
             });
 
             // Prepare table data
-            data.forEach(item => {
+            filteredData.forEach(item => {
                 const actualTime = parseFloat(item.Thoi_Gian_Thuc_Te || 0);
-                const plannedTime = parseFloat(item.hoan_thanh_dk || 0);
-                const efficiency = plannedTime > 0 && actualTime > 0 ?
-                    Math.round((plannedTime / actualTime) * 100) : 0;
+                const theoreticalTime = parseFloat(item.hoan_thanh_dk || 0);
+                const efficiency = theoreticalTime > 0 && actualTime > 0 ?
+                    Math.round((theoreticalTime / actualTime) * 100) : 0;
 
                 processedData.tableData.push({
                     date: item.ngay_tao ? new Date(item.ngay_tao).toLocaleDateString('vi-VN') : '-',
                     maCV: item.ma_cv || '-',
                     tenChiTiet: item.ten_chi_tiet || '-',
+                    shift: item.ca_lam_viec || '-', // THÊM CA LÀM VIỆC
                     production: parseInt(item.sl_thuc_te || 0),
                     actualTime: actualTime,
-                    efficiency: efficiency
+                    theoreticalTime: theoreticalTime,
+                    efficiency: efficiency,
+                    note: item.giai_trinh || '-' // Thêm trường ghi chú
                 });
             });
 
+            // SẮP XẾP THEO NGÀY MỚI NHẤT LEN ĐẦU
+            processedData.tableData.sort((a, b) => {
+                // Chuyển đổi ngày VN về Date để so sánh
+                const parseVietnameseDate = (dateStr) => {
+                    if (dateStr === '-') return new Date(0);
+                    const parts = dateStr.split('/');
+                    if (parts.length === 3) {
+                        // Định dạng dd/mm/yyyy
+                        return new Date(parts[2], parts[1] - 1, parts[0]);
+                    }
+                    return new Date(dateStr);
+                };
+
+                const dateA = parseVietnameseDate(a.date);
+                const dateB = parseVietnameseDate(b.date);
+
+                return dateB - dateA; // Sắp xếp giảm dần (mới nhất lên đầu)
+            });
+
             // Calculate summary
-            processedData.summary.totalProduction = data.reduce((sum, item) => sum + parseInt(item.sl_thuc_te || 0), 0);
-            processedData.summary.avgTime = data.length > 0 ?
-                data.reduce((sum, item) => sum + parseFloat(item.Thoi_Gian_Thuc_Te || 0), 0) / data.length : 0;
+            processedData.summary.totalProduction = filteredData.reduce((sum, item) => sum + parseInt(item.sl_thuc_te || 0), 0);
+            processedData.summary.avgTime = filteredData.length > 0 ?
+                filteredData.reduce((sum, item) => sum + parseFloat(item.Thoi_Gian_Thuc_Te || 0), 0) / filteredData.length : 0;
 
             const totalEfficiency = processedData.tableData.reduce((sum, item) => sum + item.efficiency, 0);
             processedData.summary.efficiency = processedData.tableData.length > 0 ?
@@ -2372,13 +2647,23 @@
                 const efficiencyClass = row.efficiency >= 100 ? 'text-green-600' :
                     row.efficiency >= 80 ? 'text-yellow-600' : 'text-red-600';
 
+                // Xử lý ghi chú - giới hạn độ dài hiển thị
+                const noteDisplay = row.note && row.note !== '-' ?
+                    (row.note.length > 50 ? row.note.substring(0, 50) + '...' : row.note) : '-';
+
+                // THÊM HIỂN THỊ CA LÀM VIỆC
+                const shiftDisplay = row.shift || '-';
+
                 tr.innerHTML = `
            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">${row.date}</td>
            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">${row.maCV}</td>
            <td class="px-6 py-4 text-sm text-gray-500 max-w-xs truncate">${row.tenChiTiet}</td>
+           <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${shiftDisplay}</td>
            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">${row.production.toLocaleString()}</td>
            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${row.actualTime.toFixed(1)} phút</td>
+           <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${row.theoreticalTime.toFixed(1)} phút</td>
            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium ${efficiencyClass}">${row.efficiency}%</td>
+           <td class="px-6 py-4 text-sm text-gray-500 max-w-xs" title="${row.note}">${noteDisplay}</td>
        `;
                 tbody.appendChild(tr);
             });
@@ -2822,7 +3107,7 @@
             document.getElementById('dateFrom3d').value = yesterdayStr;
             document.getElementById('dateTo3d').value = yesterdayStr;
             document.getElementById('machine3d').value = '';
-            document.getElementById('shift3d').value = '';
+            document.getElementById('shift3d').value = ''; // Reset ca làm việc
             load3DReport();
         }
 
@@ -2840,6 +3125,7 @@
             document.getElementById('dateToSL').value = yesterdayStr;
             document.getElementById('groupSL').value = '';
             document.getElementById('teamSL').value = '';
+            document.getElementById('shiftSL').value = ''; // THÊM DÒNG NÀY
             loadProductionReport();
         }
 
@@ -2871,6 +3157,7 @@
 
             document.getElementById('dateFromDB').value = yesterdayStr;
             document.getElementById('dateToDB').value = yesterdayStr;
+            document.getElementById('shiftDB').value = ''; // THÊM DÒNG NÀY
             loadPolishingReport();
         }
 
@@ -2983,24 +3270,24 @@
             }
         });
 
-        // document.addEventListener('contextmenu', function (e) {
-        //     e.preventDefault();
-        // }, false);
+        document.addEventListener('contextmenu', function (e) {
+            e.preventDefault();
+        }, false);
 
-        // document.onkeydown = function (e) {
-        //     if (e.keyCode == 123) {
-        //         return false;
-        //     }
-        //     if (e.ctrlKey && e.shiftKey && e.keyCode == 'I'.charCodeAt(0)) {
-        //         return false;
-        //     }
-        //     if (e.ctrlKey && e.shiftKey && e.keyCode == 'J'.charCodeAt(0)) {
-        //         return false;
-        //     }
-        //     if (e.ctrlKey && e.keyCode == 'U'.charCodeAt(0)) {
-        //         return false;
-        //     }
-        // };
+        document.onkeydown = function (e) {
+            if (e.keyCode == 123) {
+                return false;
+            }
+            if (e.ctrlKey && e.shiftKey && e.keyCode == 'I'.charCodeAt(0)) {
+                return false;
+            }
+            if (e.ctrlKey && e.shiftKey && e.keyCode == 'J'.charCodeAt(0)) {
+                return false;
+            }
+            if (e.ctrlKey && e.keyCode == 'U'.charCodeAt(0)) {
+                return false;
+            }
+        };
 
     </script>
 
