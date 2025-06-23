@@ -743,8 +743,8 @@
 
         // Global data storage - Lưu trữ toàn bộ dữ liệu
         let globalData = {
-            data3D: [], // Bảng con
-            data3DParent: [], // THÊM BẢNG CHA
+            data3D: [], // Bảng trien_khai_3d_laze_dt
+            dataPause: [], // Bảng tam_dung
             dataProduction: [],
             dataError: [],
             dataPolishing: [],
@@ -811,18 +811,18 @@
                 showLoading(true);
                 showToast('Đang tải toàn bộ dữ liệu...', 'warning');
 
-                // Load all tables in parallel - THÊM BẢNG CHA
+                // Load all tables in parallel - SỬA LẠI DANH SÁCH BẢNG
                 const [
                     data3D,
-                    data3DParent, // THÊM DÒNG NÀY
+                    dataPause, // Thay đổi từ data3DParent thành dataPause
                     dataProduction,
                     dataError,
                     dataPolishing,
                     dataReceive,
                     dataDelivery
                 ] = await Promise.all([
-                    fetchAppSheetData('trien_khai_3d_laze_dt'), // Bảng con
-                    fetchAppSheetData('trien_khai_3d_laze'),    // THÊM BẢNG CHA
+                    fetchAppSheetData('trien_khai_3d_laze_dt'), // Bảng chính
+                    fetchAppSheetData('tam_dung'),              // Bảng tạm dừng
                     fetchAppSheetData('ke_hoach_pkt_dt'),
                     fetchAppSheetData('tong_hop_loi'),
                     fetchAppSheetData('hoan_thien_danh_bong_dt'),
@@ -832,7 +832,7 @@
 
                 // Store in global data
                 globalData.data3D = data3D;
-                globalData.data3DParent = data3DParent; // THÊM DÒNG NÀY
+                globalData.dataPause = dataPause; // Lưu dữ liệu tạm dừng
                 globalData.dataProduction = dataProduction;
                 globalData.dataError = dataError;
                 globalData.dataPolishing = dataPolishing;
@@ -842,7 +842,7 @@
 
                 console.log('All data loaded:', {
                     '3D Data': data3D.length,
-                    '3D Parent Data': data3DParent.length, // THÊM DÒNG NÀY
+                    'Pause Data': dataPause.length, // Thay đổi log
                     'Production': dataProduction.length,
                     'Error': dataError.length,
                     'Polishing': dataPolishing.length,
@@ -905,16 +905,23 @@
             const select = document.getElementById('shift3d');
             if (!select) return;
 
-            // Lấy các giá trị ca_lam_viec từ dữ liệu thực tế
-            const shifts = [...new Set(globalData.data3D
+            // Lấy ca làm việc từ cả hai bảng
+            const shifts3D = globalData.data3D
                 .map(item => item.ca_lam_viec)
                 .filter(Boolean)
-                .map(shift => shift.toString().trim())
-            )].sort();
+                .map(shift => shift.toString().trim());
+
+            const shiftsPause = globalData.dataPause
+                .map(item => item.ca_lam_viec)
+                .filter(Boolean)
+                .map(shift => shift.toString().trim());
+
+            // Gộp và loại bỏ trùng lặp
+            const allShifts = [...new Set([...shifts3D, ...shiftsPause])].sort();
 
             select.innerHTML = '<option value="">Tất cả ca</option>';
 
-            shifts.forEach(shift => {
+            allShifts.forEach(shift => {
                 const option = document.createElement('option');
                 option.value = shift;
                 option.textContent = shift;
@@ -968,25 +975,22 @@
 
         // Populate all dropdowns with real data
         function populateAllDropdowns() {
-            // 3D Machine dropdowns - Sử dụng data3D
-            const machines = [...new Set(globalData.data3D.map(item => item.so_may).filter(Boolean))];
-            populateDropdown('machine3d', machines.sort(), 'Tất cả máy');
+            // 3D Machine dropdowns - Lấy từ cả hai bảng
+            const machines3D = [...new Set(globalData.data3D.map(item => item.so_may).filter(Boolean))];
+            const machinesPause = [...new Set(globalData.dataPause.map(item => item.so_may).filter(Boolean))];
+            const allMachines = [...new Set([...machines3D, ...machinesPause])];
 
-            // Populate ca làm việc cho 3D từ dữ liệu thực
+            populateDropdown('machine3d', allMachines.sort(), 'Tất cả máy');
+
+            // Populate ca làm việc cho 3D từ cả hai bảng
             populate3DShiftDropdown();
 
             // Production dropdowns - Sắp xếp nhóm theo thứ tự
             const groups = [...new Set(globalData.dataProduction.map(item => item.nhom).filter(Boolean))];
             populateDropdown('groupSL', groups.sort(), 'Tất cả nhóm');
-            populateTeamDropdown(); // Sử dụng hàm riêng cho tổ
-
-            // Populate ca làm việc cho Sản Lượng
+            populateTeamDropdown();
             populateProductionShiftDropdown();
-
-            // THÊM DÒNG NÀY - Populate ca làm việc cho Đánh Bóng
             populatePolishingShiftDropdown();
-
-            // Error position dropdown
             populateErrorPositionDropdown();
         }
 
@@ -1226,7 +1230,6 @@
                 }
             };
 
-            // DEBUG: Kiểm tra dữ liệu đầu vào
             console.log('Processing 3D Data:', data);
             console.log('Found machines:', machines);
 
@@ -1239,49 +1242,54 @@
                 let chayThuTime = 0;
                 let giaCongTime = 0;
                 let gaLapTime = 0;
-                let tamDungTime = 0; // SẼ LẤY TỪ BẢNG CHA
+                let tamDungTime = 0;
 
-                // Tính tổng thời gian từ dữ liệu
+                // Tính tổng thời gian từ bảng trien_khai_3d_laze_dt
                 machineData.forEach(item => {
-                    // Validate và parse dữ liệu từ bảng con
                     const cb = parseFloat(item.thoi_gian_chuan_bi || 0);
                     const ct = parseFloat(item.thoi_gian_chay_thu || 0);
                     const gc = parseFloat(item.thoi_gian_gia_cong || 0);
                     const gl = parseFloat(item.tong_thoi_gian_ga_lap || 0);
 
-                    // LẤY THỜI GIAN DỪNG TỪ BẢNG CHA THÔNG QUA id_trien_khai_3d_laze
-                    let td = 0;
-                    if (item.id_trien_khai_3d_laze) {
-                        const parentRecord = globalData.data3DParent.find(parent =>
-                            parent.id_trien_khai_3d_laze === item.id_trien_khai_3d_laze
-                        );
-                        if (parentRecord) {
-                            td = parseFloat(parentRecord.thoi_gian_dung || 0);
-                            console.log(`Found parent record for ${item.id_trien_khai_3d_laze}, thoi_gian_dung: ${td}`);
-                        } else {
-                            console.warn(`No parent record found for id: ${item.id_trien_khai_3d_laze}`);
-                        }
-                    }
-
-                    // Debug từng record
-                    console.log(`Item data:`, {
-                        machine: item.so_may,
-                        id_parent: item.id_trien_khai_3d_laze,
-                        chuanBi: cb,
-                        chayThu: ct,
-                        giaCong: gc,
-                        gaLap: gl,
-                        tamDung: td // THỜI GIAN DỪNG TỪ BẢNG CHA
-                    });
-
                     chuanBiTime += cb;
                     chayThuTime += ct;
                     giaCongTime += gc;
                     gaLapTime += gl;
-                    tamDungTime += td; // CỘNG THỜI GIAN DỪNG TỪ BẢNG CHA
+
+                    console.log(`Item data:`, {
+                        machine: item.so_may,
+                        id: item.id_trien_khai_3d_laze,
+                        chuanBi: cb,
+                        chayThu: ct,
+                        giaCong: gc,
+                        gaLap: gl
+                    });
                 });
 
-                // TÍNH TỔNG THỜI GIAN THỰC TẾ (từ các thành phần)
+                // LẤY THỜI GIAN TẠM DỪNG TỪ BẢNG tam_dung
+                // Lọc theo máy và các bộ lọc hiện tại
+                const filters = {
+                    dateFrom: document.getElementById('dateFrom3d').value,
+                    dateTo: document.getElementById('dateTo3d').value,
+                    dateField: 'ngay_tao',
+                    so_may: machine,
+                    ca_lam_viec: document.getElementById('shift3d').value
+                };
+
+                const pauseData = filterData(globalData.dataPause, filters);
+
+                pauseData.forEach(pauseItem => {
+                    const td = parseFloat(pauseItem.Thoi_Gian_Thuc_Te || 0);
+                    tamDungTime += td;
+
+                    console.log(`Pause data for ${machine}:`, {
+                        id: pauseItem.id_tam_dung,
+                        machine: pauseItem.so_may,
+                        tamDung: td
+                    });
+                });
+
+                // TÍNH TỔNG THỜI GIAN THỰC TẾ
                 const actualTotalTime = chuanBiTime + chayThuTime + giaCongTime + gaLapTime + tamDungTime;
 
                 console.log(`Machine ${machine} totals:`, {
@@ -1289,11 +1297,10 @@
                     chayThu: chayThuTime,
                     giaCong: giaCongTime,
                     gaLap: gaLapTime,
-                    tamDung: tamDungTime, // THỜI GIAN DỪNG TỪ BẢNG CHA
+                    tamDung: tamDungTime,
                     total: actualTotalTime
                 });
 
-                // Phần còn lại giữ nguyên...
                 if (actualTotalTime > 0) {
                     const chuanBiPercent = Math.round((chuanBiTime / actualTotalTime) * 100);
                     const chayThuPercent = Math.round((chayThuTime / actualTotalTime) * 100);
@@ -1307,7 +1314,15 @@
                     processedData.gaLap.push(gaLapPercent);
                     processedData.tamDung.push(tamDungPercent);
 
-                    // THÊM VÀO TABLE DATA
+                    // Tạo ghi chú tổng hợp
+                    const notes = [];
+                    if (machineData.length > 0 && machineData[0].giai_trinh) {
+                        notes.push('3D: ' + machineData[0].giai_trinh);
+                    }
+                    if (pauseData.length > 0 && pauseData[0].giai_trinh) {
+                        notes.push('Dừng: ' + pauseData[0].giai_trinh);
+                    }
+
                     processedData.tableData.push({
                         machine: machine,
                         shift: 'Tất cả',
@@ -1316,18 +1331,17 @@
                         giaCong: giaCongPercent,
                         gaLap: gaLapPercent,
                         tamDung: tamDungPercent,
-                        note: machineData.length > 0 ? (machineData[0].giai_trinh || '-') : '-',
+                        note: notes.length > 0 ? notes.join(' | ') : '-',
                         actualTimes: {
                             chuanBi: chuanBiTime,
                             chayThu: chayThuTime,
                             giaCong: giaCongTime,
                             gaLap: gaLapTime,
-                            tamDung: tamDungTime, // THỜI GIAN DỪNG TỪ BẢNG CHA
+                            tamDung: tamDungTime,
                             total: actualTotalTime
                         }
                     });
                 } else {
-                    // Phần xử lý khi không có dữ liệu - giữ nguyên
                     processedData.chuanBi.push(0);
                     processedData.chayThu.push(0);
                     processedData.giaCong.push(0);
@@ -1357,7 +1371,7 @@
                 // CẬP NHẬT SUMMARY
                 processedData.summary.totalTime += actualTotalTime;
                 processedData.summary.workingTime += giaCongTime;
-                processedData.summary.downTime += tamDungTime; // THỜI GIAN DỪNG TỪ BẢNG CHA
+                processedData.summary.downTime += tamDungTime;
             });
 
             // Tính hiệu suất tổng thể
@@ -1532,7 +1546,7 @@
 
             updateProductionSummary(processedData);
             updateProductionChart(processedData);
-            updateProductionPieChart(processedData);
+            updateProductionBarChart(processedData);
             updateProductionTeamChart(processedData); // THÊM DÒNG NÀY
             updateProductionTable(processedData);
         }
@@ -1930,6 +1944,22 @@
                 finalData = filteredData;
             }
 
+            // Thu thập tất cả mã nhân viên unique
+            const uniqueWorkerCodes = new Set();
+
+            finalData.forEach(item => {
+                if (item.Code) {
+                    // Xử lý trường hợp có nhiều mã code cách nhau bởi dấu phẩy
+                    const codes = item.Code.toString().split(',');
+                    codes.forEach(code => {
+                        const cleanCode = code.trim();
+                        if (cleanCode) {
+                            uniqueWorkerCodes.add(cleanCode);
+                        }
+                    });
+                }
+            });
+
             // Hiển thị dữ liệu
             finalData.forEach(item => {
                 const actualTime = parseFloat(item.Thoi_Gian_Thuc_Te || 0);
@@ -1980,7 +2010,6 @@
                 });
 
                 processedData.summary.totalProduction += production;
-                processedData.summary.totalWorkers += workers;
             });
 
             // SẮP XẾP THEO NGÀY MỚI NHẤT LEN ĐẦU
@@ -2053,7 +2082,10 @@
                 // Khi không lọc tổ và ca - nhóm theo nhóm
                 const groups = [...new Set(finalData.map(item => item.nhom).filter(Boolean))];
 
-                groups.forEach(group => {
+                // SẮP XẾP CÁC NHÓM THEO TÊN TỪ NHỎ ĐẾN LỚN
+                const sortedGroups = groups.sort((a, b) => a.localeCompare(b));
+
+                sortedGroups.forEach(group => {
                     const groupData = finalData.filter(item => item.nhom === group);
 
                     let actualTime = 0;
@@ -2075,6 +2107,9 @@
 
             // THÊM XỬ LÝ DỮ LIỆU CHO BIỂU ĐỒ TỔ
             processTeamChart(finalData, processedData, selectedGroup);
+
+            // Tính summary - SỬA ĐỔI PHẦN NÀY
+            processedData.summary.totalWorkers = uniqueWorkerCodes.size; // Số người duy nhất
 
             const totalEfficiency = processedData.tableData.reduce((sum, item) => sum + item.efficiency, 0);
             processedData.summary.avgEfficiency = processedData.tableData.length > 0 ?
@@ -2203,17 +2238,18 @@
             });
         }
 
-        function updateProductionPieChart(data) {
+        function updateProductionBarChart(data) {
             if (charts.chartSLPie) {
                 charts.chartSLPie.destroy();
             }
 
             const ctx = document.getElementById('chartSLPie').getContext('2d');
             charts.chartSLPie = new Chart(ctx, {
-                type: 'pie',
+                type: 'bar', // THAY ĐỔI: từ 'pie' thành 'bar'
                 data: {
                     labels: data.labels,
                     datasets: [{
+                        label: 'Sản lượng',
                         data: data.pieData,
                         backgroundColor: [
                             '#ef4444',
@@ -2225,30 +2261,35 @@
                             '#f59e0b',
                             '#10b981'
                         ],
-                        borderWidth: 2,
+                        borderWidth: 1,
                         borderColor: '#ffffff'
                     }]
                 },
                 options: {
                     responsive: true,
                     maintainAspectRatio: false,
-                    layout: {
-                        padding: {
-                            top: 40,    // TĂNG PADDING ĐỂ TẠO KHÔNG GIAN CHO LABELS
-                            bottom: 40,
-                            left: 40,
-                            right: 40
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                callback: function (value) {
+                                    return value.toLocaleString();
+                                }
+                            }
+                        },
+                        x: {
+                            ticks: {
+                                maxRotation: 45,
+                                minRotation: 0
+                            }
                         }
                     },
                     plugins: {
                         legend: {
-                            display: false // TẮT LEGEND MẶC ĐỊNH
+                            display: false // Ẩn legend vì chỉ có 1 dataset
                         },
                         tooltip: {
                             callbacks: {
-                                title: function (context) {
-                                    return 'Nhóm: ' + context[0].label;
-                                },
                                 label: function (context) {
                                     const total = context.dataset.data.reduce((a, b) => a + b, 0);
                                     const percentage = total > 0 ? Math.round((context.raw / total) * 100) : 0;
@@ -2258,68 +2299,13 @@
                                     ];
                                 }
                             }
+                        },
+                        title: {
+                            display: true,
+                            text: 'Sản lượng theo nhóm'
                         }
                     }
-                },
-                plugins: [{
-                    afterDraw: function (chart) {
-                        const ctx = chart.ctx;
-                        const data = chart.data;
-                        const total = data.datasets[0].data.reduce((a, b) => a + b, 0);
-
-                        const chartArea = chart.chartArea;
-                        const centerX = (chartArea.left + chartArea.right) / 2;
-                        const centerY = (chartArea.top + chartArea.bottom) / 2;
-                        const radius = Math.min(chartArea.right - chartArea.left, chartArea.bottom - chartArea.top) / 2.5; // GIẢM RADIUS
-
-                        const colors = ['#ef4444', '#f97316', '#22c55e', '#3b82f6', '#8b5cf6', '#ec4899', '#f59e0b', '#10b981'];
-
-                        data.labels.forEach((label, index) => {
-                            const value = data.datasets[0].data[index];
-                            const percentage = total > 0 ? Math.round((value / total) * 100) : 0;
-
-                            // Tính góc cho mỗi segment
-                            let startAngle = -Math.PI / 2; // Bắt đầu từ 12 giờ
-                            for (let i = 0; i < index; i++) {
-                                startAngle += (data.datasets[0].data[i] / total) * 2 * Math.PI;
-                            }
-                            const endAngle = startAngle + (value / total) * 2 * Math.PI;
-                            const midAngle = (startAngle + endAngle) / 2;
-
-                            // Tính vị trí cho label
-                            const labelRadius = radius + 50; // KHOẢNG CÁCH TỪ TÂM
-                            const labelX = centerX + Math.cos(midAngle) * labelRadius;
-                            const labelY = centerY + Math.sin(midAngle) * labelRadius;
-
-                            // Vẽ đường nối
-                            ctx.beginPath();
-                            ctx.moveTo(centerX + Math.cos(midAngle) * radius, centerY + Math.sin(midAngle) * radius);
-                            ctx.lineTo(labelX - (Math.cos(midAngle) > 0 ? 8 : -8), labelY);
-                            ctx.strokeStyle = colors[index % colors.length];
-                            ctx.lineWidth = 1;
-                            ctx.stroke();
-
-                            // Vẽ text với background
-                            const text = `${label}: ${percentage}%`;
-                            ctx.font = 'bold 10px Arial';
-                            ctx.textAlign = Math.cos(midAngle) > 0 ? 'left' : 'right';
-
-                            // Vẽ background cho text
-                            const textMetrics = ctx.measureText(text);
-                            const textWidth = textMetrics.width + 6;
-                            const textHeight = 14;
-                            const bgX = Math.cos(midAngle) > 0 ? labelX - 3 : labelX - textWidth + 3;
-                            const bgY = labelY - textHeight / 2;
-
-                            ctx.fillStyle = 'rgba(255, 255, 255, 0.9)';
-                            ctx.fillRect(bgX, bgY, textWidth, textHeight);
-
-                            // Vẽ text
-                            ctx.fillStyle = colors[index % colors.length];
-                            ctx.fillText(text, labelX, labelY + 2);
-                        });
-                    }
-                }]
+                }
             });
         }
 
