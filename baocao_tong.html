@@ -248,7 +248,7 @@
                 </div>
 
                 <!-- Charts -->
-                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6"> <!-- Đổi từ grid-cols-2 thành grid-cols-3 -->
                     <div class="bg-white border rounded-lg p-4">
                         <h4 class="text-lg font-semibold mb-4">So sánh thời gian thực tế vs lý thuyết</h4>
                         <div class="h-80">
@@ -259,6 +259,13 @@
                         <h4 class="text-lg font-semibold mb-4">Phân bổ sản lượng theo nhóm</h4>
                         <div class="h-80">
                             <canvas id="chartSLPie"></canvas>
+                        </div>
+                    </div>
+                    <!-- THÊM BIỂU ĐỒ MỚI -->
+                    <div class="bg-white border rounded-lg p-4">
+                        <h4 class="text-lg font-semibold mb-4">Sản lượng theo tổ trong nhóm</h4>
+                        <div class="h-80">
+                            <canvas id="chartSLTeam"></canvas>
                         </div>
                     </div>
                 </div>
@@ -736,7 +743,8 @@
 
         // Global data storage - Lưu trữ toàn bộ dữ liệu
         let globalData = {
-            data3D: [], // Chỉ cần 1 bảng data3D
+            data3D: [], // Bảng con
+            data3DParent: [], // THÊM BẢNG CHA
             dataProduction: [],
             dataError: [],
             dataPolishing: [],
@@ -803,16 +811,18 @@
                 showLoading(true);
                 showToast('Đang tải toàn bộ dữ liệu...', 'warning');
 
-                // Load all tables in parallel - Bỏ 2 bảng cũ của 3D
+                // Load all tables in parallel - THÊM BẢNG CHA
                 const [
                     data3D,
+                    data3DParent, // THÊM DÒNG NÀY
                     dataProduction,
                     dataError,
                     dataPolishing,
                     dataReceive,
                     dataDelivery
                 ] = await Promise.all([
-                    fetchAppSheetData('trien_khai_3d_laze_dt'), // Chỉ load bảng này
+                    fetchAppSheetData('trien_khai_3d_laze_dt'), // Bảng con
+                    fetchAppSheetData('trien_khai_3d_laze'),    // THÊM BẢNG CHA
                     fetchAppSheetData('ke_hoach_pkt_dt'),
                     fetchAppSheetData('tong_hop_loi'),
                     fetchAppSheetData('hoan_thien_danh_bong_dt'),
@@ -822,6 +832,7 @@
 
                 // Store in global data
                 globalData.data3D = data3D;
+                globalData.data3DParent = data3DParent; // THÊM DÒNG NÀY
                 globalData.dataProduction = dataProduction;
                 globalData.dataError = dataError;
                 globalData.dataPolishing = dataPolishing;
@@ -831,6 +842,7 @@
 
                 console.log('All data loaded:', {
                     '3D Data': data3D.length,
+                    '3D Parent Data': data3DParent.length, // THÊM DÒNG NÀY
                     'Production': dataProduction.length,
                     'Error': dataError.length,
                     'Polishing': dataPolishing.length,
@@ -1116,13 +1128,24 @@
                         }
                     }
                     else if (field === 'to' && filters.to) {
-                        // Logic lọc tổ gom nhóm - SỬA LẠI CHÍNH XÁC
+                        // Logic lọc tổ gom nhóm - SỬA LẠI ĐỂ XỬ LÝ TỔ HÀNH CHÍNH KẾT HỢP
                         const teamValue = item.to ? item.to.toString() : '';
                         if (filters.to === '0') {
-                            // Tổ hành chính
-                            if (teamValue !== '0') return false;
+                            // Tổ hành chính - KIỂM TRA CẢ TRƯỜNG HỢP ĐƠN LẺ VÀ KẾT HỢP
+                            let hasAdminTeam = false;
+
+                            if (teamValue.includes(',')) {
+                                // Trường hợp có nhiều tổ như "0, 1/3" hoặc "2/3, 0"
+                                const teams = teamValue.split(',').map(t => t.trim());
+                                hasAdminTeam = teams.includes('0');
+                            } else {
+                                // Trường hợp tổ đơn lẻ
+                                hasAdminTeam = teamValue === '0';
+                            }
+
+                            if (!hasAdminTeam) return false;
                         } else {
-                            // Kiểm tra chính xác theo pattern
+                            // Kiểm tra chính xác theo pattern cho tổ 1, 2, 3 - GIỮ NGUYÊN
                             let isMatch = false;
                             if (teamValue.includes(',')) {
                                 // Trường hợp có nhiều tổ như "1/3, 2/3"
@@ -1216,32 +1239,46 @@
                 let chayThuTime = 0;
                 let giaCongTime = 0;
                 let gaLapTime = 0;
-                let tamDungTime = 0;
+                let tamDungTime = 0; // SẼ LẤY TỪ BẢNG CHA
 
                 // Tính tổng thời gian từ dữ liệu
                 machineData.forEach(item => {
-                    // Validate và parse dữ liệu
+                    // Validate và parse dữ liệu từ bảng con
                     const cb = parseFloat(item.thoi_gian_chuan_bi || 0);
                     const ct = parseFloat(item.thoi_gian_chay_thu || 0);
                     const gc = parseFloat(item.thoi_gian_gia_cong || 0);
                     const gl = parseFloat(item.tong_thoi_gian_ga_lap || 0);
-                    const td = parseFloat(item.thoi_gian_tam_dung || 0);
+
+                    // LẤY THỜI GIAN DỪNG TỪ BẢNG CHA THÔNG QUA id_trien_khai_3d_laze
+                    let td = 0;
+                    if (item.id_trien_khai_3d_laze) {
+                        const parentRecord = globalData.data3DParent.find(parent =>
+                            parent.id_trien_khai_3d_laze === item.id_trien_khai_3d_laze
+                        );
+                        if (parentRecord) {
+                            td = parseFloat(parentRecord.thoi_gian_dung || 0);
+                            console.log(`Found parent record for ${item.id_trien_khai_3d_laze}, thoi_gian_dung: ${td}`);
+                        } else {
+                            console.warn(`No parent record found for id: ${item.id_trien_khai_3d_laze}`);
+                        }
+                    }
 
                     // Debug từng record
                     console.log(`Item data:`, {
                         machine: item.so_may,
+                        id_parent: item.id_trien_khai_3d_laze,
                         chuanBi: cb,
                         chayThu: ct,
                         giaCong: gc,
                         gaLap: gl,
-                        tamDung: td
+                        tamDung: td // THỜI GIAN DỪNG TỪ BẢNG CHA
                     });
 
                     chuanBiTime += cb;
                     chayThuTime += ct;
                     giaCongTime += gc;
                     gaLapTime += gl;
-                    tamDungTime += td;
+                    tamDungTime += td; // CỘNG THỜI GIAN DỪNG TỪ BẢNG CHA
                 });
 
                 // TÍNH TỔNG THỜI GIAN THỰC TẾ (từ các thành phần)
@@ -1252,11 +1289,11 @@
                     chayThu: chayThuTime,
                     giaCong: giaCongTime,
                     gaLap: gaLapTime,
-                    tamDung: tamDungTime,
+                    tamDung: tamDungTime, // THỜI GIAN DỪNG TỪ BẢNG CHA
                     total: actualTotalTime
                 });
 
-                // TÍNH % DựA TRÊN TỔNG THỰC TẾ
+                // Phần còn lại giữ nguyên...
                 if (actualTotalTime > 0) {
                     const chuanBiPercent = Math.round((chuanBiTime / actualTotalTime) * 100);
                     const chayThuPercent = Math.round((chayThuTime / actualTotalTime) * 100);
@@ -1273,32 +1310,30 @@
                     // THÊM VÀO TABLE DATA
                     processedData.tableData.push({
                         machine: machine,
-                        shift: 'Tất cả', // Sẽ được cập nhật dựa trên filter
+                        shift: 'Tất cả',
                         chuanBi: chuanBiPercent,
                         chayThu: chayThuPercent,
                         giaCong: giaCongPercent,
                         gaLap: gaLapPercent,
                         tamDung: tamDungPercent,
-                        note: machineData.length > 0 ? (machineData[0].giai_trinh || '-') : '-', // Thêm ghi chú
-                        // Thêm thời gian thực để debug
+                        note: machineData.length > 0 ? (machineData[0].giai_trinh || '-') : '-',
                         actualTimes: {
                             chuanBi: chuanBiTime,
                             chayThu: chayThuTime,
                             giaCong: giaCongTime,
                             gaLap: gaLapTime,
-                            tamDung: tamDungTime,
+                            tamDung: tamDungTime, // THỜI GIAN DỪNG TỪ BẢNG CHA
                             total: actualTotalTime
                         }
                     });
                 } else {
-                    // Nếu không có dữ liệu thời gian
+                    // Phần xử lý khi không có dữ liệu - giữ nguyên
                     processedData.chuanBi.push(0);
                     processedData.chayThu.push(0);
                     processedData.giaCong.push(0);
                     processedData.gaLap.push(0);
                     processedData.tamDung.push(0);
 
-                    // Vẫn thêm vào table với giá trị 0
                     processedData.tableData.push({
                         machine: machine,
                         shift: 'Tất cả',
@@ -1307,7 +1342,7 @@
                         giaCong: 0,
                         gaLap: 0,
                         tamDung: 0,
-                        note: '-', // Thêm ghi chú mặc định
+                        note: '-',
                         actualTimes: {
                             chuanBi: 0,
                             chayThu: 0,
@@ -1322,7 +1357,7 @@
                 // CẬP NHẬT SUMMARY
                 processedData.summary.totalTime += actualTotalTime;
                 processedData.summary.workingTime += giaCongTime;
-                processedData.summary.downTime += tamDungTime;
+                processedData.summary.downTime += tamDungTime; // THỜI GIAN DỪNG TỪ BẢNG CHA
             });
 
             // Tính hiệu suất tổng thể
@@ -1489,7 +1524,7 @@
                 dateField: 'ngay_tao',
                 nhom: document.getElementById('groupSL').value,
                 to: document.getElementById('teamSL').value,
-                ca_lam_viec: document.getElementById('shiftSL').value // THÊM DÒNG NÀY
+                ca_lam_viec: document.getElementById('shiftSL').value
             };
 
             const filteredData = filterData(globalData.dataProduction, filters);
@@ -1498,13 +1533,273 @@
             updateProductionSummary(processedData);
             updateProductionChart(processedData);
             updateProductionPieChart(processedData);
+            updateProductionTeamChart(processedData); // THÊM DÒNG NÀY
             updateProductionTable(processedData);
+        }
+
+        // SỬA HÀM XỬ LÝ DỮ LIỆU CHO BIỂU ĐỒ TỔ - GOM THEO NHÓM VỚI 4 TỔ CỐ ĐỊNH
+        function processTeamChart(data, processedData, selectedGroup) {
+            // 4 tổ cố định cho mỗi nhóm
+            const fixedTeams = ['Hành chính', 'Tổ 1', 'Tổ 2', 'Tổ 3'];
+
+            if (selectedGroup) {
+                // Khi có chọn nhóm cụ thể - hiển thị 4 tổ của nhóm đó
+                const teamGroups = {
+                    'Hành chính': 0,
+                    'Tổ 1': 0,
+                    'Tổ 2': 0,
+                    'Tổ 3': 0
+                };
+
+                data.forEach(item => {
+                    if (item.nhom === selectedGroup) {
+                        const teamValue = item.to ? item.to.toString() : '';
+
+                        if (teamValue.includes(',')) {
+                            // Trường hợp có nhiều tổ
+                            const teams = teamValue.split(',').map(t => t.trim());
+                            const teamCount = teams.length;
+
+                            teams.forEach(team => {
+                                const teamName = formatTeamNameForChart(team);
+                                if (teamGroups.hasOwnProperty(teamName)) {
+                                    // Chia đều sản lượng cho các tổ
+                                    teamGroups[teamName] += Math.round(parseInt(item.sl_thuc_te || 0) / teamCount);
+                                }
+                            });
+                        } else {
+                            // Trường hợp tổ đơn lẻ
+                            const teamName = formatTeamNameForChart(teamValue);
+                            if (teamGroups.hasOwnProperty(teamName)) {
+                                teamGroups[teamName] += parseInt(item.sl_thuc_te || 0);
+                            }
+                        }
+                    }
+                });
+
+                // Sắp xếp theo thứ tự cố định
+                processedData.teamLabels = fixedTeams;
+                processedData.teamData = fixedTeams.map(team => teamGroups[team]);
+
+            } else {
+                // Khi không chọn nhóm - hiển thị tất cả các nhóm
+                const allGroups = [...new Set(data.map(item => item.nhom).filter(Boolean))].sort();
+
+                const groupData = {};
+
+                allGroups.forEach(groupName => {
+                    groupData[groupName] = {
+                        'Hành chính': 0,
+                        'Tổ 1': 0,
+                        'Tổ 2': 0,
+                        'Tổ 3': 0
+                    };
+                });
+
+                data.forEach(item => {
+                    const groupName = item.nhom || 'Không xác định';
+                    if (!groupData[groupName]) {
+                        groupData[groupName] = {
+                            'Hành chính': 0,
+                            'Tổ 1': 0,
+                            'Tổ 2': 0,
+                            'Tổ 3': 0
+                        };
+                    }
+
+                    const teamValue = item.to ? item.to.toString() : '';
+
+                    if (teamValue.includes(',')) {
+                        const teams = teamValue.split(',').map(t => t.trim());
+                        const teamCount = teams.length;
+
+                        teams.forEach(team => {
+                            const teamName = formatTeamNameForChart(team);
+                            if (groupData[groupName].hasOwnProperty(teamName)) {
+                                groupData[groupName][teamName] += Math.round(parseInt(item.sl_thuc_te || 0) / teamCount);
+                            }
+                        });
+                    } else {
+                        const teamName = formatTeamNameForChart(teamValue);
+                        if (groupData[groupName].hasOwnProperty(teamName)) {
+                            groupData[groupName][teamName] += parseInt(item.sl_thuc_te || 0);
+                        }
+                    }
+                });
+
+                // Chuẩn bị dữ liệu cho biểu đồ grouped bar
+                processedData.teamLabels = allGroups;
+                processedData.teamData = {
+                    'Hành chính': allGroups.map(group => groupData[group]['Hành chính']),
+                    'Tổ 1': allGroups.map(group => groupData[group]['Tổ 1']),
+                    'Tổ 2': allGroups.map(group => groupData[group]['Tổ 2']),
+                    'Tổ 3': allGroups.map(group => groupData[group]['Tổ 3'])
+                };
+            }
+        }
+
+        // THÊM HÀM FORMAT TÊN TỔ CHO BIỂU ĐỒ
+        function formatTeamNameForChart(teamValue) {
+            if (!teamValue) return 'Không xác định';
+
+            const teamStr = teamValue.toString();
+
+            if (teamStr === '0') return 'Hành chính';
+            if (teamStr === '1/3' || teamStr === '1/2' || teamStr === '1') return 'Tổ 1';
+            if (teamStr === '2/3' || teamStr === '2/2' || teamStr === '2') return 'Tổ 2';
+            if (teamStr === '3/3' || teamStr === '3') return 'Tổ 3';
+
+            // Trường hợp khác - lấy số đầu tiên
+            const match = teamStr.match(/^(\d+)/);
+            return match ? (match[1] === '0' ? 'Hành chính' : 'Tổ ' + match[1]) : teamStr;
+        }
+
+        // SỬA HÀM TẠO BIỂU ĐỒ TỔ - 4 MÀU CỐ ĐỊNH CHO 4 TỔ
+        function updateProductionTeamChart(data) {
+            if (charts.chartSLTeam) {
+                charts.chartSLTeam.destroy();
+            }
+
+            const ctx = document.getElementById('chartSLTeam').getContext('2d');
+
+            // 4 màu cố định cho 4 tổ
+            const teamColors = {
+                'Hành chính': '#ef4444',  // Đỏ
+                'Tổ 1': '#22c55e',        // Xanh lá
+                'Tổ 2': '#3b82f6',        // Xanh dương
+                'Tổ 3': '#f97316'         // Cam
+            };
+
+            const selectedGroup = document.getElementById('groupSL').value;
+
+            if (selectedGroup) {
+                // Khi chọn nhóm cụ thể - hiển thị 4 tổ của nhóm đó
+                charts.chartSLTeam = new Chart(ctx, {
+                    type: 'bar',
+                    data: {
+                        labels: data.teamLabels,
+                        datasets: [{
+                            label: 'Sản lượng',
+                            data: data.teamData,
+                            backgroundColor: data.teamLabels.map(team => teamColors[team]),
+                            borderWidth: 1,
+                            borderColor: '#ffffff'
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                ticks: {
+                                    callback: function (value) {
+                                        return value.toLocaleString();
+                                    }
+                                }
+                            }
+                        },
+                        plugins: {
+                            legend: {
+                                display: false
+                            },
+                            tooltip: {
+                                callbacks: {
+                                    label: function (context) {
+                                        return context.label + ': ' + context.raw.toLocaleString();
+                                    }
+                                }
+                            },
+                            title: {
+                                display: true,
+                                text: `Sản lượng các tổ - ${selectedGroup}`
+                            }
+                        }
+                    }
+                });
+            } else {
+                // Khi không chọn nhóm - hiển thị grouped bar chart
+                const datasets = [
+                    {
+                        label: 'Hành chính',
+                        data: data.teamData['Hành chính'],
+                        backgroundColor: teamColors['Hành chính'],
+                        borderWidth: 1
+                    },
+                    {
+                        label: 'Tổ 1',
+                        data: data.teamData['Tổ 1'],
+                        backgroundColor: teamColors['Tổ 1'],
+                        borderWidth: 1
+                    },
+                    {
+                        label: 'Tổ 2',
+                        data: data.teamData['Tổ 2'],
+                        backgroundColor: teamColors['Tổ 2'],
+                        borderWidth: 1
+                    },
+                    {
+                        label: 'Tổ 3',
+                        data: data.teamData['Tổ 3'],
+                        backgroundColor: teamColors['Tổ 3'],
+                        borderWidth: 1
+                    }
+                ];
+
+                charts.chartSLTeam = new Chart(ctx, {
+                    type: 'bar',
+                    data: {
+                        labels: data.teamLabels,
+                        datasets: datasets
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                ticks: {
+                                    callback: function (value) {
+                                        return value.toLocaleString();
+                                    }
+                                }
+                            },
+                            x: {
+                                ticks: {
+                                    maxRotation: 45,
+                                    minRotation: 0
+                                }
+                            }
+                        },
+                        plugins: {
+                            legend: {
+                                position: 'bottom',
+                                labels: {
+                                    boxWidth: 12,
+                                    padding: 15
+                                }
+                            },
+                            tooltip: {
+                                callbacks: {
+                                    label: function (context) {
+                                        return context.dataset.label + ': ' + context.raw.toLocaleString();
+                                    }
+                                }
+                            },
+                            title: {
+                                display: true,
+                                text: 'So sánh sản lượng các tổ theo nhóm'
+                            }
+                        }
+                    }
+                });
+            }
         }
 
         function processProductionData(data) {
             const selectedGroup = document.getElementById('groupSL').value;
             const selectedTeam = document.getElementById('teamSL').value;
-            const selectedShift = document.getElementById('shiftSL').value; // THÊM MỚI
+            const selectedShift = document.getElementById('shiftSL').value;
 
             let filteredData = data;
             if (selectedGroup) {
@@ -1519,14 +1814,26 @@
                 });
             }
 
-            // Lọc theo tổ gom nhóm - SỬA LẠI CHÍNH XÁC
+            // Lọc theo tổ gom nhóm - SỬA LẠI ĐỂ XỬ LÝ TỔ HÀNH CHÍNH KẾT HỢP
             if (selectedTeam) {
                 filteredData = filteredData.filter(item => {
                     const teamValue = item.to ? item.to.toString() : '';
                     if (selectedTeam === '0') {
-                        return teamValue === '0';
+                        // Tổ hành chính - KIỂM TRA CẢ TRƯỜNG HỢP ĐƠN LẺ VÀ KẾT HỢP
+                        let hasAdminTeam = false;
+
+                        if (teamValue.includes(',')) {
+                            // Trường hợp có nhiều tổ như "0, 1/3" hoặc "2/3, 0"
+                            const teams = teamValue.split(',').map(t => t.trim());
+                            hasAdminTeam = teams.includes('0');
+                        } else {
+                            // Trường hợp tổ đơn lẻ
+                            hasAdminTeam = teamValue === '0';
+                        }
+
+                        return hasAdminTeam; // TRẢ VỀ TRUE NẾU CÓ TỔ HÀNH CHÍNH
                     } else {
-                        // Kiểm tra chính xác
+                        // Kiểm tra chính xác cho tổ 1, 2, 3 - GIỮ NGUYÊN LOGIC CŨ
                         if (teamValue.includes(',')) {
                             // Trường hợp có nhiều tổ
                             const teams = teamValue.split(',').map(t => t.trim());
@@ -1560,6 +1867,8 @@
                 actual: [],
                 theoretical: [],
                 pieData: [],
+                teamLabels: [], // THÊM MỚI
+                teamData: [],   // THÊM MỚI
                 tableData: [],
                 summary: {
                     totalProduction: 0,
@@ -1582,9 +1891,11 @@
                         // Nếu có nhiều tổ, tách thành các dòng riêng
                         const teams = teamValue.split(',').map(t => t.trim());
 
-                        // Chỉ lấy các tổ thuộc nhóm được chọn
+                        // CHỌN CÁC TỔ THUỘC NHÓM ĐƯỢC CHỌN (BAO GỒM TỔ HÀNH CHÍNH)
                         const validTeams = teams.filter(team => {
-                            if (selectedTeam === '1') {
+                            if (selectedTeam === '0') {
+                                return team === '0'; // TỔ HÀNH CHÍNH
+                            } else if (selectedTeam === '1') {
                                 return team.startsWith('1/') || team === '1';
                             } else if (selectedTeam === '2') {
                                 return team.startsWith('2/') || team === '2';
@@ -1762,6 +2073,9 @@
                 });
             }
 
+            // THÊM XỬ LÝ DỮ LIỆU CHO BIỂU ĐỒ TỔ
+            processTeamChart(finalData, processedData, selectedGroup);
+
             const totalEfficiency = processedData.tableData.reduce((sum, item) => sum + item.efficiency, 0);
             processedData.summary.avgEfficiency = processedData.tableData.length > 0 ?
                 Math.round(totalEfficiency / processedData.tableData.length) : 0;
@@ -1775,16 +2089,16 @@
 
             const teamStr = teamValue.toString();
 
-            if (teamStr === '0') return 'Hành chính';
-            if (teamStr === '1/3') return '1';
-            if (teamStr === '2/3') return '2';
-            if (teamStr === '3/3') return '3';
-            if (teamStr === '1/2') return '1';
-            if (teamStr === '2/2') return '2';
+            if (teamStr === '0') return 'Hành chính'; // ĐẢM BẢO DÒNG NÀY CÓ
+            if (teamStr === '1/3') return 'Tổ 1';
+            if (teamStr === '2/3') return 'Tổ 2';
+            if (teamStr === '3/3') return 'Tổ 3';
+            if (teamStr === '1/2') return 'Tổ 1';
+            if (teamStr === '2/2') return 'Tổ 2';
 
             // Các trường hợp khác - lấy số đầu tiên
             const match = teamStr.match(/^(\d+)/);
-            return match ? match[1] : teamStr;
+            return match ? (match[1] === '0' ? 'Hành chính' : 'Tổ ' + match[1]) : teamStr;
         }
 
         // Hàm format tên tổ gốc (khi không lọc)
@@ -1793,26 +2107,29 @@
 
             const teamStr = teamValue.toString();
 
+            // XỬ LÝ TỔ HÀNH CHÍNH
             if (teamStr === '0') return 'Hành chính';
+
             if (teamStr.includes(',')) {
                 // Trường hợp có nhiều tổ như "1/3, 2/3"
                 return teamStr.split(',').map(t => {
                     const clean = t.trim();
-                    if (clean === '1/3') return '1';
-                    if (clean === '2/3') return '2';
-                    if (clean === '3/3') return '3';
-                    if (clean === '1/2') return '1';
-                    if (clean === '2/2') return '2';
+                    if (clean === '0') return 'Hành chính'; // THÊM DÒNG NÀY
+                    if (clean === '1/3') return 'Tổ 1';
+                    if (clean === '2/3') return 'Tổ 2';
+                    if (clean === '3/3') return 'Tổ 3';
+                    if (clean === '1/2') return 'Tổ 1';
+                    if (clean === '2/2') return 'Tổ 2';
                     return clean;
                 }).join(', ');
             }
 
             // Trường hợp tổ đơn lẻ
-            if (teamStr === '1/3') return '1';
-            if (teamStr === '2/3') return '2';
-            if (teamStr === '3/3') return '3';
-            if (teamStr === '1/2') return '1';
-            if (teamStr === '2/2') return '2';
+            if (teamStr === '1/3') return 'Tổ 1';
+            if (teamStr === '2/3') return 'Tổ 2';
+            if (teamStr === '3/3') return 'Tổ 3';
+            if (teamStr === '1/2') return 'Tổ 1';
+            if (teamStr === '2/2') return 'Tổ 2';
 
             return teamStr;
         }
@@ -1903,7 +2220,10 @@
                             '#f97316',
                             '#22c55e',
                             '#3b82f6',
-                            '#8b5cf6'
+                            '#8b5cf6',
+                            '#ec4899',
+                            '#f59e0b',
+                            '#10b981'
                         ],
                         borderWidth: 2,
                         borderColor: '#ffffff'
@@ -1912,21 +2232,94 @@
                 options: {
                     responsive: true,
                     maintainAspectRatio: false,
+                    layout: {
+                        padding: {
+                            top: 40,    // TĂNG PADDING ĐỂ TẠO KHÔNG GIAN CHO LABELS
+                            bottom: 40,
+                            left: 40,
+                            right: 40
+                        }
+                    },
                     plugins: {
                         legend: {
-                            position: 'bottom'
+                            display: false // TẮT LEGEND MẶC ĐỊNH
                         },
                         tooltip: {
                             callbacks: {
+                                title: function (context) {
+                                    return 'Nhóm: ' + context[0].label;
+                                },
                                 label: function (context) {
                                     const total = context.dataset.data.reduce((a, b) => a + b, 0);
                                     const percentage = total > 0 ? Math.round((context.raw / total) * 100) : 0;
-                                    return context.label + ': ' + context.raw.toLocaleString() + ' (' + percentage + '%)';
+                                    return [
+                                        'Sản lượng: ' + context.raw.toLocaleString(),
+                                        'Tỷ lệ: ' + percentage + '%'
+                                    ];
                                 }
                             }
                         }
                     }
-                }
+                },
+                plugins: [{
+                    afterDraw: function (chart) {
+                        const ctx = chart.ctx;
+                        const data = chart.data;
+                        const total = data.datasets[0].data.reduce((a, b) => a + b, 0);
+
+                        const chartArea = chart.chartArea;
+                        const centerX = (chartArea.left + chartArea.right) / 2;
+                        const centerY = (chartArea.top + chartArea.bottom) / 2;
+                        const radius = Math.min(chartArea.right - chartArea.left, chartArea.bottom - chartArea.top) / 2.5; // GIẢM RADIUS
+
+                        const colors = ['#ef4444', '#f97316', '#22c55e', '#3b82f6', '#8b5cf6', '#ec4899', '#f59e0b', '#10b981'];
+
+                        data.labels.forEach((label, index) => {
+                            const value = data.datasets[0].data[index];
+                            const percentage = total > 0 ? Math.round((value / total) * 100) : 0;
+
+                            // Tính góc cho mỗi segment
+                            let startAngle = -Math.PI / 2; // Bắt đầu từ 12 giờ
+                            for (let i = 0; i < index; i++) {
+                                startAngle += (data.datasets[0].data[i] / total) * 2 * Math.PI;
+                            }
+                            const endAngle = startAngle + (value / total) * 2 * Math.PI;
+                            const midAngle = (startAngle + endAngle) / 2;
+
+                            // Tính vị trí cho label
+                            const labelRadius = radius + 50; // KHOẢNG CÁCH TỪ TÂM
+                            const labelX = centerX + Math.cos(midAngle) * labelRadius;
+                            const labelY = centerY + Math.sin(midAngle) * labelRadius;
+
+                            // Vẽ đường nối
+                            ctx.beginPath();
+                            ctx.moveTo(centerX + Math.cos(midAngle) * radius, centerY + Math.sin(midAngle) * radius);
+                            ctx.lineTo(labelX - (Math.cos(midAngle) > 0 ? 8 : -8), labelY);
+                            ctx.strokeStyle = colors[index % colors.length];
+                            ctx.lineWidth = 1;
+                            ctx.stroke();
+
+                            // Vẽ text với background
+                            const text = `${label}: ${percentage}%`;
+                            ctx.font = 'bold 10px Arial';
+                            ctx.textAlign = Math.cos(midAngle) > 0 ? 'left' : 'right';
+
+                            // Vẽ background cho text
+                            const textMetrics = ctx.measureText(text);
+                            const textWidth = textMetrics.width + 6;
+                            const textHeight = 14;
+                            const bgX = Math.cos(midAngle) > 0 ? labelX - 3 : labelX - textWidth + 3;
+                            const bgY = labelY - textHeight / 2;
+
+                            ctx.fillStyle = 'rgba(255, 255, 255, 0.9)';
+                            ctx.fillRect(bgX, bgY, textWidth, textHeight);
+
+                            // Vẽ text
+                            ctx.fillStyle = colors[index % colors.length];
+                            ctx.fillText(text, labelX, labelY + 2);
+                        });
+                    }
+                }]
             });
         }
 
@@ -3394,6 +3787,20 @@
             .overflow-x-auto th,
             .overflow-x-auto td {
                 padding: 8px 12px;
+            }
+        }
+
+        /* Responsive cho 3 biểu đồ */
+        @media (max-width: 1024px) {
+            .grid.lg\:grid-cols-3 {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (min-width: 1024px) and (max-width: 1280px) {
+            .grid.lg\:grid-cols-3>div:last-child {
+                grid-column: 1 / -1;
+                /* Biểu đồ thứ 3 sẽ chiếm full width trên màn hình vừa */
             }
         }
 
