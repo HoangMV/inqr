@@ -813,7 +813,7 @@
         let filteredData = [];
         let selectedRows = new Map();
         let currentPage = 0;
-        let pageSize = 50;
+        let pageSize = 200;
         let isLoading = false;
 
         const appId = '684ad0ab-ffc5-4c21-a959-f5e023c668e3';
@@ -946,7 +946,7 @@
       `;
         }
 
-        // Hàm cập nhật dữ liệu "Xác nhận mới"
+        // Hàm cập nhật dữ liệu
         async function updateXacNhanMoi(orderKd, newValue) {
             try {
                 const response = await fetch(`https://${region}.appsheet.com/api/v2/apps/${appId}/tables/xac_nhan_ke_hoach/Action`, {
@@ -1613,7 +1613,7 @@
             updateSelectAllCheckbox();
         }
 
-        // Excel Export functionality - BÌNH THƯỜNG KHÔNG CÓ MÀU
+        // Excel Export functionality
         async function generateExcelExport() {
             const selectedItems = filteredData.filter(item => selectedRows.has(item._id));
 
@@ -2079,9 +2079,6 @@
         function handleSwipe() {
             const swipeThreshold = 50;
             const diff = touchStartY - touchEndY;
-
-            // You can add swipe functionality here if needed
-            // For example, swipe up/down to change pages
         }
 
         // Initialize
