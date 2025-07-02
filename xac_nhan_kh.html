@@ -125,10 +125,11 @@
 
         .stats-card {
             background: white;
-            padding: 20px;
+            padding-top: 5px;
             border-radius: 12px;
             border: 1px solid #e5e7eb;
             transition: all 0.2s ease;
+            justify-items: center;
         }
 
         .stats-card:hover {
@@ -140,7 +141,7 @@
             color: #6b7280;
             text-transform: uppercase;
             letter-spacing: 0.5px;
-            margin-bottom: 8px;
+            font-weight: bold;
         }
 
         .stats-value {
@@ -295,14 +296,25 @@
             background-color: #ffa726 !important;
         }
 
-        /* .ok-status {
+        .ok-status {
             color: #16a34a;
             font-weight: bold;
-        } */
+        }
 
         .hbv-status {
             color: #dc2626;
             font-weight: bold;
+        }
+
+        /* Màu cho các cột số lượng - CHỈ TRÊN TRANG WEB */
+        .sx-xl-nonzero {
+            color: #dc2626 !important;
+            font-weight: bold !important;
+        }
+
+        .tap-via-rua-ktra-goi-nonzero {
+            color: #16a34a !important;
+            font-weight: bold !important;
         }
     </style>
 </head>
@@ -344,30 +356,44 @@
             </div>
 
             <!-- Filters Section -->
-            <div class="bg-gray-50 rounded-xl p-6">
-                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 xl:grid-cols-6 gap-6 filters-grid">
+            <div class="bg-gray-50 rounded-xl p-2">
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-6 filters-grid">
                     <!-- Search -->
-                    <div class="filter-group lg:col-span-2">
+                    <div class="filter-group">
                         <label class="filter-label">Tìm kiếm</label>
                         <input type="text" placeholder="Order KD, tên chi tiết..." class="input-field" id="searchInput">
                     </div>
 
-                    <!-- PKY filter -->
+                    <!-- Thời hạn mới của KH filter -->
                     <div class="filter-group">
-                        <label class="filter-label">PKY</label>
-                        <select id="pkyFilter" class="select-field">
-                            <option value="all">Tất cả PKY</option>
+                        <label class="filter-label">Thời hạn mới của KH</label>
+                        <select id="thoiHanFilter" class="select-field">
+                            <option value="all">Tất cả</option>
                         </select>
                     </div>
 
-                    <!-- Date range filter -->
-                    <div class="filter-group lg:col-span-2">
-                        <label class="filter-label">Ngày GC KT</label>
-                        <div class="date-range-group">
-                            <input type="date" id="dateFromFilter" class="input-field" placeholder="Từ ngày">
-                            <span class="date-range-separator">đến</span>
-                            <input type="date" id="dateToFilter" class="input-field" placeholder="Đến ngày">
-                        </div>
+                    <!-- Xác nhận cũ filter -->
+                    <div class="filter-group">
+                        <label class="filter-label">Xác nhận cũ</label>
+                        <select id="xacNhanCuFilter" class="select-field">
+                            <option value="all">Tất cả</option>
+                        </select>
+                    </div>
+
+                    <!-- Xác nhận mới filter -->
+                    <div class="filter-group">
+                        <label class="filter-label">Xác nhận mới</label>
+                        <select id="xacNhanMoiFilter" class="select-field">
+                            <option value="all">Tất cả</option>
+                        </select>
+                    </div>
+
+                    <!-- Xác nhận xuất filter -->
+                    <div class="filter-group">
+                        <label class="filter-label">Xác nhận xuất</label>
+                        <select id="xacNhanXuatFilter" class="select-field">
+                            <option value="all">Tất cả</option>
+                        </select>
                     </div>
 
                     <!-- Page size selector -->
@@ -386,27 +412,43 @@
     </header>
 
     <!-- Statistics -->
-    <div class="mx-auto px-6 py-6">
-        <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 stats-grid">
-            <div class="stats-card">
-                <div class="stats-label">Tổng Order</div>
-                <div class="stats-value" id="totalOrdersCount">0</div>
-            </div>
+    <div class="mx-auto p-4">
+        <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-10 gap-4 stats-grid">
             <div class="stats-card">
                 <div class="stats-label">Tổng SLL</div>
                 <div class="stats-value" id="totalSLLCount">0</div>
             </div>
             <div class="stats-card">
-                <div class="stats-label">OK</div>
-                <div class="stats-value text-green-600" id="okCount">0</div>
+                <div class="stats-label">SX</div>
+                <div class="stats-value text-blue-600" id="sxCount">0</div>
             </div>
             <div class="stats-card">
-                <div class="stats-label">HBV</div>
-                <div class="stats-value text-red-600" id="hbvCount">0</div>
+                <div class="stats-label">XL</div>
+                <div class="stats-value text-green-600" id="xlCount">0</div>
             </div>
             <div class="stats-card">
-                <div class="stats-label">Hiển thị</div>
-                <div class="stats-value text-blue-600" id="displayedCount">0</div>
+                <div class="stats-label">TAP</div>
+                <div class="stats-value text-purple-600" id="tapCount">0</div>
+            </div>
+            <div class="stats-card">
+                <div class="stats-label">VIA</div>
+                <div class="stats-value text-orange-600" id="viaCount">0</div>
+            </div>
+            <div class="stats-card">
+                <div class="stats-label">Rửa</div>
+                <div class="stats-value text-cyan-600" id="ruaCount">0</div>
+            </div>
+            <div class="stats-card">
+                <div class="stats-label">Ktra</div>
+                <div class="stats-value text-pink-600" id="ktraCount">0</div>
+            </div>
+            <div class="stats-card">
+                <div class="stats-label">Gói</div>
+                <div class="stats-value text-indigo-600" id="goiCount">0</div>
+            </div>
+            <div class="stats-card">
+                <div class="stats-label">Đã gói</div>
+                <div class="stats-value text-red-600" id="daGoiCount">0</div>
             </div>
             <div class="stats-card">
                 <div class="stats-label">Đã chọn</div>
@@ -425,11 +467,8 @@
                             <th><input type="checkbox" id="selectAllCheckbox" class="checkbox-custom"></th>
                             <th>STT</th>
                             <th>Order KD</th>
-                            <th>Order lệnh phôi</th>
-                            <th>Order vật liệu</th>
                             <th>Tên chi tiết</th>
                             <th>File GC</th>
-                            <th>PKY</th>
                             <th>Số lượng</th>
                             <th>Ngày GC KT</th>
                             <th>Thời hạn mới của KH</th>
@@ -437,6 +476,7 @@
                             <th>TT ưu tiên</th>
                             <th class="xac-nhan-cu-col">Xác nhận cũ</th>
                             <th class="xac-nhan-moi-col">Xác nhận mới</th>
+                            <th>Xác nhận xuất</th>
                             <th>Trạng thái</th>
                             <th>SX</th>
                             <th>XL</th>
@@ -591,45 +631,39 @@
         // Filtering
         const applyFilters = debounce(function () {
             const search = document.getElementById('searchInput').value.toLowerCase().trim();
-            const pky = document.getElementById('pkyFilter').value;
-            const dateFrom = document.getElementById('dateFromFilter').value;
-            const dateTo = document.getElementById('dateToFilter').value;
+            const thoiHan = document.getElementById('thoiHanFilter').value;
+            const xacNhanCu = document.getElementById('xacNhanCuFilter').value;
+            const xacNhanMoi = document.getElementById('xacNhanMoiFilter').value;
+            const xacNhanXuat = document.getElementById('xacNhanXuatFilter').value;
 
             filteredData = allData.filter(item => {
                 // Search filter
                 if (search) {
                     const searchableText = [
-                        item.order_kd, item.ten_chi_tiet, item.file_gc, item.tinh_chat
+                        item.order_kd, item.ten_chi_tiet, item.file_gc,
                     ].join(' ').toLowerCase();
 
                     if (!searchableText.includes(search)) return false;
                 }
 
-                // PKY filter
-                if (pky !== 'all' && item.pky !== pky) {
+                // Thời hạn mới của KH filter
+                if (thoiHan !== 'all' && formatDate(item.thoi_han) !== thoiHan) {
                     return false;
                 }
 
-                // Date range filter
-                if (dateFrom || dateTo) {
-                    if (!item.ngay_gckt) return false;
+                // Xác nhận cũ filter
+                if (xacNhanCu !== 'all' && (item.xac_nhan_cu || '').toString() !== xacNhanCu) {
+                    return false;
+                }
 
-                    try {
-                        const itemDate = new Date(item.ngay_gckt);
+                // Xác nhận mới filter
+                if (xacNhanMoi !== 'all' && (item.xac_nhan_moi || '').toString() !== xacNhanMoi) {
+                    return false;
+                }
 
-                        if (dateFrom) {
-                            const fromDate = new Date(dateFrom);
-                            if (itemDate < fromDate) return false;
-                        }
-
-                        if (dateTo) {
-                            const toDate = new Date(dateTo);
-                            toDate.setHours(23, 59, 59, 999);
-                            if (itemDate > toDate) return false;
-                        }
-                    } catch (error) {
-                        return false;
-                    }
+                // Xác nhận xuất filter
+                if (xacNhanXuat !== 'all' && (item.amj_xn || '').toString() !== xacNhanXuat) {
+                    return false;
                 }
 
                 return true;
@@ -643,40 +677,233 @@
 
         // Stats
         function updateStats() {
-            const totalOrders = allData.length;
             const totalSLL = allData.reduce((sum, item) => sum + (parseInt(item.sll) || 0), 0);
-            const okCount = allData.filter(item => item.pky === 'OK').length;
-            const hbvCount = allData.filter(item => item.pky === 'HBV').length;
-            const displayed = filteredData.length;
+            const sxCount = allData.reduce((sum, item) => sum + (parseInt(item.loi_ton) || 0), 0);
+            const xlCount = allData.reduce((sum, item) => sum + (parseInt(item.loi_ton1) || 0), 0);
+            const tapCount = allData.reduce((sum, item) => sum + (parseInt(item.ton_tap) || 0), 0);
+            const viaCount = allData.reduce((sum, item) => sum + (parseInt(item.ton_via) || 0), 0);
+            const ruaCount = allData.reduce((sum, item) => sum + (parseInt(item.ton_rua) || 0), 0);
+            const ktraCount = allData.reduce((sum, item) => sum + (parseInt(item.ton_kiem_tra) || 0), 0);
+            const goiCount = allData.reduce((sum, item) => sum + (parseInt(item.ton_goi) || 0), 0);
+            const daGoiCount = allData.reduce((sum, item) => sum + (parseInt(item.da_goi) || 0), 0);
             const selected = selectedRows.size;
 
-            document.getElementById('totalOrdersCount').textContent = totalOrders;
             document.getElementById('totalSLLCount').textContent = totalSLL;
-            document.getElementById('okCount').textContent = okCount;
-            document.getElementById('hbvCount').textContent = hbvCount;
-            document.getElementById('displayedCount').textContent = displayed;
+            document.getElementById('sxCount').textContent = sxCount;
+            document.getElementById('xlCount').textContent = xlCount;
+            document.getElementById('tapCount').textContent = tapCount;
+            document.getElementById('viaCount').textContent = viaCount;
+            document.getElementById('ruaCount').textContent = ruaCount;
+            document.getElementById('ktraCount').textContent = ktraCount;
+            document.getElementById('goiCount').textContent = goiCount;
+            document.getElementById('daGoiCount').textContent = daGoiCount;
             document.getElementById('selectedCountStat').textContent = selected;
             document.getElementById('selectedCountExcel').textContent = selected;
-            document.getElementById('filteredCount').textContent = displayed;
+            document.getElementById('filteredCount').textContent = filteredData.length;
         }
 
         // Populate filters
         function populateFilters() {
-            const pkySet = new Set();
+            // Thời hạn mới của KH filter
+            const thoiHanSet = new Set();
             allData.forEach(item => {
-                if (item.pky && item.pky.trim()) {
-                    pkySet.add(item.pky.trim());
+                const formattedDate = formatDate(item.thoi_han);
+                if (formattedDate && formattedDate.trim()) {
+                    thoiHanSet.add(formattedDate.trim());
                 }
             });
 
-            const pkySelect = document.getElementById('pkyFilter');
-            pkySelect.innerHTML = '<option value="all">Tất cả PKY</option>';
-            Array.from(pkySet).sort().forEach(pky => {
-                const option = document.createElement('option');
-                option.value = pky;
-                option.textContent = pky;
-                pkySelect.appendChild(option);
+            const thoiHanSelect = document.getElementById('thoiHanFilter');
+            thoiHanSelect.innerHTML = '<option value="all">Tất cả</option>';
+
+            // Sắp xếp theo thời gian cho Thời hạn mới của KH
+            const sortedThoiHan = Array.from(thoiHanSet).sort((a, b) => {
+                const dateA = convertDateStringToDate(a);
+                const dateB = convertDateStringToDate(b);
+                return dateA - dateB; // Sắp xếp từ cũ đến mới
             });
+
+            sortedThoiHan.forEach(date => {
+                const option = document.createElement('option');
+                option.value = date;
+                option.textContent = date;
+                thoiHanSelect.appendChild(option);
+            });
+
+            // Xác nhận cũ filter
+            const xacNhanCuSet = new Set();
+            allData.forEach(item => {
+                if (item.xac_nhan_cu && item.xac_nhan_cu.toString().trim()) {
+                    xacNhanCuSet.add(item.xac_nhan_cu.toString().trim());
+                }
+            });
+
+            const xacNhanCuSelect = document.getElementById('xacNhanCuFilter');
+            xacNhanCuSelect.innerHTML = '<option value="all">Tất cả</option>';
+
+            // Sắp xếp theo thời gian cho Xác nhận cũ
+            const sortedXacNhanCu = Array.from(xacNhanCuSet).sort((a, b) => {
+                // Kiểm tra xem có phải là định dạng ngày không
+                if (isDateFormat(a) && isDateFormat(b)) {
+                    const dateA = convertDateStringToDate(a);
+                    const dateB = convertDateStringToDate(b);
+                    return dateA - dateB;
+                }
+                // Nếu không phải ngày thì sắp xếp alphabet
+                return a.localeCompare(b);
+            });
+
+            sortedXacNhanCu.forEach(value => {
+                const option = document.createElement('option');
+                option.value = value;
+                option.textContent = value;
+                xacNhanCuSelect.appendChild(option);
+            });
+
+            // Xác nhận mới filter
+            const xacNhanMoiSet = new Set();
+            allData.forEach(item => {
+                if (item.xac_nhan_moi && item.xac_nhan_moi.toString().trim()) {
+                    xacNhanMoiSet.add(item.xac_nhan_moi.toString().trim());
+                }
+            });
+
+            const xacNhanMoiSelect = document.getElementById('xacNhanMoiFilter');
+            xacNhanMoiSelect.innerHTML = '<option value="all">Tất cả</option>';
+
+            // Sắp xếp theo thời gian cho Xác nhận mới
+            const sortedXacNhanMoi = Array.from(xacNhanMoiSet).sort((a, b) => {
+                // Kiểm tra xem có phải là định dạng ngày không
+                if (isDateFormat(a) && isDateFormat(b)) {
+                    const dateA = convertDateStringToDate(a);
+                    const dateB = convertDateStringToDate(b);
+                    return dateA - dateB;
+                }
+                // Nếu không phải ngày thì sắp xếp alphabet
+                return a.localeCompare(b);
+            });
+
+            sortedXacNhanMoi.forEach(value => {
+                const option = document.createElement('option');
+                option.value = value;
+                option.textContent = value;
+                xacNhanMoiSelect.appendChild(option);
+            });
+
+            // Xác nhận xuất filter
+            const xacNhanXuatSet = new Set();
+            allData.forEach(item => {
+                if (item.amj_xn && item.amj_xn.toString().trim()) {
+                    xacNhanXuatSet.add(item.amj_xn.toString().trim());
+                }
+            });
+
+            const xacNhanXuatSelect = document.getElementById('xacNhanXuatFilter');
+            xacNhanXuatSelect.innerHTML = '<option value="all">Tất cả</option>';
+
+            // Sắp xếp theo thời gian cho Xác nhận xuất
+            const sortedXacNhanXuat = Array.from(xacNhanXuatSet).sort((a, b) => {
+                // Kiểm tra xem có phải là định dạng ngày không
+                if (isDateFormat(a) && isDateFormat(b)) {
+                    const dateA = convertDateStringToDate(a);
+                    const dateB = convertDateStringToDate(b);
+                    return dateA - dateB;
+                }
+                // Nếu không phải ngày thì sắp xếp alphabet
+                return a.localeCompare(b);
+            });
+
+            sortedXacNhanXuat.forEach(value => {
+                const option = document.createElement('option');
+                option.value = value;
+                option.textContent = value;
+                xacNhanXuatSelect.appendChild(option);
+            });
+        }
+
+        // Hàm hỗ trợ để kiểm tra xem có phải định dạng ngày không
+        function isDateFormat(str) {
+            // Kiểm tra các định dạng: dd/mm/yyyy, dd-mm-yyyy, mm/dd/yyyy, yyyy-mm-dd, etc.
+            const datePatterns = [
+                /^\d{1,2}\/\d{1,2}\/\d{4}$/,     // dd/mm/yyyy hoặc mm/dd/yyyy
+                /^\d{1,2}-\d{1,2}-\d{4}$/,      // dd-mm-yyyy
+                /^\d{4}-\d{1,2}-\d{1,2}$/,      // yyyy-mm-dd
+                /^\d{1,2}\/[a-zA-Z]{3}\/\d{4}$/,// dd/mmm/yyyy (01/Jul/2025)
+                /^\d{1,2}-[a-zA-Z]{3}-\d{4}$/   // dd-mmm-yyyy
+            ];
+
+            return datePatterns.some(pattern => pattern.test(str));
+        }
+
+        // Hàm chuyển đổi chuỗi ngày về đối tượng Date
+        function convertDateStringToDate(dateStr) {
+            if (!dateStr) return new Date(0);
+
+            try {
+                // Xử lý định dạng dd/mmm/yyyy (01/Jul/2025)
+                if (dateStr.includes('/') && dateStr.split('/')[1].length === 3) {
+                    const parts = dateStr.split('/');
+                    const day = parseInt(parts[0]);
+                    const monthMap = {
+                        'Jan': 0, 'Feb': 1, 'Mar': 2, 'Apr': 3, 'May': 4, 'Jun': 5,
+                        'Jul': 6, 'Aug': 7, 'Sep': 8, 'Oct': 9, 'Nov': 10, 'Dec': 11
+                    };
+                    const month = monthMap[parts[1]];
+                    const year = parseInt(parts[2]);
+                    return new Date(year, month, day);
+                }
+
+                // Xử lý định dạng dd-mmm-yyyy
+                if (dateStr.includes('-') && dateStr.split('-')[1].length === 3) {
+                    const parts = dateStr.split('-');
+                    const day = parseInt(parts[0]);
+                    const monthMap = {
+                        'Jan': 0, 'Feb': 1, 'Mar': 2, 'Apr': 3, 'May': 4, 'Jun': 5,
+                        'Jul': 6, 'Aug': 7, 'Sep': 8, 'Oct': 9, 'Nov': 10, 'Dec': 11
+                    };
+                    const month = monthMap[parts[1]];
+                    const year = parseInt(parts[2]);
+                    return new Date(year, month, day);
+                }
+
+                // Xử lý định dạng dd/mm/yyyy
+                if (dateStr.includes('/')) {
+                    const parts = dateStr.split('/');
+                    if (parts.length === 3) {
+                        const day = parseInt(parts[0]);
+                        const month = parseInt(parts[1]) - 1; // Month is 0-indexed
+                        const year = parseInt(parts[2]);
+                        return new Date(year, month, day);
+                    }
+                }
+
+                // Xử lý định dạng dd-mm-yyyy
+                if (dateStr.includes('-')) {
+                    const parts = dateStr.split('-');
+                    if (parts.length === 3) {
+                        // Kiểm tra xem có phải yyyy-mm-dd không
+                        if (parts[0].length === 4) {
+                            const year = parseInt(parts[0]);
+                            const month = parseInt(parts[1]) - 1;
+                            const day = parseInt(parts[2]);
+                            return new Date(year, month, day);
+                        } else {
+                            // dd-mm-yyyy
+                            const day = parseInt(parts[0]);
+                            const month = parseInt(parts[1]) - 1;
+                            const year = parseInt(parts[2]);
+                            return new Date(year, month, day);
+                        }
+                    }
+                }
+
+                // Fallback: thử parse trực tiếp
+                const date = new Date(dateStr);
+                return isNaN(date.getTime()) ? new Date(0) : date;
+
+            } catch (error) {
+                return new Date(0); // Return epoch if parsing fails
+            }
         }
 
         // Table rendering
@@ -717,33 +944,50 @@
 
             const pkyClass = item.pky === 'OK' ? 'ok-status' : (item.pky === 'HBV' ? 'hbv-status' : '');
 
+            // Kiểm tra số khác 0 và áp dụng class tương ứng CHỈ TRÊN TRANG WEB
+            const sxValue = parseInt(item.loi_ton) || 0;
+            const xlValue = parseInt(item.loi_ton1) || 0;
+            const tapValue = parseInt(item.ton_tap) || 0;
+            const viaValue = parseInt(item.ton_via) || 0;
+            const ruaValue = parseInt(item.ton_rua) || 0;
+            const ktraValue = parseInt(item.ton_kiem_tra) || 0;
+            const goiValue = parseInt(item.ton_goi) || 0;
+            const daGoiValue = parseInt(item.da_goi) || 0;
+
+            const sxClass = sxValue !== 0 ? 'sx-xl-nonzero' : '';
+            const xlClass = xlValue !== 0 ? 'sx-xl-nonzero' : '';
+            const tapClass = tapValue !== 0 ? 'tap-via-rua-ktra-goi-nonzero' : '';
+            const viaClass = viaValue !== 0 ? 'tap-via-rua-ktra-goi-nonzero' : '';
+            const ruaClass = ruaValue !== 0 ? 'tap-via-rua-ktra-goi-nonzero' : '';
+            const ktraClass = ktraValue !== 0 ? 'tap-via-rua-ktra-goi-nonzero' : '';
+            const goiClass = goiValue !== 0 ? 'tap-via-rua-ktra-goi-nonzero' : '';
+            const daGoiClass = daGoiValue !== 0 ? 'tap-via-rua-ktra-goi-nonzero' : '';
+
             row.innerHTML = `
-                <td><input type="checkbox" class="checkbox-custom row-checkbox" ${isSelected ? 'checked' : ''}></td>
-                <td>${item.stt || stt}</td>
-                <td>${item.order_kd || ''}</td>
-                <td>${item.order_phoi || ''}</td>
-                <td>${item.order_vat_lieu || ''}</td>
-                <td title="${item.ten_chi_tiet || ''}">${item.ten_chi_tiet || ''}</td>
-                <td>${item.file_gc || ''}</td>
-                <td class="${pkyClass}">${item.pky || ''}</td>
-                <td>${item.sll || ''}</td>
-                <td>${item.ngay_gckt}</td>
-                <td>${formatDate(item.thoi_han)}</td>
-                <td>${item.tinh_chat || ''}</td>
-                <td>${item.tt || ''}</td>
-                <td class="xac-nhan-cu-col">${item.xac_nhan_cu || ''}</td>
-                <td class="xac-nhan-moi-col">${item.amj_xn || ''}</td>
-                <td>${item.trang_thai || ''}</td>
-                <td>${item.loi_ton || ''}</td>
-                <td>${item.loi_ton1 || ''}</td>
-                <td>${item.ton_tap || ''}</td>
-                <td>${item.ton_via || ''}</td>
-                <td>${item.ton_rua || ''}</td>
-                <td>${item.ton_kiem_tra || ''}</td>
-                <td>${item.ton_goi || ''}</td>
-                <td>${item.da_goi || ''}</td>
-                <td title="${item['Thông tin'] || ''}">${item['Thông tin'] || ''}</td>
-            `;
+               <td><input type="checkbox" class="checkbox-custom row-checkbox" ${isSelected ? 'checked' : ''}></td>
+               <td>${item.stt || stt}</td>
+               <td>${item.order_kd || ''}</td>
+               <td title="${item.ten_chi_tiet || ''}">${item.ten_chi_tiet || ''}</td>
+               <td>${item.file_gc || ''}</td>
+               <td>${item.sll || ''}</td>
+               <td>${item.ngay_gckt}</td>
+               <td>${formatDate(item.thoi_han)}</td>
+               <td>${item.tinh_chat || ''}</td>
+               <td>${item.tt || ''}</td>
+               <td class="xac-nhan-cu-col">${item.xac_nhan_cu || ''}</td>
+               <td class="xac-nhan-moi-col">${item.xac_nhan_moi || ''}</td>
+               <td>${item.amj_xn || ''}</td>
+               <td class="${pkyClass}">${item.pky || ''}</td>
+               <td class="${sxClass}">${item.loi_ton || ''}</td>
+               <td class="${xlClass}">${item.loi_ton1 || ''}</td>
+               <td class="${tapClass}">${item.ton_tap || ''}</td>
+               <td class="${viaClass}">${item.ton_via || ''}</td>
+               <td class="${ruaClass}">${item.ton_rua || ''}</td>
+               <td class="${ktraClass}">${item.ton_kiem_tra || ''}</td>
+               <td class="${goiClass}">${item.ton_goi || ''}</td>
+               <td class="${daGoiClass}">${item.da_goi || ''}</td>
+               <td title="${item['Thông tin'] || ''}">${item['Thông tin'] || ''}</td>
+           `;
 
             return row;
         }
@@ -761,8 +1005,8 @@
             let html = '';
 
             html += `<button ${currentPage === 0 ? 'disabled' : ''} onclick="goToPage(${currentPage - 1})">
-           <i class="fas fa-chevron-left"></i>
-       </button>`;
+        <i class="fas fa-chevron-left"></i>
+    </button>`;
 
             const startPage = Math.max(0, currentPage - 2);
             const endPage = Math.min(totalPages - 1, currentPage + 2);
@@ -776,8 +1020,8 @@
 
             for (let i = startPage; i <= endPage; i++) {
                 html += `<button class="${i === currentPage ? 'active' : ''}" onclick="goToPage(${i})">
-               ${i + 1}
-           </button>`;
+            ${i + 1}
+        </button>`;
             }
 
             if (endPage < totalPages - 1) {
@@ -788,8 +1032,8 @@
             }
 
             html += `<button ${currentPage >= totalPages - 1 ? 'disabled' : ''} onclick="goToPage(${currentPage + 1})">
-           <i class="fas fa-chevron-right"></i>
-       </button>`;
+        <i class="fas fa-chevron-right"></i>
+    </button>`;
 
             pagination.innerHTML = html;
         }
@@ -890,7 +1134,7 @@
             updateSelectAllCheckbox();
         }
 
-        // Excel Export functionality - cập nhật để tạo 2 sheets
+        // Excel Export functionality - BÌNH THƯỜNG KHÔNG CÓ MÀU
         async function generateExcelExport() {
             const selectedItems = filteredData.filter(item => selectedRows.has(item._id));
 
@@ -984,24 +1228,25 @@
                 { width: 15 },   // K - Tính chất
                 { width: 8 },    // L - TT ưu tiên
                 { width: 12 },   // M - Xác nhận cũ
-                { width: 12 },   // N - AMJ xác nhận
-                { width: 12 },   // O - Trạng thái
-                { width: 8 },    // P - SX
-                { width: 8 },    // Q - XL
-                { width: 8 },    // R - TAP
-                { width: 8 },    // S - VIA
-                { width: 8 },    // T - Rửa
-                { width: 8 },    // U - Ktra
-                { width: 8 },    // V - Gói
-                { width: 8 },    // W - Đã gói
-                { width: 15 }    // X - Thông tin
+                { width: 12 },   // N - Xác nhận mới
+                { width: 12 },   // O - AMJ xác nhận
+                { width: 12 },   // P - Trạng thái
+                { width: 8 },    // Q - SX
+                { width: 8 },    // R - XL
+                { width: 8 },    // S - TAP
+                { width: 8 },    // T - VIA
+                { width: 8 },    // U - Rửa
+                { width: 8 },    // V - Ktra
+                { width: 8 },    // W - Gói
+                { width: 8 },    // X - Đã gói
+                { width: 15 }    // Y - Thông tin
             ];
 
             // Header (dòng 1) - giống sheet 1
             const headerRow = worksheet.addRow([
                 'STT', 'Order KD', 'Order lệnh phôi', 'Order vật liệu', 'Tên chi tiết',
                 'File GC', 'PKY', 'Số lượng', 'Ngày GC KT', 'Thời hạn mới của KH',
-                'Tính chất', 'TT ưu tiên', 'Xác nhận cũ', 'AMJ xác nhận', 'Trạng thái', 'SX',
+                'Tính chất', 'TT ưu tiên', 'Xác nhận cũ', 'Xác nhận mới', 'AMJ xác nhận', 'Trạng thái', 'SX',
                 'XL', 'TAP', 'VIA', 'Rửa', 'Ktra', 'Gói', 'Đã gói', 'Thông tin'
             ]);
 
@@ -1036,7 +1281,7 @@
             // Thêm một số dòng trống có border để người dùng có thể nhập dữ liệu
             for (let i = 0; i < 50; i++) {
                 const emptyRow = worksheet.addRow([
-                    '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', ''
+                    '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', ''
                 ]);
 
                 emptyRow.eachCell((cell) => {
@@ -1057,7 +1302,8 @@
                 { state: 'frozen', ySplit: 1 }
             ];
         }
-        // Tạo worksheet với định dạng chi tiết theo mẫu
+
+        // Tạo worksheet với định dạng chi tiết theo mẫu - BÌNH THƯỜNG KHÔNG CÓ MÀU
         async function createExcelWorksheetWithFormat(worksheet, selectedItems) {
             // Thiết lập trang in A4 ngang
             worksheet.pageSetup = {
@@ -1074,7 +1320,7 @@
                     header: 0.3,
                     footer: 0.3
                 },
-                printArea: 'A1:AB1000',
+                printArea: 'A1:Y1000',
                 scale: 100
             };
 
@@ -1093,24 +1339,25 @@
                 { width: 15 },   // K - Tính chất
                 { width: 8 },    // L - TT ưu tiên
                 { width: 12 },   // M - Xác nhận cũ
-                { width: 12 },   // N - AMJ xác nhận
-                { width: 12 },   // O - Trạng thái
-                { width: 8 },    // P - SX
-                { width: 8 },    // Q - XL
-                { width: 8 },    // R - TAP
-                { width: 8 },    // S - VIA
-                { width: 8 },    // T - Rửa
-                { width: 8 },    // U - Ktra
-                { width: 8 },    // V - Gói
-                { width: 8 },    // W - Đã gói
-                { width: 15 }    // X - Thông tin
+                { width: 12 },   // N - Xác nhận mới
+                { width: 12 },   // O - AMJ xác nhận
+                { width: 12 },   // P - Trạng thái
+                { width: 8 },    // Q - SX
+                { width: 8 },    // R - XL
+                { width: 8 },    // S - TAP
+                { width: 8 },    // T - VIA
+                { width: 8 },    // U - Rửa
+                { width: 8 },    // V - Ktra
+                { width: 8 },    // W - Gói
+                { width: 8 },    // X - Đã gói
+                { width: 15 }    // Y - Thông tin
             ];
 
             // Header (dòng 1)
             const headerRow = worksheet.addRow([
                 'STT', 'Order KD', 'Order lệnh phôi', 'Order vật liệu', 'Tên chi tiết',
                 'File GC', 'PKY', 'Số lượng', 'Ngày GC KT', 'Thời hạn mới của KH',
-                'Tính chất', 'TT ưu tiên', 'Xác nhận cũ', 'AMJ xác nhận', 'Trạng thái', 'SX',
+                'Tính chất', 'TT ưu tiên', 'Xác nhận cũ', 'Xác nhận mới', 'AMJ xác nhận', 'Trạng thái', 'SX',
                 'XL', 'TAP', 'VIA', 'Rửa', 'Ktra', 'Gói', 'Đã gói', 'Thông tin'
             ]);
 
@@ -1158,6 +1405,7 @@
                     item.tinh_chat || '',
                     item.tt || '',
                     item.xac_nhan_cu || '',
+                    item.xac_nhan_moi || '',
                     item.amj_xn || '',
                     item.trang_thai || '',
                     item.loi_ton || '',
@@ -1173,7 +1421,7 @@
 
                 const dataRow = worksheet.addRow(rowData);
 
-                // Định dạng cho dòng dữ liệu
+                // Định dạng cho dòng dữ liệu - BÌNH THƯỜNG KHÔNG CÓ MÀU ĐẶC BIỆT
                 dataRow.eachCell((cell, colNumber) => {
                     let cellBorder = {
                         top: { style: 'thin', color: { argb: '000000' } },
@@ -1186,7 +1434,7 @@
                     let cellValue = cell.value;
 
                     // Định dạng số cho các cột cụ thể: Order KD, Số lượng, SX, XL, TAP, VIA, Rửa, Ktra, Gói, Đã gói
-                    const columnsToFormat = [2, 8, 16, 17, 18, 19, 20, 21, 22, 23];
+                    const columnsToFormat = [2, 8, 17, 18, 19, 20, 21, 22, 23, 24];
 
                     if (columnsToFormat.includes(colNumber)) {
                         if (cellValue && !isNaN(cellValue) && cellValue !== '') {
@@ -1209,18 +1457,19 @@
                         }
                     }
 
+                    // Định dạng BÌNH THƯỜNG - không có màu đặc biệt cho các cột số lượng
                     cell.style = {
                         font: {
                             name: 'Times New Roman',
                             size: 9,
                             bold: false,
-                            color: { argb: '000000' }
+                            color: { argb: '000000' } // Màu đen bình thường
                         },
                         alignment: { horizontal: 'center', vertical: 'middle', wrapText: true },
                         border: cellBorder
                     };
 
-                    // Màu nền cho cột "Xác nhận cũ" và "Xác nhận mới"
+                    // CHỈ GIỮ màu nền cho cột "Xác nhận cũ" và "Xác nhận mới"
                     if (colNumber === 13) { // Xác nhận cũ
                         cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFEB3B' } };
                     } else if (colNumber === 14) { // Xác nhận mới
@@ -1246,9 +1495,10 @@
         document.addEventListener('DOMContentLoaded', function () {
             // Search and filters
             document.getElementById('searchInput').addEventListener('input', applyFilters);
-            document.getElementById('pkyFilter').addEventListener('change', applyFilters);
-            document.getElementById('dateFromFilter').addEventListener('change', applyFilters);
-            document.getElementById('dateToFilter').addEventListener('change', applyFilters);
+            document.getElementById('thoiHanFilter').addEventListener('change', applyFilters);
+            document.getElementById('xacNhanCuFilter').addEventListener('change', applyFilters);
+            document.getElementById('xacNhanMoiFilter').addEventListener('change', applyFilters);
+            document.getElementById('xacNhanXuatFilter').addEventListener('change', applyFilters);
 
             // Page size
             document.getElementById('pageSizeSelect').addEventListener('change', function () {
@@ -1303,11 +1553,6 @@
             }
         });
 
-        // Initialize
-        setCurrentDate();
-        fetchData();
-
-        // Disable right-click and dev tools
         document.addEventListener('contextmenu', function (e) {
             e.preventDefault();
         }, false);
@@ -1326,6 +1571,10 @@
                 return false;
             }
         };
+
+        // Initialize
+        setCurrentDate();
+        fetchData();
     </script>
 </body>
 
