@@ -2326,7 +2326,7 @@
             });
 
             const totalActualTime = processedData.summary.totalActualTime;
-            const totalWorkerTime = processedData.summary.totalWorkers * 660;
+            const totalWorkerTime = processedData.summary.totalWorkers * 630;
 
             processedData.summary.avgEfficiency = totalWorkerTime > 0 ?
                 Math.round((totalActualTime / totalWorkerTime) * 100) : 0;
@@ -3203,7 +3203,7 @@
             const totalActualTime = processedData.summary.totalActualTime;
             // Đếm số nhân sự từ dữ liệu đánh bóng (cần thêm logic đếm nhân sự)
             const totalWorkers = [...new Set(filteredData.map(item => item.Code).filter(Boolean))].length;
-            const totalWorkerTime = totalWorkers * 660; // 660 phút/người
+            const totalWorkerTime = totalWorkers * 630; // 630 phút/người
 
             processedData.summary.efficiency = totalWorkerTime > 0 ?
                 Math.round((totalActualTime / totalWorkerTime) * 100) : 0;
