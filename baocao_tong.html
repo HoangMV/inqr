@@ -866,21 +866,26 @@
                 // Load all tables in parallel - SỬA LẠI DANH SÁCH BẢNG
                 const [
                     data3D,
-                    dataPause, // Thay đổi từ data3DParent thành dataPause
+                    dataPause,
                     dataProduction,
                     dataError,
                     dataPolishing,
                     dataReceive,
-                    dataDelivery
+                    dataDelivery,
+                    dataPlanPKT  // THÊM MỚI
                 ] = await Promise.all([
-                    fetchAppSheetData('trien_khai_3d_laze_dt'), // Bảng chính
-                    fetchAppSheetData('tam_dung'),              // Bảng tạm dừng
+                    fetchAppSheetData('trien_khai_3d_laze_dt'),
+                    fetchAppSheetData('tam_dung'),
                     fetchAppSheetData('ke_hoach_pkt_dt'),
                     fetchAppSheetData('tong_hop_loi'),
                     fetchAppSheetData('hoan_thien_danh_bong_dt'),
                     fetchAppSheetData('so_giao_nhan'),
-                    fetchAppSheetData('giao_kho_vp')
+                    fetchAppSheetData('giao_kho_vp'),
+                    fetchAppSheetData('ke_hoach_pkt')  // THÊM MỚI
                 ]);
+
+                // Lưu vào global data
+                globalData.dataPlanPKT = dataPlanPKT;  // THÊM MỚI
 
                 // Store in global data
                 globalData.data3D = data3D;
@@ -2092,12 +2097,7 @@
                 }
             };
 
-            // Tính tồn kho từ toàn bộ bảng ke_hoach_pkt (không áp dụng bộ lọc)
-            const allInventoryData = globalData.dataProduction.filter(item => {
-                const hasCncTap = item.cnc_tap && item.cnc_tap.toString().trim() !== '';
-                const hasXlbmDanhNi = item.xlbm_danh_ni && item.xlbm_danh_ni.toString().trim() !== '';
-                return !hasCncTap && !hasXlbmDanhNi;
-            });
+            const allInventoryData = globalData.dataPlanPKT || [];  // SỬ DỤNG BẢNG MỚI
 
             allInventoryData.forEach(item => {
                 processedData.summary.totalTapTon += parseInt(item.ton_tap || 0);
