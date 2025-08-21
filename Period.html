@@ -45,6 +45,11 @@
                 display: none;
             }
 
+            .qr-container {
+                transform: scale(0.7);
+                transform-origin: top right;
+            }
+
             body {
                 padding: 0;
             }
@@ -118,6 +123,18 @@
         }
 
         /* Information rows below header */
+        .info-with-qr {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin: 5px 0;
+            gap: 15px;
+        }
+
+        .info-left {
+            flex: 1;
+        }
+
         .below-header-info {
             display: flex;
             margin-bottom: 2px;
@@ -135,9 +152,52 @@
 
         .requirement-text {
             font-size: 10px;
+            margin-top: 3px;
         }
 
-        /* Main table */
+        /* QR Code styles */
+        .qr-container {
+            text-align: center;
+            border: 1px solid #ddd;
+            background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+        }
+
+        .qr-title {
+            font-size: 9px;
+            font-weight: bold;
+            margin-bottom: 4px;
+            color: #495057;
+        }
+
+        .qr-code-box {
+            width: 60px;
+            height: 60px;
+            border: 1px solid #dee2e6;
+            border-radius: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-color: white;
+            position: relative;
+        }
+
+        .qr-subtitle {
+            font-size: 7px;
+            color: #6c757d;
+            font-style: italic;
+        }
+
+        /* QR fallback styles */
+        .qr-fallback {
+            width: 100%;
+            height: 100%;
+            background-image: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><rect width="100" height="100" fill="white"/><rect x="10" y="10" width="15" height="15" fill="black"/><rect x="30" y="10" width="5" height="5" fill="black"/><rect x="40" y="10" width="5" height="5" fill="black"/><rect x="55" y="10" width="5" height="5" fill="black"/><rect x="75" y="10" width="15" height="15" fill="black"/><rect x="10" y="15" width="5" height="5" fill="white"/><rect x="20" y="15" width="5" height="5" fill="white"/><rect x="75" y="15" width="5" height="5" fill="white"/><rect x="85" y="15" width="5" height="5" fill="white"/><rect x="10" y="20" width="5" height="5" fill="white"/><rect x="15" y="20" width="5" height="5" fill="black"/><rect x="20" y="20" width="5" height="5" fill="white"/><rect x="30" y="20" width="5" height="5" fill="black"/><rect x="35" y="20" width="10" height="5" fill="white"/><rect x="50" y="20" width="5" height="5" fill="black"/><rect x="75" y="20" width="5" height="5" fill="white"/><rect x="80" y="20" width="5" height="5" fill="black"/><rect x="85" y="20" width="5" height="5" fill="white"/><text x="50" y="55" text-anchor="middle" font-family="Arial" font-size="8" fill="black">QR</text></svg>');
+            background-size: contain;
+            background-repeat: no-repeat;
+            background-position: center;
+        }
+
+        /* Main table styles remain the same */
         .main-table {
             width: 100%;
             border-collapse: collapse;
@@ -296,23 +356,32 @@
                 </div>
             </div>
 
-            <!-- Information section -->
-            <div style="margin: 5px 0;">
-                <div class="below-header-info">
-                    <span class="info-label">Hạng mục / thiết bị</span>
-                    <span>: <span id="hang-muc">Tổng quan nhà máy</span></span>
+            <!-- Information section with QR Code -->
+            <div class="info-with-qr">
+                <!-- Phần thông tin bên trái -->
+                <div class="info-left">
+                    <div class="below-header-info">
+                        <span class="info-label">Hạng mục / thiết bị</span>
+                        <span>: <span id="hang-muc">Tổng quan nhà máy</span></span>
+                    </div>
+                    <div class="below-header-info">
+                        <span class="info-label">Định kỳ</span>
+                        <span>: <span id="dinh-ky">Hàng ngày</span></span>
+                    </div>
+                    <div class="below-header-info">
+                        <span class="info-label">Thời gian thực hiện</span>
+                        <span>: <span>..............................</span></span>
+                    </div>
+                    <div class="requirement-text">
+                        <span>Yêu cầu: đánh dấu (✓) vào nội dung công việc đã hoàn thành ở cột (3), ghi đánh giá ở cột (4),
+                            ghi kết luận ở phần ghi chú</span>
+                    </div>
                 </div>
-                <div class="below-header-info">
-                    <span class="info-label">Định kỳ</span>
-                    <span>: <span id="dinh-ky">Hàng ngày</span></span>
-                </div>
-                <div class="below-header-info">
-                    <span class="info-label">Thời gian thực hiện</span>
-                    <span>: <span>..............................</span></span>
-                </div>
-                <div class="requirement-text">
-                    <span>Yêu cầu: đánh dấu (✓) vào nội dung công việc đã hoàn thành ở cột (3), ghi đánh giá ở cột (4),
-                        ghi kết luận ở phần ghi chú</span>
+                
+                <!-- Phần QR Code bên phải -->
+                <div class="qr-container">
+                    <div id="qr-code" class="qr-code-box">
+                    </div>
                 </div>
             </div>
 
@@ -379,7 +448,7 @@
                     <td class="col-ghi-chu cao">Trang <span id="footer-page">1</span> trên tổng số <span
                             id="footer-total-pages">1</span> trang</td>
                 </tr>
-                 <tr>
+                <tr>
                     <td class="col-stt cao" colspan="6">Phiếu bảo trì bảo dưỡng này được in từ hệ thống NECS MMS (Torasung)</td>
                 </tr>
             </table>
@@ -454,6 +523,41 @@
                 grouped[thietBi].push(detail);
             });
             return grouped;
+        }
+
+        // Function để tạo QR Code sử dụng API online
+        function generateQRCode() {
+            const currentURL = encodeURIComponent(window.location.href);
+            const qrContainer = document.getElementById('qr-code');
+            
+            // Tạo QR code bằng API online
+            const qrApiUrl = `https://api.qrserver.com/v1/create-qr-code/?size=90x90&data=${currentURL}&format=png&margin=0`;
+            
+            // Tạo img element
+            const img = document.createElement('img');
+            img.src = qrApiUrl;
+            img.style.width = '100%';
+            img.style.height = '100%';
+            img.style.objectFit = 'contain';
+            img.alt = 'QR Code';
+            
+            // Xử lý khi load thành công
+            img.onload = function() {
+                qrContainer.innerHTML = '';
+                qrContainer.appendChild(img);
+            };
+            
+            // Xử lý khi load thất bại
+            img.onerror = function() {
+                qrContainer.innerHTML = '<div class="qr-fallback"></div>';
+            };
+            
+            // Fallback ngay lập tức nếu không thể tạo img
+            setTimeout(() => {
+                if (qrContainer.children.length === 0) {
+                    qrContainer.innerHTML = '<div class="qr-fallback"></div>';
+                }
+            }, 3000);
         }
 
         // Function to render table
@@ -565,6 +669,9 @@
         function showContent() {
             document.getElementById('loading').style.display = 'none';
             document.getElementById('content').style.display = 'block';
+            
+            // Tạo QR code sau khi hiển thị nội dung
+            setTimeout(generateQRCode, 200);
         }
 
         // Main initialization function
