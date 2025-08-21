@@ -45,9 +45,9 @@
                 display: none;
             }
 
-            .qr-container {
-                transform: scale(0.7);
-                transform-origin: top right;
+            .qr-code-box {
+                width: 60px;
+                height: 60px;
             }
 
             body {
@@ -373,11 +373,12 @@
                         <span>: <span>..............................</span></span>
                     </div>
                     <div class="requirement-text">
-                        <span>Yêu cầu: đánh dấu (✓) vào nội dung công việc đã hoàn thành ở cột (3), ghi đánh giá ở cột (4),
+                        <span>Yêu cầu: đánh dấu (✓) vào nội dung công việc đã hoàn thành ở cột (3), ghi đánh giá ở cột
+                            (4),
                             ghi kết luận ở phần ghi chú</span>
                     </div>
                 </div>
-                
+
                 <!-- Phần QR Code bên phải -->
                 <div class="qr-container">
                     <div id="qr-code" class="qr-code-box">
@@ -449,7 +450,8 @@
                             id="footer-total-pages">1</span> trang</td>
                 </tr>
                 <tr>
-                    <td class="col-stt cao" colspan="6">Phiếu bảo trì bảo dưỡng này được in từ hệ thống NECS MMS (Torasung)</td>
+                    <td class="col-stt cao" colspan="6">Phiếu bảo trì bảo dưỡng này được in từ hệ thống NECS MMS
+                        (Torasung)</td>
                 </tr>
             </table>
         </div>
@@ -529,10 +531,10 @@
         function generateQRCode() {
             const currentURL = encodeURIComponent(window.location.href);
             const qrContainer = document.getElementById('qr-code');
-            
+
             // Tạo QR code bằng API online
             const qrApiUrl = `https://api.qrserver.com/v1/create-qr-code/?size=90x90&data=${currentURL}&format=png&margin=0`;
-            
+
             // Tạo img element
             const img = document.createElement('img');
             img.src = qrApiUrl;
@@ -540,18 +542,18 @@
             img.style.height = '100%';
             img.style.objectFit = 'contain';
             img.alt = 'QR Code';
-            
+
             // Xử lý khi load thành công
-            img.onload = function() {
+            img.onload = function () {
                 qrContainer.innerHTML = '';
                 qrContainer.appendChild(img);
             };
-            
+
             // Xử lý khi load thất bại
-            img.onerror = function() {
+            img.onerror = function () {
                 qrContainer.innerHTML = '<div class="qr-fallback"></div>';
             };
-            
+
             // Fallback ngay lập tức nếu không thể tạo img
             setTimeout(() => {
                 if (qrContainer.children.length === 0) {
@@ -669,7 +671,7 @@
         function showContent() {
             document.getElementById('loading').style.display = 'none';
             document.getElementById('content').style.display = 'block';
-            
+
             // Tạo QR code sau khi hiển thị nội dung
             setTimeout(generateQRCode, 200);
         }
