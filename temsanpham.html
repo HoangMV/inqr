@@ -11,7 +11,7 @@
        PRINT: A4 LANDSCAPE - 4x5
        ========================= */
     @media print {
-      @page { size: A4 landscape; margin: 1.5mm; }
+      @page { size: A4 landscape; margin: 5mm; }
 
       * {
         margin: 0;
@@ -37,8 +37,8 @@
 
       /* 1 trang A4 ngang đúng kích thước vật lý (trừ margin) */
       .a4-sheet {
-        width: calc(297mm - 3mm); /* Trừ margin 1.5mm x 2 */
-        height: calc(210mm - 3mm); /* Trừ margin 1.5mm x 2 */
+        width: calc(297mm - 10mm); /* Trừ margin 5mm x 2 */
+        height: calc(210mm - 10mm); /* Trừ margin 5mm x 2 */
         display: grid;
         grid-template-columns: repeat(4, 1fr);
         grid-template-rows: repeat(5, 1fr);
@@ -68,9 +68,10 @@
       }
 
       table.tem td {
-        border: 1px solid #000;
+        border: 1px solid rgba(179, 176, 176, 0.911);
         padding: 0.5mm 1mm;
-        font-size: 11px;
+        font-size: 10px;
+        font-weight: bold;
         line-height: 1.1;
         vertical-align: middle;
 
@@ -98,11 +99,11 @@
       col.c4 { width: 15%; }
 
       .center { text-align: center; }
-      .value { font-weight: normal; }
+      .value { font-weight: bold; }
 
       /* Ô kích thước: font nhỏ hơn, cho phép xuống dòng */
       .size-value {
-        font-size: 8px !important;
+        font-size: 10px !important;
         white-space: normal !important;
         line-height: 1.15 !important;
         overflow: visible !important;
